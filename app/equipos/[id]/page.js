@@ -20,7 +20,7 @@ export default async function EquipoPage({ params }) {
     const teamRes = await supabase.from('teams').select('*').eq('id', id).single();
     if (teamRes.data) team = teamRes.data;
 
-    const playersRes = await supabase.from('players').select('*').eq('team_id', id).order('overall_rating', { ascending: false });
+    const playersRes = await supabase.from('players').select('*, player_teams!inner(team_id)').eq('player_teams.team_id', id).order('overall_rating', { ascending: false });
     if (playersRes.data) players = playersRes.data;
   } catch (err) {
     console.error("Error fetching team/players from Supabase", err);

@@ -8,7 +8,7 @@ export default function SugerirJugador() {
     nombre: '',
     edad: 20,
     posicion: 'DEL',
-    team_id: '',
+    team_ids: [],
     foto_url: '',
     perfil_fisico: '',
     cualidades_tecnicas: '',
@@ -44,7 +44,7 @@ export default function SugerirJugador() {
       if (teamsData) {
         setTeams(teamsData);
         if (teamsData.length > 0) {
-          setFormData(prev => ({ ...prev, team_id: teamsData[0].id }));
+          setFormData(prev => ({ ...prev, team_ids: [teamsData[0].id] }));
         }
       }
       const { data: playersData } = await supabase.from('players').select('*').order('nombre');
@@ -67,7 +67,7 @@ export default function SugerirJugador() {
   const handleModeChange = (newMode) => {
     setMode(newMode);
     if (newMode === 'new') {
-      setFormData({ ...initialFormState, team_id: teams[0]?.id || '' });
+      setFormData({ ...initialFormState, team_ids: teams.length > 0 ? [teams[0].id] : [] });
     } else {
       // If switching to edit mode, maybe select the first player by default
       if (players.length > 0) {
@@ -82,6 +82,7 @@ export default function SugerirJugador() {
       setFormData({
         ...initialFormState,
         ...selectedPlayer,
+        team_ids: selectedPlayer.player_teams?.map(pt => pt.team_id) || [],
         cualidades_tecnicas: selectedPlayer.cualidades_tecnicas?.join(', ') || '',
         fortalezas: selectedPlayer.fortalezas?.join(', ') || '',
         debilidades: selectedPlayer.debilidades?.join(', ') || ''
@@ -122,14 +123,23 @@ export default function SugerirJugador() {
   const handleGenerate = (e) => {
     e.preventDefault();
     
-    const playerToExport = {
-      ...formData,
-      cualidades_tecnicas: formData.cualidades_tecnicas.split(',').map(s => s.trim()).filter(Boolean),
-      fortalezas: formData.fortalezas.split(',').map(s => s.trim()).filter(Boolean),
-      debilidades: formData.debilidades.split(',').map(s => s.trim()).filter(Boolean),
-    };
+    // Prepare data
+    const dataToSave = { ...formData };
+    
+    // Array parsing
+    if (typeof dataToSave.cualidades_tecnicas === 'string') {
+      dataToSave.cualidades_tecnicas = dataToSave.cualidades_tecnicas.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    if (typeof dataToSave.fortalezas === 'string') {
+      dataToSave.fortalezas = dataToSave.fortalezas.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    if (typeof dataToSave.debilidades === 'string') {
+      dataToSave.debilidades = dataToSave.debilidades.split(',').map(s => s.trim()).filter(Boolean);
+    }
 
-    setGeneratedJson(JSON.stringify(playerToExport, null, 2));
+    const { team_ids, player_teams, ...restData } = dataToSave;
+
+    setGeneratedJson(JSON.stringify({ ...restData, team_ids }, null, 2));
     setCopied(false);
   };
 
@@ -202,10 +212,27 @@ export default function SugerirJugador() {
               </select>
             </div>
             <div>
-              <label className="block text-sm text-slate-400 mb-1">Equipo</label>
-              <select name="team_id" value={formData.team_id} onChange={handleChange} required className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white">
-                {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
+              <label className="block text-sm text-slate-400 mb-1">Equipos (Puedes seleccionar varios)</label>
+              <div className="grid grid-cols-2 gap-2 bg-slate-900 border border-slate-700 p-2 rounded max-h-32 overflow-y-auto">
+                {teams.map(t => (
+                  <label key={t.id} className="flex items-center gap-2 cursor-pointer text-sm text-slate-300">
+                    <input 
+                      type="checkbox" 
+                      checked={(formData.team_ids || []).includes(t.id)}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setFormData(prev => {
+                          const currentIds = prev.team_ids || [];
+                          const newIds = checked ? [...currentIds, t.id] : currentIds.filter(id => id !== t.id);
+                          return { ...prev, team_ids: newIds };
+                        });
+                      }}
+                      className="w-4 h-4 rounded bg-slate-800 border-slate-600 text-green-500 focus:ring-green-500 focus:ring-offset-slate-900"
+                    />
+                    <span className="truncate">{t.name}</span>
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
           

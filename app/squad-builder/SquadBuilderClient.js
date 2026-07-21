@@ -137,8 +137,13 @@ export default function SquadBuilderClient({ teams, players }) {
     })
   );
 
-  const teamPlayers = players.filter(p => p.team_id === selectedTeam);
-  const otherPlayers = players.filter(p => p.team_id !== selectedTeam);
+  const isPlayerInTeam = (p, tId) => {
+    if (p.player_teams) return p.player_teams.some(pt => pt.team_id === tId);
+    return p.team_id === tId;
+  };
+
+  const teamPlayers = players.filter(p => isPlayerInTeam(p, selectedTeam));
+  const otherPlayers = players.filter(p => !isPlayerInTeam(p, selectedTeam));
 
   // Compute Squad OVR
   const activePlayers = pitch.filter(pos => pos.player);

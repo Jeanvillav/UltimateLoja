@@ -17,7 +17,7 @@ export default async function SquadBuilderPage() {
     const teamsRes = await supabase.from('teams').select('*');
     if (teamsRes.data) teams = teamsRes.data;
 
-    const playersRes = await supabase.from('players').select('*').order('overall_rating', { ascending: false });
+    const playersRes = await supabase.from('players').select('*, player_teams(team_id)').order('overall_rating', { ascending: false });
     if (playersRes.data) players = playersRes.data;
   } catch (err) {
     console.error("Error fetching squad data from Supabase", err);

@@ -58,7 +58,7 @@ export default function AdminPage() {
   }, [supabase.auth]);
 
   const fetchPlayers = async () => {
-    const { data } = await supabase.from('players').select('*').order('nombre');
+    const { data } = await supabase.from('players').select('*, player_teams(team_id)').order('nombre');
     if (data) setPlayers(data);
   };
 
@@ -227,24 +227,35 @@ export default function AdminPage() {
       fisico: previewPlayer.physical
     }, previewPlayer.posicion);
     
-    const playerToSave = { ...previewPlayer, overall_rating: calculatedOvr };
+    const { team_ids, player_teams, team_id, ...restPlayerToSave } = { ...previewPlayer, overall_rating: calculatedOvr };
 
-    if (typeof playerToSave.cualidades_tecnicas === 'string') {
-      playerToSave.cualidades_tecnicas = playerToSave.cualidades_tecnicas.split(',').map(s => s.trim()).filter(Boolean);
+    if (typeof restPlayerToSave.cualidades_tecnicas === 'string') {
+      restPlayerToSave.cualidades_tecnicas = restPlayerToSave.cualidades_tecnicas.split(',').map(s => s.trim()).filter(Boolean);
     }
-    if (typeof playerToSave.fortalezas === 'string') {
-      playerToSave.fortalezas = playerToSave.fortalezas.split(',').map(s => s.trim()).filter(Boolean);
+    if (typeof restPlayerToSave.fortalezas === 'string') {
+      restPlayerToSave.fortalezas = restPlayerToSave.fortalezas.split(',').map(s => s.trim()).filter(Boolean);
     }
-    if (typeof playerToSave.debilidades === 'string') {
-      playerToSave.debilidades = playerToSave.debilidades.split(',').map(s => s.trim()).filter(Boolean);
+    if (typeof restPlayerToSave.debilidades === 'string') {
+      restPlayerToSave.debilidades = restPlayerToSave.debilidades.split(',').map(s => s.trim()).filter(Boolean);
     }
 
-    if (playerToSave.id) {
-      const res = await supabase.from('players').update(playerToSave).eq('id', playerToSave.id);
+    let newPlayerId = restPlayerToSave.id;
+
+    if (newPlayerId) {
+      const res = await supabase.from('players').update(restPlayerToSave).eq('id', newPlayerId);
       error = res.error;
     } else {
-      const res = await supabase.from('players').insert([playerToSave]);
+      const res = await supabase.from('players').insert([restPlayerToSave]).select().single();
       error = res.error;
+      if (res.data) newPlayerId = res.data.id;
+    }
+
+    if (!error && newPlayerId && Array.isArray(team_ids)) {
+       await supabase.from('player_teams').delete().eq('player_id', newPlayerId);
+       if (team_ids.length > 0) {
+         const inserts = team_ids.map(tid => ({ player_id: newPlayerId, team_id: tid }));
+         await supabase.from('player_teams').insert(inserts);
+       }
     }
     
     if (error) {
@@ -279,12 +290,13 @@ export default function AdminPage() {
       setErrorMsg("Error al guardar equipo: " + error.message);
     } else {
       if (savedTeamId) {
-        // 1. Remove all players from this team
-        await supabase.from('players').update({ team_id: null }).eq('team_id', savedTeamId);
+        // 1. Remove all players from this team in player_teams
+        await supabase.from('player_teams').delete().eq('team_id', savedTeamId);
         
-        // 2. Add selected players to this team
+        // 2. Add selected players to this team in player_teams
         if (selectedPlayersForTeam.length > 0) {
-          await supabase.from('players').update({ team_id: savedTeamId }).in('id', selectedPlayersForTeam);
+          const inserts = selectedPlayersForTeam.map(pid => ({ player_id: pid, team_id: savedTeamId }));
+          await supabase.from('player_teams').insert(inserts);
         }
       }
 
@@ -299,8 +311,16 @@ export default function AdminPage() {
 
   const handleEditTeam = (team) => {
     setPreviewTeam(team);
-    const playersInTeam = players.filter(p => p.team_id === team.id).map(p => p.id);
+    const playersInTeam = players.filter(p => p.player_teams?.some(pt => pt.team_id === team.id)).map(p => p.id);
     setSelectedPlayersForTeam(playersInTeam);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleEditPlayer = (player) => {
+    // Map player_teams to team_ids for the editor
+    const mappedPlayer = { ...player, team_ids: player.player_teams?.map(pt => pt.team_id) || [] };
+    setPreviewPlayer(mappedPlayer);
+    setJsonInput(JSON.stringify(mappedPlayer, null, 2));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -481,13 +501,28 @@ export default function AdminPage() {
                     </select>
                     <input type="number" name="edad" value={previewPlayer.edad || 0} onChange={handleInputChange} placeholder="Edad" className="w-1/2 bg-slate-800 border border-slate-700 rounded p-2 text-white text-sm font-bold text-center focus:border-green-500 outline-none transition" />
                   </div>
-                  <div className="flex gap-2">
-                    <select name="team_id" value={previewPlayer.team_id || ''} onChange={handleInputChange} className="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-sm font-bold focus:border-green-500 outline-none transition cursor-pointer">
-                      <option value="">Sin Equipo (Agente Libre)</option>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-bold text-slate-400">Equipos:</label>
+                    <div className="grid grid-cols-2 gap-2 bg-slate-800 p-3 rounded border border-slate-700">
                       {teams.map(team => (
-                        <option key={team.id} value={team.id}>{team.name}</option>
+                        <label key={team.id} className="flex items-center gap-2 cursor-pointer text-sm text-slate-300">
+                          <input 
+                            type="checkbox" 
+                            checked={(previewPlayer.team_ids || []).includes(team.id)}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setPreviewPlayer(prev => {
+                                const currentIds = prev.team_ids || [];
+                                const newIds = checked ? [...currentIds, team.id] : currentIds.filter(id => id !== team.id);
+                                return { ...prev, team_ids: newIds };
+                              });
+                            }}
+                            className="w-4 h-4 rounded bg-slate-900 border-slate-700 text-green-500 focus:ring-green-500 focus:ring-offset-slate-800"
+                          />
+                          <span className="truncate">{team.name}</span>
+                        </label>
                       ))}
-                    </select>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -595,7 +630,12 @@ export default function AdminPage() {
                     {player.nombre}
                   </td>
                   <td className="p-4 text-slate-300">
-                    <span className="text-sm">{teams.find(t => t.id === player.team_id)?.name || <span className="text-slate-500 italic">Agente Libre</span>}</span>
+                    <span className="text-sm">
+                      {player.player_teams?.length > 0 
+                        ? player.player_teams.map(pt => teams.find(t => t.id === pt.team_id)?.name).filter(Boolean).join(', ')
+                        : <span className="text-slate-500 italic">Agente Libre</span>
+                      }
+                    </span>
                   </td>
                   <td className="p-4 text-slate-300">
                     <span className="bg-slate-800 px-2 py-1 rounded text-xs font-bold text-slate-300">{player.posicion}</span>
