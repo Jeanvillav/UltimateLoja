@@ -1,5 +1,6 @@
 import { Inter, Outfit } from 'next/font/google';
 import './globals.css';
+import Navbar from '@/components/Navbar';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -12,14 +13,15 @@ const outfit = Outfit({
 });
 
 export const metadata = {
-  title: 'Futbol Stats | Premium Player Ratings',
-  description: 'Manage and analyze your 5, 6, or 7-a-side football players with FIFA-style statistics and advanced insights.',
+  title: 'Ultimate Loja | FC 26 Style',
+  description: 'Manage and analyze your football players with FIFA-style statistics.',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="es" className={`${inter.variable} ${outfit.variable}`}>
       <body>
+        <Navbar />
         <main>
           {children}
         </main>

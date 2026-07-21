@@ -9,19 +9,31 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [players, setPlayers] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  // Import state
+  const [jsonInput, setJsonInput] = useState('');
+  const [previewPlayer, setPreviewPlayer] = useState(null);
 
   const supabase = createClient();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) fetchPlayers();
+      if (session) {
+        fetchPlayers();
+        fetchTeams();
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) fetchPlayers();
+      if (session) {
+        fetchPlayers();
+        fetchTeams();
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -30,6 +42,11 @@ export default function AdminPage() {
   const fetchPlayers = async () => {
     const { data } = await supabase.from('players').select('*').order('nombre');
     if (data) setPlayers(data);
+  };
+
+  const fetchTeams = async () => {
+    const { data } = await supabase.from('teams').select('*').order('name');
+    if (data) setTeams(data);
   };
 
   const handleLogin = async (e) => {
@@ -55,54 +72,60 @@ export default function AdminPage() {
     }
   };
 
+  const handleParseJSON = () => {
+    try {
+      const parsed = JSON.parse(jsonInput);
+      setPreviewPlayer(parsed);
+      setErrorMsg('');
+    } catch (err) {
+      setErrorMsg("JSON Inválido: " + err.message);
+      setPreviewPlayer(null);
+    }
+  };
+
+  const handleCreatePlayer = async () => {
+    if (!previewPlayer) return;
+    setLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    const { error } = await supabase.from('players').insert([previewPlayer]);
+    
+    if (error) {
+      setErrorMsg("Error al crear jugador: " + error.message);
+    } else {
+      setSuccessMsg("¡Jugador creado exitosamente!");
+      setJsonInput('');
+      setPreviewPlayer(null);
+      fetchPlayers();
+    }
+    setLoading(false);
+  };
+
   if (!session) {
     return (
       <div className="flex justify-center items-center min-h-[70vh]">
         <form onSubmit={handleLogin} className="glass-panel p-8 rounded-2xl w-full max-w-md">
           <h1 className="text-3xl font-bold font-outfit text-white mb-6 text-center">Admin Login</h1>
-          
           {errorMsg && <div className="bg-red-500/20 border border-red-500 text-red-400 p-3 rounded mb-4 text-sm">{errorMsg}</div>}
-          
           <div className="mb-4">
             <label className="block text-slate-400 mb-2">Email</label>
-            <input 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white outline-none focus:border-green-500"
-              required 
-            />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white outline-none focus:border-green-500" required />
           </div>
-          
           <div className="mb-6">
             <label className="block text-slate-400 mb-2">Contraseña</label>
-            <input 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white outline-none focus:border-green-500"
-              required 
-            />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white outline-none focus:border-green-500" required />
           </div>
-          
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded transition-colors disabled:opacity-50"
-          >
+          <button type="submit" disabled={loading} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded transition-colors disabled:opacity-50">
             {loading ? 'Iniciando...' : 'Ingresar'}
           </button>
-          
-          <p className="text-xs text-slate-500 text-center mt-4">
-            Debes crear un usuario en el panel de Supabase (Authentication) para poder ingresar.
-          </p>
         </form>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold font-outfit text-white">Panel de Administración</h1>
         <button onClick={handleLogout} className="px-4 py-2 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition">
@@ -110,39 +133,104 @@ export default function AdminPage() {
         </button>
       </div>
 
+      {errorMsg && <div className="bg-red-500/20 border border-red-500 text-red-400 p-4 rounded-lg mb-6">{errorMsg}</div>}
+      {successMsg && <div className="bg-green-500/20 border border-green-500 text-green-400 p-4 rounded-lg mb-6">{successMsg}</div>}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        {/* Import JSON Section */}
+        <div className="glass-panel p-6 rounded-xl">
+          <h2 className="text-2xl font-bold font-outfit text-yellow-400 mb-4">Crear Jugador (Importar JSON)</h2>
+          <p className="text-sm text-slate-400 mb-4">Pega el código JSON que generó tu amigo en la pantalla de Sugerencias para crearlo instantáneamente.</p>
+          
+          <textarea 
+            value={jsonInput}
+            onChange={(e) => setJsonInput(e.target.value)}
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-green-400 font-mono text-xs h-40 mb-4 outline-none focus:border-yellow-500"
+            placeholder='{"nombre": "Jugador", "overall_rating": 80...}'
+          />
+          <button onClick={handleParseJSON} className="w-full py-2 bg-slate-800 text-white rounded hover:bg-slate-700 transition border border-slate-600">
+            Revisar JSON
+          </button>
+        </div>
+
+        {/* Preview Section */}
+        <div className="glass-panel p-6 rounded-xl">
+          <h2 className="text-2xl font-bold font-outfit text-green-400 mb-4">Vista Previa</h2>
+          {!previewPlayer ? (
+            <div className="h-40 flex items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded-lg">
+              Carga un JSON para ver la previsualización
+            </div>
+          ) : (
+            <div className="bg-slate-900 p-4 rounded-lg border border-green-500/30">
+              <div className="flex items-center gap-4 mb-4">
+                 {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={previewPlayer.foto_url || `https://placehold.co/100x100/111827/22c55e?text=${previewPlayer.nombre.charAt(0)}`} alt="Preview" className="w-16 h-16 rounded-full object-cover" />
+                <div>
+                  <h3 className="text-xl font-bold text-white">{previewPlayer.nombre}</h3>
+                  <p className="text-slate-400">{previewPlayer.posicion} • {previewPlayer.edad} años</p>
+                </div>
+                <div className="ml-auto text-3xl font-black text-yellow-400">{previewPlayer.overall_rating}</div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+                <div className="text-slate-300">Equipo ID: <span className="text-slate-500 text-xs">{previewPlayer.team_id}</span></div>
+                <div className="text-slate-300">Físico: <span className="text-green-400">{previewPlayer.physical}</span></div>
+                <div className="text-slate-300">Pase: <span className="text-green-400">{previewPlayer.passing}</span></div>
+                <div className="text-slate-300">Tiro: <span className="text-green-400">{previewPlayer.shooting}</span></div>
+              </div>
+
+              <button 
+                onClick={handleCreatePlayer} 
+                disabled={loading}
+                className="w-full py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white font-bold rounded transition shadow-lg disabled:opacity-50"
+              >
+                {loading ? 'Guardando...' : 'Confirmar y Guardar Jugador'}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="glass-panel rounded-xl overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-slate-900/50">
-            <tr>
-              <th className="p-4 text-slate-400 font-medium">Nombre</th>
-              <th className="p-4 text-slate-400 font-medium">Posición</th>
-              <th className="p-4 text-slate-400 font-medium">Media (OVR)</th>
-              <th className="p-4 text-slate-400 font-medium">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {players.map(player => (
-              <tr key={player.id} className="border-t border-white/5">
-                <td className="p-4 font-bold text-white">{player.nombre}</td>
-                <td className="p-4 text-slate-300">{player.posicion}</td>
-                <td className="p-4 text-yellow-400 font-bold">{player.overall_rating}</td>
-                <td className="p-4">
-                  <button 
-                    onClick={() => handleDelete(player.id)}
-                    className="text-red-400 hover:text-red-300 text-sm font-bold"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {players.length === 0 && (
+        <h2 className="text-2xl font-bold font-outfit text-white p-6 border-b border-white/10">Jugadores Existentes</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-slate-900/50">
               <tr>
-                <td colSpan="4" className="p-8 text-center text-slate-500">No hay jugadores</td>
+                <th className="p-4 text-slate-400 font-medium">Nombre</th>
+                <th className="p-4 text-slate-400 font-medium">Posición</th>
+                <th className="p-4 text-slate-400 font-medium">Media (OVR)</th>
+                <th className="p-4 text-slate-400 font-medium">Acciones</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {players.map(player => (
+                <tr key={player.id} className="border-t border-white/5 hover:bg-white/5">
+                  <td className="p-4 font-bold text-white flex items-center gap-3">
+                     {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={player.foto_url || `https://placehold.co/30x30/111827/22c55e?text=${player.nombre.charAt(0)}`} alt="" className="w-8 h-8 rounded-full" />
+                    {player.nombre}
+                  </td>
+                  <td className="p-4 text-slate-300">{player.posicion}</td>
+                  <td className="p-4 text-yellow-400 font-bold">{player.overall_rating}</td>
+                  <td className="p-4">
+                    <button 
+                      onClick={() => handleDelete(player.id)}
+                      className="text-red-400 hover:text-red-300 text-sm font-bold bg-red-400/10 px-3 py-1 rounded"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {players.length === 0 && (
+                <tr>
+                  <td colSpan="4" className="p-8 text-center text-slate-500">No hay jugadores</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
