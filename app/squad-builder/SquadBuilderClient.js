@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { DndContext, useDraggable, useDroppable, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
-import { useSquadStore } from '@/store/squadStore';
+import { useSquadStore, FORMATIONS } from '@/store/squadStore';
 import html2canvas from 'html2canvas';
 import { useSearchParams } from 'next/navigation';
 import { calculateOVR } from '@/utils/ovrCalculator';
@@ -107,7 +107,7 @@ export default function SquadBuilderClient({ teams, players }) {
   const [selectedTeam, setSelectedTeam] = useState(baseTeamId || (teams[0]?.id || ''));
   const pitchRef = useRef(null);
   
-  const { pitch, assignPlayer, clearSquad } = useSquadStore();
+  const { pitch, assignPlayer, clearSquad, activeFormation, setFormation } = useSquadStore();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -139,6 +139,12 @@ export default function SquadBuilderClient({ teams, players }) {
 
   const teamPlayers = players.filter(p => p.team_id === selectedTeam);
   const otherPlayers = players.filter(p => p.team_id !== selectedTeam);
+
+  // Compute Squad OVR
+  const activePlayers = pitch.filter(pos => pos.player);
+  const squadOvr = activePlayers.length > 0
+    ? Math.round(activePlayers.reduce((sum, pos) => sum + getDynamicRating(pos.player, pos.name), 0) / activePlayers.length)
+    : 0;
 
   if (!isClient) return <div className="text-center p-8">Cargando constructor de plantillas...</div>;
 
@@ -185,10 +191,35 @@ export default function SquadBuilderClient({ teams, players }) {
 
           {/* Main Area: Pitch */}
           <div className="w-full lg:w-2/3 flex flex-col items-center">
-            <div className="flex gap-4 mb-6 w-full justify-end">
-              <button onClick={clearSquad} className="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition border border-slate-600">
-                Limpiar
-              </button>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6 w-full justify-between items-center bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <div className="text-xs text-slate-400 uppercase tracking-wider font-bold mb-1">Valoración</div>
+                  <div className={`text-3xl font-black font-outfit ${squadOvr >= 85 ? 'text-yellow-400' : squadOvr >= 75 ? 'text-green-400' : squadOvr > 0 ? 'text-white' : 'text-slate-600'}`}>
+                    {squadOvr || '--'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-slate-400 font-bold">Formación:</label>
+                  <select 
+                    value={activeFormation || '4-3-3'}
+                    onChange={(e) => setFormation(e.target.value)}
+                    className="bg-slate-800 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-green-500 font-bold"
+                  >
+                    {Object.keys(FORMATIONS).map(f => (
+                      <option key={f} value={f}>{f}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <button onClick={clearSquad} className="px-4 py-2 bg-red-500/20 text-red-400 font-bold rounded-lg hover:bg-red-500/30 transition border border-red-500/30">
+                  Limpiar
+                </button>
+              </div>
             </div>
 
             {/* The Pitch wrapped for horizontal scrolling on mobile */}

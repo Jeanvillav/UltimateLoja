@@ -567,6 +567,7 @@ export default function AdminPage() {
             <thead className="bg-slate-900/50">
               <tr>
                 <th className="p-4 text-slate-400 font-medium">Nombre</th>
+                <th className="p-4 text-slate-400 font-medium">Equipo</th>
                 <th className="p-4 text-slate-400 font-medium">Posición</th>
                 <th className="p-4 text-slate-400 font-medium">Media (OVR)</th>
                 <th className="p-4 text-slate-400 font-medium">Acciones</th>
@@ -579,6 +580,9 @@ export default function AdminPage() {
                      {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={player.foto_url || `https://placehold.co/30x30/111827/22c55e?text=${player.nombre.charAt(0)}`} alt="" className="w-10 h-10 rounded-full object-cover border border-slate-700" />
                     {player.nombre}
+                  </td>
+                  <td className="p-4 text-slate-300">
+                    <span className="text-sm">{teams.find(t => t.id === player.team_id)?.name || <span className="text-slate-500 italic">Agente Libre</span>}</span>
                   </td>
                   <td className="p-4 text-slate-300">
                     <span className="bg-slate-800 px-2 py-1 rounded text-xs font-bold text-slate-300">{player.posicion}</span>
