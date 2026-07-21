@@ -1,24 +1,27 @@
 import React from 'react';
 import Link from 'next/link';
+import { calculateOVR } from '@/utils/ovrCalculator';
 
 export default function FC26Card({ player, asPreview = false, livePhotoUrl = null }) {
+  const shortPos = (player.posicion || 'DEL').split(' ')[0].substring(0, 3).toUpperCase();
+  const calculatedOvr = calculateOVR(player, shortPos);
+
   // Determine card style based on rating
   let bgGradient = "from-yellow-400 to-yellow-600"; // Gold
   let textColor = "text-yellow-950";
   let borderGlow = "shadow-[0_0_15px_rgba(250,204,21,0.4)]";
   
-  if (player.overall_rating < 75) {
+  if (calculatedOvr < 75) {
     bgGradient = "from-slate-300 to-slate-500"; // Silver
     textColor = "text-slate-900";
     borderGlow = "shadow-[0_0_15px_rgba(203,213,225,0.4)]";
   }
-  if (player.overall_rating < 65) {
+  if (calculatedOvr < 65) {
     bgGradient = "from-amber-700 to-amber-900"; // Bronze
     textColor = "text-amber-100";
     borderGlow = "shadow-[0_0_15px_rgba(180,83,9,0.4)]";
   }
 
-  const shortPos = (player.posicion || 'DEL').split(' ')[0].substring(0, 3).toUpperCase();
   const idOrName = player.id || player.nombre || 'Nuevo';
   
   // Use livePhotoUrl if provided (for live preview in cropper), otherwise use db foto_url
@@ -47,7 +50,7 @@ export default function FC26Card({ player, asPreview = false, livePhotoUrl = nul
       {/* Top bar: Rating and Position */}
       <div className="flex justify-between items-start z-10 relative pointer-events-none">
         <div className="flex flex-col items-center drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]">
-          <span className="text-4xl font-black font-outfit leading-none">{player.overall_rating || 0}</span>
+          <div className="text-4xl font-black font-outfit leading-none">{calculatedOvr}</div>
           <span className="text-lg font-bold">{shortPos}</span>
         </div>
         <div className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center backdrop-blur-sm shadow-md border border-white/20">

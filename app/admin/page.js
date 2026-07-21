@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
+import { calculateOVR } from '@/utils/ovrCalculator';
 import FC26Card from '@/components/FC26Card';
 
 export default function AdminPage() {
@@ -196,11 +197,24 @@ export default function AdminPage() {
     setSuccessMsg('');
 
     let error;
-    if (previewPlayer.id) {
-      const res = await supabase.from('players').update(previewPlayer).eq('id', previewPlayer.id);
+    
+    // Auto-calculate and store OVR in DB for sorting purposes
+    const calculatedOvr = calculateOVR({
+      ritmo: previewPlayer.pace,
+      tiro: previewPlayer.shooting,
+      pase: previewPlayer.passing,
+      regate: previewPlayer.dribbling,
+      defensa: previewPlayer.defending,
+      fisico: previewPlayer.physical
+    }, previewPlayer.posicion);
+    
+    const playerToSave = { ...previewPlayer, overall_rating: calculatedOvr };
+
+    if (playerToSave.id) {
+      const res = await supabase.from('players').update(playerToSave).eq('id', playerToSave.id);
       error = res.error;
     } else {
-      const res = await supabase.from('players').insert([previewPlayer]);
+      const res = await supabase.from('players').insert([playerToSave]);
       error = res.error;
     }
     
@@ -367,9 +381,18 @@ export default function AdminPage() {
                 </div>
               </div>
               
-              <div className="mb-6 bg-yellow-900/10 border border-yellow-500/20 p-4 rounded-xl">
-                <label className="block text-xs text-yellow-500 font-bold mb-2 uppercase tracking-widest text-center">Media General (OVR)</label>
-                <input type="number" name="overall_rating" value={previewPlayer.overall_rating || 0} onChange={handleInputChange} className="w-full bg-black/40 border border-yellow-500/50 rounded-lg p-3 text-yellow-400 font-black text-center text-3xl shadow-inner focus:border-yellow-400 outline-none transition" />
+              <div className="mb-6 bg-yellow-900/10 border border-yellow-500/20 p-4 rounded-xl flex flex-col items-center">
+                <label className="block text-xs text-yellow-500 font-bold mb-2 uppercase tracking-widest text-center">Media General (OVR) Calculada</label>
+                <div className="w-full bg-black/40 border border-yellow-500/50 rounded-lg p-3 text-yellow-400 font-black text-center text-3xl shadow-inner cursor-not-allowed opacity-80">
+                  {calculateOVR({
+                    ritmo: previewPlayer.pace,
+                    tiro: previewPlayer.shooting,
+                    pase: previewPlayer.passing,
+                    regate: previewPlayer.dribbling,
+                    defensa: previewPlayer.defending,
+                    fisico: previewPlayer.physical
+                  }, previewPlayer.posicion)}
+                </div>
               </div>
               
               <div className="grid grid-cols-2 gap-3 mb-8">
@@ -424,7 +447,14 @@ export default function AdminPage() {
                     <span className="bg-slate-800 px-2 py-1 rounded text-xs font-bold text-slate-300">{player.posicion}</span>
                   </td>
                   <td className="p-4">
-                    <span className="text-yellow-400 font-black text-lg bg-yellow-400/10 px-3 py-1 rounded-lg border border-yellow-400/20">{player.overall_rating}</span>
+                    <span className="text-yellow-400 font-black text-lg bg-yellow-400/10 px-3 py-1 rounded-lg border border-yellow-400/20">{calculateOVR({
+                      ritmo: player.pace,
+                      tiro: player.shooting,
+                      pase: player.passing,
+                      regate: player.dribbling,
+                      defensa: player.defending,
+                      fisico: player.physical
+                    }, player.posicion)}</span>
                   </td>
                   <td className="p-4 flex gap-3">
                     <button 

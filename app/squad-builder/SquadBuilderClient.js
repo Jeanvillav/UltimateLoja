@@ -1,36 +1,19 @@
 'use client';
 
 import React, { useState, useRef, useEffect, Suspense } from 'react';
-import { DndContext, useDraggable, useDroppable, DragOverlay } from '@dnd-kit/core';
+import { DndContext, useDraggable, useDroppable, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
 import { useSquadStore } from '@/store/squadStore';
 import html2canvas from 'html2canvas';
 import { useSearchParams } from 'next/navigation';
+import { calculateOVR } from '@/utils/ovrCalculator';
 
 // Calculates dynamic OVR based on natural position vs pitch position
 function getDynamicRating(player, pitchPosName) {
   if (!player || !pitchPosName) return 0;
   
-  const naturalPos = player.posicion.split(' ')[0].substring(0, 3).toUpperCase(); // POR, DEF, MED, DEL
-  let penalty = 0;
-
-  if (naturalPos === pitchPosName) {
-    return player.overall_rating; // Perfect match
-  }
-
-  // Calculate penalties based on mismatch
-  if (pitchPosName === 'POR') {
-    penalty = -40; // Anyone else in goal is terrible
-  } else if (naturalPos === 'POR') {
-    penalty = -40; // Goalkeeper playing outfield is terrible
-  } else {
-    // Outfield players swapping
-    const positions = { 'DEF': 1, 'MED': 2, 'DEL': 3 };
-    const diff = Math.abs(positions[naturalPos] - positions[pitchPosName]);
-    if (diff === 1) penalty = -4; // e.g. DEF as MED
-    if (diff === 2) penalty = -12; // e.g. DEF as DEL
-  }
-
-  return Math.max(1, player.overall_rating + penalty);
+  // Calculate what their rating would be if they naturally played this position
+  const dynamicOvr = calculateOVR(player, pitchPosName);
+  return dynamicOvr;
 }
 
 function PitchDraggablePlayer({ player, posId, removePlayer, pitchPosName }) {
@@ -40,7 +23,8 @@ function PitchDraggablePlayer({ player, posId, removePlayer, pitchPosName }) {
   });
 
   const dynamicRating = getDynamicRating(player, pitchPosName);
-  const isPenalized = dynamicRating < player.overall_rating;
+  const naturalOvr = calculateOVR(player, player.posicion);
+  const isPenalized = dynamicRating < naturalOvr;
 
   return (
     <div 
@@ -73,6 +57,9 @@ function SidebarDraggablePlayer({ player }) {
     data: player
   });
 
+  const shortPos = (player.posicion || 'DEL').split(' ')[0].substring(0, 3).toUpperCase();
+  const calculatedOvr = calculateOVR(player, shortPos);
+
   return (
     <div 
       ref={setNodeRef} 
@@ -84,7 +71,7 @@ function SidebarDraggablePlayer({ player }) {
       <img src={player.foto_url || `https://placehold.co/50x50/111827/22c55e?text=${player.nombre.charAt(0)}`} alt={player.nombre} className="w-10 h-10 rounded-full object-cover pointer-events-none" />
       <div>
         <div className="font-bold font-outfit">{player.nombre}</div>
-        <div className="text-xs text-slate-400">OVR: {player.overall_rating} • {player.posicion.split(' ')[0]}</div>
+        <div className="text-xs text-slate-400">OVR: {calculatedOvr} • {player.posicion.split(' ')[0]}</div>
       </div>
     </div>
   );
@@ -141,6 +128,15 @@ export default function SquadBuilderClient({ teams, players }) {
 
 
 
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 5 },
+    })
+  );
+
   const teamPlayers = players.filter(p => p.team_id === selectedTeam);
   const otherPlayers = players.filter(p => p.team_id !== selectedTeam);
 
@@ -148,7 +144,7 @@ export default function SquadBuilderClient({ teams, players }) {
 
   return (
     <Suspense fallback={<div className="text-center">Cargando...</div>}>
-      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           
           {/* Sidebar */}
@@ -195,18 +191,19 @@ export default function SquadBuilderClient({ teams, players }) {
               </button>
             </div>
 
-            {/* The Pitch */}
-            <div 
-              ref={pitchRef}
-              className="relative w-full max-w-[600px] aspect-[2/3] bg-gradient-to-b from-green-700 to-green-900 rounded-lg border-4 border-white/20 shadow-2xl overflow-hidden"
-              style={{
-                backgroundImage: `
-                  linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-                `,
-                backgroundSize: '100% 10%, 20% 100%'
-              }}
-            >
+            {/* The Pitch wrapped for horizontal scrolling on mobile */}
+            <div className="w-full overflow-x-auto pb-4 custom-scrollbar">
+              <div 
+                ref={pitchRef}
+                className="relative w-[600px] aspect-[2/3] mx-auto bg-gradient-to-b from-green-700 to-green-900 rounded-lg border-4 border-white/20 shadow-2xl overflow-hidden"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+                  `,
+                  backgroundSize: '100% 10%, 20% 100%'
+                }}
+              >
               {/* Pitch lines */}
               <div className="absolute top-0 left-[25%] w-[50%] h-[15%] border-b-2 border-x-2 border-white/30"></div>
               <div className="absolute bottom-0 left-[25%] w-[50%] h-[15%] border-t-2 border-x-2 border-white/30"></div>
