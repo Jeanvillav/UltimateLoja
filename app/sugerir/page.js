@@ -261,7 +261,7 @@ export default function SugerirJugador() {
             <div className="grid grid-cols-3 gap-3">
               {['overall_rating', 'pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].map(stat => {
                 let label = stat.replace('_rating', ' (OVR)');
-                const isGK = formData.posicion === 'Portero (POR)';
+                const isGK = formData.posicion === 'POR';
                 if (isGK) {
                   if (stat === 'pace') label = 'DIV (Estirada)';
                   if (stat === 'shooting') label = 'HAN (Manejo)';

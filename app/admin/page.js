@@ -544,7 +544,7 @@ export default function AdminPage() {
               <div className="grid grid-cols-2 gap-3 mb-8">
                 {['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].map(stat => {
                   let label = stat;
-                  const isGK = previewPlayer.posicion === 'Portero (POR)';
+                  const isGK = previewPlayer.posicion === 'POR';
                   if (isGK) {
                     if (stat === 'pace') label = 'DIV (Estirada)';
                     if (stat === 'shooting') label = 'HAN (Manejo)';
