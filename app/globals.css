@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #111827;
-  --color-secondary: #1f2937;
-  --color-accent: #e5ff00; /* FIFA 15 Yellow/Lime */
-  --color-highlight: #00d2ff; /* FIFA 15 Cyan */
-  --color-neon-green: #22c55e;
+  --color-primary: #101419; /* Very dark blue/grey */
+  --color-secondary: #1e252e;
+  --color-accent: #c3ff00; /* FIFA 15 Bright Lime Green */
+  --color-highlight: #00e5ff; /* FIFA 15 Bright Cyan */
+  --color-neon-green: #c3ff00; /* Map old green to lime */
   --color-dark-green: #14532d;
 }
 
@@ -63,4 +63,29 @@ h1, h2, h3, h4, h5, h6 {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--color-highlight);
+}
+
+/* FIFA 15 Buttons */
+.btn-fifa {
+  background: var(--color-secondary);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  border-radius: 0;
+}
+.btn-fifa:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 15px rgba(195, 255, 0, 0.3);
+  color: var(--color-accent);
+}
+.btn-fifa-cyan:hover {
+  border-color: var(--color-highlight);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+  color: var(--color-highlight);
 }

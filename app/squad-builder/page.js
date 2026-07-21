@@ -35,7 +35,7 @@ export default async function SquadBuilderPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-black font-outfit text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-yellow-500">
+      <h1 className="text-4xl font-black font-outfit text-center mb-8 text-white drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]">
         Squad Builder
       </h1>
       

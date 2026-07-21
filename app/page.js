@@ -8,7 +8,7 @@ export default function Home() {
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-green-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-yellow-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
         
-        <h1 className="text-5xl md:text-7xl font-black font-outfit mb-6 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-yellow-500">
+        <h1 className="text-5xl md:text-7xl font-black font-outfit mb-6 text-white drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]">
           Bienvenido a las<br/>Canchas Sintéticas de Loja
         </h1>
         
@@ -22,7 +22,7 @@ export default function Home() {
             Ver Equipos
           </Link>
           
-          <Link href="/squad-builder" className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:shadow-[0_0_30px_rgba(34,197,94,0.6)] hover:-translate-y-1 text-lg flex items-center justify-center gap-2">
+          <Link href="/squad-builder" className="w-full sm:w-auto px-8 py-4 btn-fifa w-full font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:shadow-[0_0_30px_rgba(34,197,94,0.6)] hover:-translate-y-1 text-lg flex items-center justify-center gap-2">
             Crea tu Plantilla
           </Link>
         </div>

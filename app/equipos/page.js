@@ -33,7 +33,7 @@ export default async function Equipos() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-4xl md:text-5xl font-black font-outfit text-center mb-4 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-yellow-500">
+      <h1 className="text-4xl md:text-5xl font-black font-outfit text-center mb-4 text-white drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]">
         Equipos de Loja
       </h1>
       <p className="text-center text-slate-400 mb-12 max-w-2xl mx-auto text-lg">

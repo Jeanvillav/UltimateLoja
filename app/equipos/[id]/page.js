@@ -64,7 +64,7 @@ export default async function EquipoPage({ params }) {
         </div>
         
         <div className="md:ml-auto mt-4 md:mt-0">
-          <Link href={`/squad-builder?base=${team.id}`} className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+          <Link href={`/squad-builder?base=${team.id}`} className="px-6 py-3 btn-fifa w-full font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(34,197,94,0.3)]">
             Usar como Base en Squad Builder
           </Link>
         </div>
