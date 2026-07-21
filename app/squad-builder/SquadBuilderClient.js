@@ -101,7 +101,17 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
   const [saveMessage, setSaveMessage] = useState('');
   const pitchRef = useRef(null);
   
-  const { pitch, assignPlayer, clearSquad, activeFormation, setFormation } = useSquadStore();
+  const { pitch, assignPlayer, clearSquad, activeFormation, setFormation, loadLineup } = useSquadStore();
+
+  useEffect(() => {
+    // Auto-load team lineup if provided via query param
+    if (baseTeamId) {
+      const team = teams.find(t => t.id === baseTeamId);
+      if (team && team.lineup && team.formation) {
+        loadLineup(team.formation, team.lineup);
+      }
+    }
+  }, [baseTeamId, teams, loadLineup]);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {

@@ -98,7 +98,12 @@ export const useSquadStore = create(
       
       clearSquad: () => set((state) => ({
         pitch: state.pitch.map(pos => ({ ...pos, player: null }))
-      }))
+      })),
+      
+      loadLineup: (formation, newPitch) => set({
+        activeFormation: formation,
+        pitch: newPitch
+      })
     }),
     {
       name: 'squad-storage',
