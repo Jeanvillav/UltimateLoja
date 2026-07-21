@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import FC26Card from '@/components/FC26Card';
+import TeamLineup from '@/components/TeamLineup';
 import fs from 'fs';
 import path from 'path';
 
@@ -54,11 +55,15 @@ export default async function EquipoPage({ params }) {
         </div>
         
         <div className="md:ml-auto mt-4 md:mt-0">
-          <Link href={`/squad-builder?base=${team.id}`} className="px-6 py-3 btn-fifa w-full font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(34,197,94,0.3)]">
-            Usar como Base en Squad Builder
+          <Link href={`/squad-builder?base=${team.id}`} className="px-6 py-3 btn-fifa w-full font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(34,197,94,0.3)] block text-center">
+            Diseñar / Editar Alineación
           </Link>
         </div>
       </div>
+
+      <TeamLineup team={team} />
+
+      <h2 className="text-3xl font-black font-outfit text-white mb-6">Plantilla Completa</h2>
 
       {players.length === 0 ? (
         <p className="text-center text-slate-500 text-lg">No hay jugadores registrados en este equipo.</p>

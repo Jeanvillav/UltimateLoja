@@ -38,3 +38,8 @@ export function calculateOVR(stats, position) {
 
   return Math.round(ovr);
 }
+
+export function getDynamicRating(player, pitchPosName) {
+  if (!player || !pitchPosName) return 0;
+  return calculateOVR(player, pitchPosName);
+}

@@ -9,10 +9,14 @@ export const dynamic = 'force-dynamic';
 export default async function SquadBuilderPage() {
   let teams = [];
   let players = [];
+  let isAdmin = false;
 
   try {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
+
+    const { data: authData } = await supabase.auth.getUser();
+    isAdmin = !!authData?.user;
 
     const teamsRes = await supabase.from('teams').select('*');
     if (teamsRes.data) teams = teamsRes.data;
@@ -29,7 +33,7 @@ export default async function SquadBuilderPage() {
         Squad Builder
       </h1>
       
-      <SquadBuilderClient teams={teams} players={players} />
+      <SquadBuilderClient teams={teams} players={players} isAdmin={isAdmin} />
     </div>
   );
 }

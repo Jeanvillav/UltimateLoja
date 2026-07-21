@@ -4,17 +4,9 @@ import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { DndContext, useDraggable, useDroppable, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
 import { useSquadStore, FORMATIONS } from '@/store/squadStore';
 import html2canvas from 'html2canvas';
+import { calculateOVR, getDynamicRating } from '@/utils/ovrCalculator';
+import { createClient } from '@/utils/supabase/client';
 import { useSearchParams } from 'next/navigation';
-import { calculateOVR } from '@/utils/ovrCalculator';
-
-// Calculates dynamic OVR based on natural position vs pitch position
-function getDynamicRating(player, pitchPosName) {
-  if (!player || !pitchPosName) return 0;
-  
-  // Calculate what their rating would be if they naturally played this position
-  const dynamicOvr = calculateOVR(player, pitchPosName);
-  return dynamicOvr;
-}
 
 function PitchDraggablePlayer({ player, posId, removePlayer, pitchPosName }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -99,12 +91,14 @@ function DroppablePosition({ pos }) {
   );
 }
 
-export default function SquadBuilderClient({ teams, players }) {
+export default function SquadBuilderClient({ teams, players, isAdmin }) {
   const searchParams = useSearchParams();
   const baseTeamId = searchParams.get('base');
   
   const [activePlayer, setActivePlayer] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(baseTeamId || (teams[0]?.id || ''));
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
   const pitchRef = useRef(null);
   
   const { pitch, assignPlayer, clearSquad, activeFormation, setFormation } = useSquadStore();
@@ -137,8 +131,28 @@ export default function SquadBuilderClient({ teams, players }) {
     })
   );
 
+  const handleSaveTeamLineup = async () => {
+    if (!selectedTeam) return;
+    setIsSaving(true);
+    setSaveMessage('');
+    const supabase = createClient();
+    const { error } = await supabase.from('teams').update({
+      formation: activeFormation,
+      lineup: pitch
+    }).eq('id', selectedTeam);
+    
+    setIsSaving(false);
+    if (error) {
+      setSaveMessage('Error al guardar alineación.');
+      console.error(error);
+    } else {
+      setSaveMessage('¡Alineación guardada con éxito!');
+      setTimeout(() => setSaveMessage(''), 3000);
+    }
+  };
+
   const isPlayerInTeam = (p, tId) => {
-    if (p.player_teams) return p.player_teams.some(pt => pt.team_id === tId);
+    if (p.player_teams && p.player_teams.length > 0) return p.player_teams.some(pt => pt.team_id === tId);
     return p.team_id === tId;
   };
 
@@ -220,6 +234,18 @@ export default function SquadBuilderClient({ teams, players }) {
                     ))}
                   </select>
                 </div>
+                {isAdmin && selectedTeam && (
+                  <div className="flex flex-col items-end">
+                    <button 
+                      onClick={handleSaveTeamLineup}
+                      disabled={isSaving}
+                      className="btn-fifa py-2 px-4 text-sm whitespace-nowrap bg-gradient-to-r from-blue-600 to-indigo-600 shadow-[0_0_10px_rgba(79,70,229,0.5)]"
+                    >
+                      {isSaving ? 'Guardando...' : 'Guardar como Titular'}
+                    </button>
+                    {saveMessage && <span className="text-xs text-green-400 mt-1">{saveMessage}</span>}
+                  </div>
+                )}
                 
                 <button onClick={clearSquad} className="px-4 py-2 bg-red-500/20 text-red-400 font-bold rounded-lg hover:bg-red-500/30 transition border border-red-500/30">
                   Limpiar
