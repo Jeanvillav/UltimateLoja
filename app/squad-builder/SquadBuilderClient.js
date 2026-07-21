@@ -139,26 +139,7 @@ export default function SquadBuilderClient({ teams, players }) {
     setActivePlayer(event.active.data.current);
   };
 
-  const exportImage = async () => {
-    if (pitchRef.current) {
-      try {
-        const canvas = await html2canvas(pitchRef.current, { 
-          backgroundColor: '#111827', 
-          scale: 2,
-          useCORS: true,
-          allowTaint: true
-        });
-        const image = canvas.toDataURL("image/jpeg", 0.9);
-        const link = document.createElement('a');
-        link.href = image;
-        link.download = 'mi-plantilla-loja.jpg';
-        link.click();
-      } catch (err) {
-        console.error("Error exportando imagen", err);
-        alert("Hubo un error exportando la imagen.");
-      }
-    }
-  };
+
 
   const teamPlayers = players.filter(p => p.team_id === selectedTeam);
   const otherPlayers = players.filter(p => p.team_id !== selectedTeam);
@@ -211,9 +192,6 @@ export default function SquadBuilderClient({ teams, players }) {
             <div className="flex gap-4 mb-6 w-full justify-end">
               <button onClick={clearSquad} className="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition border border-slate-600">
                 Limpiar
-              </button>
-              <button onClick={exportImage} className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-slate-900 font-bold rounded-lg hover:brightness-110 transition shadow-lg">
-                Exportar
               </button>
             </div>
 

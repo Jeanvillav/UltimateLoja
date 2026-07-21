@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #101419; /* Very dark blue/grey */
-  --color-secondary: #1e252e;
-  --color-accent: #c3ff00; /* FIFA 15 Bright Lime Green */
-  --color-highlight: #00e5ff; /* FIFA 15 Bright Cyan */
-  --color-neon-green: #c3ff00; /* Map old green to lime */
+  --color-primary: #111827; /* Dark grey/black */
+  --color-secondary: #1f2937;
+  --color-accent: #ffffff; /* White for contrast */
+  --color-highlight: #22c55e; /* Classic EA Sports Green */
+  --color-neon-green: #22c55e;
   --color-dark-green: #14532d;
 }
 
