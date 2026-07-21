@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import RadarChart from '@/components/RadarChart';
+import FC26Card from '@/components/FC26Card';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import fs from 'fs';
@@ -48,96 +49,74 @@ export default async function PlayerPage({ params }) {
 
   return (
     <div>
-      <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', marginBottom: '2rem', color: 'var(--text-secondary)' }}>
-        <ChevronLeft size={20} /> Volver
+      <Link href="/" className="inline-flex items-center mb-8 text-white hover:text-green-400 transition-colors bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">
+        <ChevronLeft size={20} className="mr-2" /> Volver
       </Link>
       
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3rem' }}>
-        <div style={{ flex: '1 1 300px', display: 'flex', justifyContent: 'center' }}>
-          <div className="fifa-card" style={{ 
-            background: player.overall_rating >= 75 ? "linear-gradient(135deg, #fbbf24 0%, #d97706 100%)" : 
-                        player.overall_rating >= 65 ? "linear-gradient(135deg, #94a3b8 0%, #475569 100%)" : 
-                        "linear-gradient(135deg, #b45309 0%, #78350f 100%)",
-            transform: 'scale(1.2)', 
-            transformOrigin: 'top center',
-            marginBottom: '4rem'
-          }}>
-            <div className="fifa-card-header">
-              <div className="fifa-rating">{player.overall_rating}</div>
-              <div className="fifa-position">{player.posicion.split(' ')[0].substring(0, 3).toUpperCase()}</div>
-            </div>
-            
-            <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', marginBottom: '10px' }}>
-              <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </div>
-            <div className="fifa-name">{player.nombre}</div>
-            <div className="fifa-stats-grid">
-              <div className="fifa-stat-row"><span className="fifa-stat-label">PAC</span><span className="fifa-stat-val">{player.pace}</span></div>
-              <div className="fifa-stat-row"><span className="fifa-stat-label">DRI</span><span className="fifa-stat-val">{player.dribbling}</span></div>
-              <div className="fifa-stat-row"><span className="fifa-stat-label">SHO</span><span className="fifa-stat-val">{player.shooting}</span></div>
-              <div className="fifa-stat-row"><span className="fifa-stat-label">DEF</span><span className="fifa-stat-val">{player.defending}</span></div>
-              <div className="fifa-stat-row"><span className="fifa-stat-label">PAS</span><span className="fifa-stat-val">{player.passing}</span></div>
-              <div className="fifa-stat-row"><span className="fifa-stat-label">PHY</span><span className="fifa-stat-val">{player.physical}</span></div>
-            </div>
-          </div>
+      <div className="flex flex-wrap lg:flex-nowrap gap-12 items-start justify-center">
+        <div className="flex-shrink-0 flex justify-center sticky top-24">
+          <FC26Card player={player} asPreview={true} />
         </div>
 
-        <div style={{ flex: '2 1 500px' }} className="glass">
-          <div style={{ padding: '2rem' }}>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{player.nombre}</h1>
-            <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>{player.posicion} • {player.edad} años</p>
+        <div className="flex-grow w-full max-w-4xl bg-black/60 backdrop-blur-md rounded-3xl p-8 border border-white/10 shadow-2xl text-white">
+          <div className="mb-8 border-b border-white/10 pb-6">
+            <h1 className="text-5xl font-black mb-2 drop-shadow-lg text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">{player.nombre}</h1>
+            <p className="text-xl text-green-400 font-bold uppercase tracking-widest">{player.posicion} <span className="text-slate-400 mx-2">•</span> <span className="text-yellow-400">{player.edad} años</span></p>
+          </div>
 
             <RadarChart stats={player} />
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '2rem' }}>
-              <div>
-                <h3 style={{ color: 'var(--green)', marginBottom: '1rem' }}>Fortalezas</h3>
-                <ul style={{ listStyle: 'none' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+              <div className="bg-green-900/20 p-6 rounded-2xl border border-green-500/20">
+                <h3 className="text-green-400 font-bold mb-4 uppercase tracking-wider text-sm flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-400 rounded-full"></span> Fortalezas
+                </h3>
+                <ul className="space-y-3">
                   {player.fortalezas?.map((f, i) => (
-                    <li key={i} style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'flex-start' }}>
-                      <span style={{ color: 'var(--green)', marginRight: '0.5rem' }}>+</span> {f}
+                    <li key={i} className="flex items-start text-slate-200">
+                      <span className="text-green-400 font-bold mr-3 mt-1">+</span> {f}
                     </li>
                   ))}
                 </ul>
               </div>
               
-              <div>
-                <h3 style={{ color: 'var(--red)', marginBottom: '1rem' }}>Debilidades</h3>
-                <ul style={{ listStyle: 'none' }}>
+              <div className="bg-red-900/20 p-6 rounded-2xl border border-red-500/20">
+                <h3 className="text-red-400 font-bold mb-4 uppercase tracking-wider text-sm flex items-center gap-2">
+                  <span className="w-2 h-2 bg-red-400 rounded-full"></span> Debilidades
+                </h3>
+                <ul className="space-y-3">
                   {player.debilidades?.map((d, i) => (
-                    <li key={i} style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'flex-start' }}>
-                      <span style={{ color: 'var(--red)', marginRight: '0.5rem' }}>-</span> {d}
+                    <li key={i} className="flex items-start text-slate-200">
+                      <span className="text-red-400 font-bold mr-3 mt-1">-</span> {d}
                     </li>
                   ))}
                 </ul>
               </div>
             </div>
 
-            <div style={{ marginTop: '2rem' }}>
-              <h3 style={{ marginBottom: '1rem' }}>Cualidades Técnicas</h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div className="mt-8 bg-slate-800/40 p-6 rounded-2xl border border-white/5">
+              <h3 className="text-yellow-400 font-bold mb-4 uppercase tracking-wider text-sm">Cualidades Técnicas</h3>
+              <div className="flex flex-wrap gap-2">
                 {player.cualidades_tecnicas?.map((c, i) => (
-                  <span key={i} style={{ padding: '0.25rem 0.75rem', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '999px', fontSize: '0.9rem' }}>
+                  <span key={i} className="px-4 py-1.5 bg-black/50 border border-slate-600 rounded-full text-sm font-medium text-slate-200">
                     {c}
                   </span>
                 ))}
               </div>
             </div>
 
-            <div style={{ marginTop: '2rem' }}>
-              <h3 style={{ marginBottom: '0.5rem' }}>Perfil Físico</h3>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>{player.perfil_fisico}</p>
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+              <div className="bg-slate-800/40 p-6 rounded-2xl border border-white/5">
+                <h3 className="text-blue-400 font-bold mb-3 uppercase tracking-wider text-sm">Perfil Físico</h3>
+                <p className="text-slate-300 leading-relaxed text-sm">{player.perfil_fisico}</p>
+              </div>
 
-            <div style={{ marginTop: '2rem' }}>
-              <h3 style={{ marginBottom: '0.5rem' }}>Rol Táctico</h3>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>{player.rol_tactico}</p>
+              <div className="bg-slate-800/40 p-6 rounded-2xl border border-white/5">
+                <h3 className="text-purple-400 font-bold mb-3 uppercase tracking-wider text-sm">Rol Táctico</h3>
+                <p className="text-slate-300 leading-relaxed text-sm">{player.rol_tactico}</p>
+              </div>
             </div>
           </div>
-        </div>
       </div>
     </div>
   );
