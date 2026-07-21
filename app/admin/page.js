@@ -21,8 +21,8 @@ export default function AdminPage() {
   
   // Cropper State
   const [uploading, setUploading] = useState(false);
-  const [cropImageSrc, setCropImageSrc] = useState(null); // The original image selected
-  const [showCropper, setShowCropper] = useState(false); // Modal visibility
+  const [cropImageSrc, setCropImageSrc] = useState(null); 
+  const [showCropper, setShowCropper] = useState(false); 
   const cropperRef = useRef(null);
   
   const supabase = createClient();
@@ -85,7 +85,7 @@ export default function AdminPage() {
     const jsonStr = JSON.stringify(playerToEdit, null, 2);
     setJsonInput(jsonStr);
     setPreviewPlayer(playerToEdit);
-    setSuccessMsg('Jugador cargado para edición. Revisa el panel de arriba.');
+    setSuccessMsg('Jugador cargado. Puedes editar sus datos abajo.');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -100,7 +100,18 @@ export default function AdminPage() {
     }
   };
 
-  // STEP 1: Handle File Selection and load into Cropper Modal
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    const isNumber = ['edad', 'overall_rating', 'pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].includes(name);
+    const updatedValue = isNumber ? parseInt(value) || 0 : value;
+    
+    setPreviewPlayer(prev => {
+      const updated = { ...prev, [name]: updatedValue };
+      setJsonInput(JSON.stringify(updated, null, 2));
+      return updated;
+    });
+  };
+
   const onFileChange = (e) => {
     e.preventDefault();
     let files;
@@ -117,11 +128,9 @@ export default function AdminPage() {
     if (files && files.length > 0) {
       reader.readAsDataURL(files[0]);
     }
-    // Reset file input so same file can be selected again if cancelled
     e.target.value = '';
   };
 
-  // STEP 2: Extract Blob from Cropper and upload to Supabase
   const handleCropAndUpload = async () => {
     if (typeof cropperRef.current?.cropper !== "undefined") {
       setUploading(true);
@@ -129,9 +138,8 @@ export default function AdminPage() {
       
       const cropper = cropperRef.current.cropper;
       
-      // Get a canvas of the cropped area
       cropper.getCroppedCanvas({
-        maxWidth: 1024, // Optional: scale down if it's too huge
+        maxWidth: 1024,
         maxHeight: 1024,
       }).toBlob(async (blob) => {
         if (!blob) {
@@ -151,8 +159,11 @@ export default function AdminPage() {
 
           const { data } = supabase.storage.from('photos').getPublicUrl(fileName);
           
-          setPreviewPlayer(prev => ({ ...prev, foto_url: data.publicUrl }));
-          setJsonInput(JSON.stringify({ ...previewPlayer, foto_url: data.publicUrl }, null, 2));
+          setPreviewPlayer(prev => {
+            const updated = { ...prev, foto_url: data.publicUrl };
+            setJsonInput(JSON.stringify(updated, null, 2));
+            return updated;
+          });
           
           setShowCropper(false);
           setCropImageSrc(null);
@@ -226,7 +237,7 @@ export default function AdminPage() {
               <Cropper
                 src={cropImageSrc}
                 style={{ height: "100%", width: "100%" }}
-                initialAspectRatio={1} // Square default
+                initialAspectRatio={1}
                 guides={true}
                 ref={cropperRef}
                 viewMode={1}
@@ -268,71 +279,83 @@ export default function AdminPage() {
       {successMsg && <div className="bg-green-500/20 border border-green-500 text-green-400 p-4 rounded-lg mb-6">{successMsg}</div>}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        {/* Import / Edit JSON Section */}
-        <div className="glass-panel p-6 rounded-xl">
-          <h2 className="text-2xl font-bold font-outfit text-yellow-400 mb-4">Crear / Editar Jugador (JSON)</h2>
+        {/* Import JSON Section */}
+        <div className="glass-panel p-6 rounded-xl flex flex-col">
+          <h2 className="text-2xl font-bold font-outfit text-yellow-400 mb-4">Importar JSON Bruto</h2>
           <p className="text-sm text-slate-400 mb-4">
-            Pega el código JSON generado o haz clic en "Editar" en un jugador de la tabla para cargarlo aquí. 
+            Pega aquí el código que te mandó un amigo y haz clic en revisar. También puedes iniciar una carta vacía: 
+            <button onClick={() => setJsonInput('{"nombre":"","edad":20,"posicion":"DEL","overall_rating":70,"pace":70,"shooting":70,"passing":70,"dribbling":70,"defending":70,"physical":70}')} className="text-yellow-400 underline ml-2">Plantilla en Blanco</button>
           </p>
-          
           <textarea 
             value={jsonInput}
             onChange={(e) => setJsonInput(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-green-400 font-mono text-xs h-64 mb-4 outline-none focus:border-yellow-500"
+            className="w-full flex-1 bg-slate-900 border border-slate-700 rounded-lg p-3 text-green-400 font-mono text-xs mb-4 outline-none focus:border-yellow-500 min-h-[150px]"
             placeholder='{"nombre": "Jugador", "overall_rating": 80...}'
           />
           <button onClick={handleParseJSON} className="w-full py-2 bg-slate-800 text-white rounded hover:bg-slate-700 transition border border-slate-600">
-            Revisar JSON y Previsualizar
+            Cargar al Panel de Edición
           </button>
         </div>
 
-        {/* Preview Section */}
+        {/* Intuitive Edit Section */}
         <div className="glass-panel p-6 rounded-xl flex flex-col">
-          <h2 className="text-2xl font-bold font-outfit text-green-400 mb-4">Vista Previa</h2>
+          <h2 className="text-2xl font-bold font-outfit text-green-400 mb-4">Editor Intuitivo</h2>
           {!previewPlayer ? (
-            <div className="flex-1 min-h-[150px] flex items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded-lg">
-              Carga un JSON para ver la previsualización
+            <div className="flex-1 min-h-[250px] flex items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded-lg">
+              Carga un JSON o dale "Editar" a un jugador para empezar
             </div>
           ) : (
-            <div className="bg-slate-900 p-4 rounded-lg border border-green-500/30 flex-1 flex flex-col">
-              <div className="flex items-center justify-between mb-2">
+            <div className="bg-slate-900 p-4 rounded-lg border border-green-500/30 flex-1 flex flex-col overflow-y-auto max-h-[600px] custom-scrollbar pr-2">
+              <div className="flex items-center justify-between mb-4">
                 <span className={`text-xs font-bold px-2 py-1 rounded ${previewPlayer.id ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
                   {previewPlayer.id ? 'MODO EDICIÓN' : 'MODO CREACIÓN NUEVA'}
                 </span>
                 {previewPlayer.id && (
                   <button onClick={() => { setPreviewPlayer(null); setJsonInput(''); }} className="text-xs text-red-400 hover:underline">
-                    Cancelar Edición
+                    Cancelar
                   </button>
                 )}
               </div>
               
-              <div className="flex items-center gap-4 mb-4 mt-2">
-                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={previewPlayer.foto_url || `https://placehold.co/100x100/111827/22c55e?text=${previewPlayer.nombre.charAt(0)}`} alt="Preview" className="w-16 h-16 rounded-full object-cover border-2 border-slate-700" />
-                <div>
-                  <h3 className="text-xl font-bold text-white">{previewPlayer.nombre}</h3>
-                  <p className="text-slate-400">{previewPlayer.posicion} • {previewPlayer.edad} años</p>
+              <div className="flex gap-4 mb-4">
+                <div className="relative group cursor-pointer w-24 h-24 flex-shrink-0">
+                   {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={previewPlayer.foto_url || `https://placehold.co/100x100/111827/22c55e?text=${previewPlayer.nombre.charAt(0)}`} alt="Preview" className="w-24 h-24 rounded-full object-cover border-2 border-slate-700 group-hover:opacity-50 transition" />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                    <span className="text-xs font-bold text-white bg-black/50 px-2 rounded">Cambiar</span>
+                  </div>
+                  <input type="file" accept="image/*" onChange={onFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
                 </div>
-                <div className="ml-auto text-3xl font-black text-yellow-400">{previewPlayer.overall_rating}</div>
+                
+                <div className="flex-1 space-y-2">
+                  <input type="text" name="nombre" value={previewPlayer.nombre || ''} onChange={handleInputChange} placeholder="Nombre" className="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white font-bold" />
+                  <div className="flex gap-2">
+                    <select name="posicion" value={previewPlayer.posicion || 'DEL'} onChange={handleInputChange} className="w-1/2 bg-slate-800 border border-slate-700 rounded p-2 text-white text-sm">
+                      <option value="POR">POR</option>
+                      <option value="DEF">DEF</option>
+                      <option value="MED">MED</option>
+                      <option value="DEL">DEL</option>
+                    </select>
+                    <input type="number" name="edad" value={previewPlayer.edad || 0} onChange={handleInputChange} placeholder="Edad" className="w-1/2 bg-slate-800 border border-slate-700 rounded p-2 text-white text-sm" />
+                  </div>
+                </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-                <div className="text-slate-300">Físico: <span className="text-green-400">{previewPlayer.physical}</span></div>
-                <div className="text-slate-300">Pase: <span className="text-green-400">{previewPlayer.passing}</span></div>
-                <div className="text-slate-300">Tiro: <span className="text-green-400">{previewPlayer.shooting}</span></div>
-                <div className="text-slate-300">Ritmo: <span className="text-green-400">{previewPlayer.pace}</span></div>
+              <div className="mb-4">
+                <label className="block text-xs text-yellow-500 font-bold mb-1">Media General (OVR)</label>
+                <input type="number" name="overall_rating" value={previewPlayer.overall_rating || 0} onChange={handleInputChange} className="w-full bg-slate-800 border border-yellow-600/50 rounded p-2 text-yellow-400 font-black text-center text-xl" />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].map(stat => (
+                  <div key={stat} className="flex flex-col">
+                    <label className="text-[10px] text-slate-400 uppercase font-bold">{stat}</label>
+                    <input type="number" name={stat} value={previewPlayer[stat] || 0} onChange={handleInputChange} className="bg-slate-800 border border-slate-700 rounded p-2 text-green-400 font-bold" />
+                  </div>
+                ))}
               </div>
 
-              <div className="mt-auto pt-4 border-t border-slate-800">
-                <label className="block text-xs font-bold text-slate-400 mb-2">Cambiar / Recortar Foto Oficial</label>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={onFileChange} 
-                  disabled={uploading}
-                  className="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white hover:file:bg-slate-700 transition cursor-pointer mb-4"
-                />
-                
+              <div className="mt-auto border-t border-slate-800 pt-4">
                 <button 
                   onClick={handleSavePlayer} 
                   disabled={loading || uploading}
@@ -350,6 +373,7 @@ export default function AdminPage() {
         </div>
       </div>
 
+      {/* Existing Players Table (same as before) */}
       <div className="glass-panel rounded-xl overflow-hidden">
         <h2 className="text-2xl font-bold font-outfit text-white p-6 border-b border-white/10">Jugadores Existentes</h2>
         <div className="overflow-x-auto">
