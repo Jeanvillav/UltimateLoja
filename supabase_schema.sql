@@ -82,8 +82,8 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('photos', 'photos', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Habilitar RLS en la tabla de storage.objects
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+-- Habilitar RLS en la tabla de storage.objects (Comentado porque Supabase ya lo tiene por defecto y puede dar error de permisos)
+-- ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 
 -- Políticas de Storage
 

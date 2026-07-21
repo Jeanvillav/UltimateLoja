@@ -42,9 +42,17 @@ export default function FC26Card({ player }) {
         </div>
 
         {/* Player Image */}
-        <div className="absolute top-12 left-0 right-0 flex justify-center pointer-events-none z-0">
+        <div className="absolute bottom-[110px] left-0 right-0 flex justify-center pointer-events-none z-0 px-4">
            {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={foto} alt={player.nombre} className="h-44 object-contain drop-shadow-xl filter contrast-125" />
+          <img 
+            src={foto} 
+            alt={player.nombre} 
+            className="w-full h-56 object-cover object-top drop-shadow-xl filter contrast-125" 
+            style={{ 
+              maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)', 
+              WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)' 
+            }} 
+          />
         </div>
 
         {/* Bottom Section */}
