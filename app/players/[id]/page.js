@@ -16,11 +16,24 @@ export default async function PlayerPage({ params }) {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
-    const { data, error } = await supabase.from('players').select('*').eq('id', id).single();
+    const decodedId = decodeURIComponent(id);
+    
+    // Check if id is a UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const isUuid = uuidRegex.test(decodedId);
+
+    let query = supabase.from('players').select('*');
+    if (isUuid) {
+      query = query.eq('id', decodedId);
+    } else {
+      query = query.eq('nombre', decodedId);
+    }
+
+    const { data, error } = await query.single();
     if (data) {
       player = data;
     } else {
-      throw new Error("No encontrado en DB");
+      throw new Error("No encontrado en DB: " + (error?.message || ""));
     }
   } catch (err) {
     try {

@@ -34,15 +34,15 @@ export default function FC26Card({ player, asPreview = false, livePhotoUrl = nul
       <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHBhdGggZD0iTTEwIDBMICAyMCAxMCBMMTAgMjAgTDAgMTAgWiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==')] bg-repeat pointer-events-none"></div>
       
       {/* Player Image */}
-      <div className="absolute bottom-[105px] left-14 right-2 h-48 flex justify-center pointer-events-none z-0">
+      <div className="absolute bottom-[105px] inset-x-0 mx-auto w-52 h-52 flex justify-center pointer-events-none z-0">
          {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
           src={foto} 
           alt={player.nombre} 
-          className="w-full h-full object-cover object-bottom drop-shadow-xl filter contrast-125" 
+          className="w-full h-full object-cover object-center drop-shadow-xl filter contrast-125" 
           style={{ 
-            maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)', 
-            WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)' 
+            maskImage: 'radial-gradient(circle at center, black 45%, transparent 75%)', 
+            WebkitMaskImage: 'radial-gradient(circle at center, black 45%, transparent 75%)' 
           }} 
         />
       </div>

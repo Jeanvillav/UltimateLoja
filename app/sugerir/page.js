@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 
 export default function SugerirJugador() {
-  const [formData, setFormData] = useState({
+  const initialFormState = {
     nombre: '',
     edad: 20,
     posicion: 'DEL',
@@ -22,8 +22,12 @@ export default function SugerirJugador() {
     dribbling: 70,
     defending: 70,
     physical: 70
-  });
+  };
 
+  const [formData, setFormData] = useState(initialFormState);
+
+  const [mode, setMode] = useState('new'); // 'new' | 'edit'
+  const [players, setPlayers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [generatedJson, setGeneratedJson] = useState('');
   const [copied, setCopied] = useState(false);
@@ -35,16 +39,20 @@ export default function SugerirJugador() {
   const supabase = createClient();
 
   useEffect(() => {
-    const fetchTeams = async () => {
-      const { data } = await supabase.from('teams').select('id, name').order('name');
-      if (data) {
-        setTeams(data);
-        if (data.length > 0) {
-          setFormData(prev => ({ ...prev, team_id: data[0].id }));
+    const fetchData = async () => {
+      const { data: teamsData } = await supabase.from('teams').select('id, name').order('name');
+      if (teamsData) {
+        setTeams(teamsData);
+        if (teamsData.length > 0) {
+          setFormData(prev => ({ ...prev, team_id: teamsData[0].id }));
         }
       }
+      const { data: playersData } = await supabase.from('players').select('*').order('nombre');
+      if (playersData) {
+        setPlayers(playersData);
+      }
     };
-    fetchTeams();
+    fetchData();
   }, [supabase]);
 
   const handleChange = (e) => {
@@ -54,6 +62,31 @@ export default function SugerirJugador() {
       ...prev,
       [name]: isNumber ? parseInt(value) || 0 : value
     }));
+  };
+
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
+    if (newMode === 'new') {
+      setFormData({ ...initialFormState, team_id: teams[0]?.id || '' });
+    } else {
+      // If switching to edit mode, maybe select the first player by default
+      if (players.length > 0) {
+        handlePlayerSelect(players[0].id);
+      }
+    }
+  };
+
+  const handlePlayerSelect = (playerId) => {
+    const selectedPlayer = players.find(p => p.id === playerId);
+    if (selectedPlayer) {
+      setFormData({
+        ...initialFormState,
+        ...selectedPlayer,
+        cualidades_tecnicas: selectedPlayer.cualidades_tecnicas?.join(', ') || '',
+        fortalezas: selectedPlayer.fortalezas?.join(', ') || '',
+        debilidades: selectedPlayer.debilidades?.join(', ') || ''
+      });
+    }
   };
 
   const handleFileUpload = async (e) => {
@@ -116,7 +149,40 @@ export default function SugerirJugador() {
       </p>
 
       <div className="flex flex-col md:flex-row gap-8">
-        <form onSubmit={handleGenerate} className="glass-panel p-6 rounded-2xl flex-1 space-y-4">
+        <div className="glass-panel p-6 rounded-2xl flex-1 flex flex-col">
+          
+          <div className="flex bg-slate-900 rounded-lg p-1 mb-6 border border-slate-700">
+            <button 
+              onClick={() => handleModeChange('new')}
+              className={`flex-1 py-2 font-bold text-sm rounded-md transition ${mode === 'new' ? 'bg-green-600 text-white' : 'text-slate-400 hover:text-white'}`}
+            >
+              Nuevo Jugador
+            </button>
+            <button 
+              onClick={() => handleModeChange('edit')}
+              className={`flex-1 py-2 font-bold text-sm rounded-md transition ${mode === 'edit' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+            >
+              Modificar Existente
+            </button>
+          </div>
+
+          {mode === 'edit' && (
+            <div className="mb-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-xl">
+              <label className="block text-sm font-bold text-blue-400 mb-2">Selecciona el jugador a modificar:</label>
+              <select 
+                onChange={(e) => handlePlayerSelect(e.target.value)} 
+                value={formData.id || ''}
+                className="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white focus:border-blue-500 outline-none font-bold"
+              >
+                <option value="" disabled>-- Elige un jugador --</option>
+                {players.map(p => (
+                  <option key={p.id} value={p.id}>{p.nombre} ({p.overall_rating} OVR)</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <form onSubmit={handleGenerate} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-slate-400 mb-1">Nombre</label>
@@ -178,19 +244,26 @@ export default function SugerirJugador() {
           <div className="border-t border-slate-700 pt-4 mt-4">
             <h3 className="text-lg font-bold text-green-400 mb-2">Análisis (Opcional)</h3>
             <label className="block text-xs text-slate-400 mb-1">Perfil Físico</label>
-            <textarea name="perfil_fisico" value={formData.perfil_fisico} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" rows="2"></textarea>
+            <textarea name="perfil_fisico" value={formData.perfil_fisico || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" rows="2"></textarea>
+            
+            <label className="block text-xs text-slate-400 mb-1">Rol Táctico</label>
+            <input type="text" name="rol_tactico" value={formData.rol_tactico || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" />
+
+            <label className="block text-xs text-slate-400 mb-1">Cualidades Técnicas (separadas por coma)</label>
+            <input type="text" name="cualidades_tecnicas" value={formData.cualidades_tecnicas || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" />
             
             <label className="block text-xs text-slate-400 mb-1">Fortalezas (separadas por coma)</label>
-            <input type="text" name="fortalezas" value={formData.fortalezas} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" />
+            <input type="text" name="fortalezas" value={formData.fortalezas || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" />
             
             <label className="block text-xs text-slate-400 mb-1">Debilidades (separadas por coma)</label>
-            <input type="text" name="debilidades" value={formData.debilidades} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" />
+            <input type="text" name="debilidades" value={formData.debilidades || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" />
           </div>
 
-          <button type="submit" disabled={uploading} className="w-full py-3 btn-fifa w-full font-bold rounded-xl transition-all shadow-lg mt-4 disabled:opacity-50">
+          <button type="submit" disabled={uploading} className={`w-full py-3 btn-fifa w-full font-bold rounded-xl transition-all shadow-lg mt-4 disabled:opacity-50 ${mode === 'edit' ? 'btn-fifa-cyan' : ''}`}>
             Generar Código JSON
           </button>
-        </form>
+          </form>
+        </div>
 
         {generatedJson && (
           <div className="flex-1 flex flex-col gap-4">

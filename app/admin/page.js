@@ -21,6 +21,13 @@ export default function AdminPage() {
   const [jsonInput, setJsonInput] = useState('');
   const [previewPlayer, setPreviewPlayer] = useState(null);
   
+  // Tab state
+  const [activeTab, setActiveTab] = useState('jugadores'); // 'jugadores' | 'equipos'
+  
+  // Teams state
+  const [previewTeam, setPreviewTeam] = useState(null);
+  const [selectedPlayersForTeam, setSelectedPlayersForTeam] = useState([]);
+  
   // Cropper State
   const [uploading, setUploading] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState(null); 
@@ -85,6 +92,18 @@ export default function AdminPage() {
 
   const handleEdit = (player) => {
     const { created_at, ...playerToEdit } = player;
+    
+    // Convert arrays to comma-separated strings for the UI
+    if (Array.isArray(playerToEdit.cualidades_tecnicas)) {
+      playerToEdit.cualidades_tecnicas = playerToEdit.cualidades_tecnicas.join(', ');
+    }
+    if (Array.isArray(playerToEdit.fortalezas)) {
+      playerToEdit.fortalezas = playerToEdit.fortalezas.join(', ');
+    }
+    if (Array.isArray(playerToEdit.debilidades)) {
+      playerToEdit.debilidades = playerToEdit.debilidades.join(', ');
+    }
+
     const jsonStr = JSON.stringify(playerToEdit, null, 2);
     setJsonInput(jsonStr);
     setPreviewPlayer(playerToEdit);
@@ -161,7 +180,7 @@ export default function AdminPage() {
         }
 
         try {
-          const fileName = `admin_uploads/cropped_${Math.random().toString(36).substring(2, 15)}_${Date.now()}.jpeg`;
+          const fileName = `players/cropped_${Math.random().toString(36).substring(2, 15)}_${Date.now()}.jpeg`;
           
           const { error: uploadError } = await supabase.storage
             .from('photos')
@@ -210,6 +229,16 @@ export default function AdminPage() {
     
     const playerToSave = { ...previewPlayer, overall_rating: calculatedOvr };
 
+    if (typeof playerToSave.cualidades_tecnicas === 'string') {
+      playerToSave.cualidades_tecnicas = playerToSave.cualidades_tecnicas.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    if (typeof playerToSave.fortalezas === 'string') {
+      playerToSave.fortalezas = playerToSave.fortalezas.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    if (typeof playerToSave.debilidades === 'string') {
+      playerToSave.debilidades = playerToSave.debilidades.split(',').map(s => s.trim()).filter(Boolean);
+    }
+
     if (playerToSave.id) {
       const res = await supabase.from('players').update(playerToSave).eq('id', playerToSave.id);
       error = res.error;
@@ -227,6 +256,62 @@ export default function AdminPage() {
       fetchPlayers();
     }
     setLoading(false);
+  };
+
+  const handleSaveTeam = async () => {
+    if (!previewTeam?.name) return setErrorMsg("El nombre del equipo es requerido");
+    setLoading(true);
+    let error = null;
+    let savedTeamId = previewTeam.id;
+
+    if (previewTeam.id) {
+      const res = await supabase.from('teams').update({ name: previewTeam.name, logo_url: previewTeam.logo_url }).eq('id', previewTeam.id);
+      error = res.error;
+    } else {
+      const res = await supabase.from('teams').insert([{ name: previewTeam.name, logo_url: previewTeam.logo_url }]).select('id').single();
+      error = res.error;
+      if (res.data) {
+        savedTeamId = res.data.id;
+      }
+    }
+
+    if (error) {
+      setErrorMsg("Error al guardar equipo: " + error.message);
+    } else {
+      if (savedTeamId) {
+        // 1. Remove all players from this team
+        await supabase.from('players').update({ team_id: null }).eq('team_id', savedTeamId);
+        
+        // 2. Add selected players to this team
+        if (selectedPlayersForTeam.length > 0) {
+          await supabase.from('players').update({ team_id: savedTeamId }).in('id', selectedPlayersForTeam);
+        }
+      }
+
+      setSuccessMsg(previewTeam.id ? "¡Equipo actualizado exitosamente!" : "¡Equipo creado exitosamente!");
+      setPreviewTeam(null);
+      setSelectedPlayersForTeam([]);
+      fetchTeams();
+      fetchPlayers(); // refresh players table
+    }
+    setLoading(false);
+  };
+
+  const handleEditTeam = (team) => {
+    setPreviewTeam(team);
+    const playersInTeam = players.filter(p => p.team_id === team.id).map(p => p.id);
+    setSelectedPlayersForTeam(playersInTeam);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeleteTeam = async (id) => {
+    if (!confirm('¿Seguro que deseas eliminar este equipo?')) return;
+    const { error } = await supabase.from('teams').delete().eq('id', id);
+    if (error) {
+      alert('Error: ' + error.message);
+    } else {
+      fetchTeams();
+    }
   };
 
   if (!session) {
@@ -315,10 +400,28 @@ export default function AdminPage() {
         </button>
       </div>
 
+      {/* Tabs */}
+      <div className="flex border-b border-slate-700 mb-8">
+        <button 
+          onClick={() => { setActiveTab('jugadores'); setErrorMsg(''); setSuccessMsg(''); }}
+          className={`px-6 py-3 font-bold transition ${activeTab === 'jugadores' ? 'border-b-2 border-green-500 text-green-400' : 'text-slate-400 hover:text-slate-300'}`}
+        >
+          Jugadores
+        </button>
+        <button 
+          onClick={() => { setActiveTab('equipos'); setErrorMsg(''); setSuccessMsg(''); }}
+          className={`px-6 py-3 font-bold transition ${activeTab === 'equipos' ? 'border-b-2 border-green-500 text-green-400' : 'text-slate-400 hover:text-slate-300'}`}
+        >
+          Equipos
+        </button>
+      </div>
+
       {errorMsg && <div className="bg-red-500/20 border border-red-500 text-red-400 p-4 rounded-lg mb-6">{errorMsg}</div>}
       {successMsg && <div className="bg-green-500/20 border border-green-500 text-green-400 p-4 rounded-lg mb-6">{successMsg}</div>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      {activeTab === 'jugadores' && (
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         {/* Import JSON Section */}
         <div className="glass-panel p-6 rounded-xl flex flex-col">
           <h2 className="text-2xl font-bold font-outfit text-yellow-400 mb-4">Importar JSON Bruto</h2>
@@ -412,6 +515,32 @@ export default function AdminPage() {
                 ))}
               </div>
 
+              <div className="mb-6 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                <h3 className="text-sm font-bold text-green-400 mb-3 uppercase tracking-wider">Análisis y Perfil</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1">Perfil Físico</label>
+                    <textarea name="perfil_fisico" value={previewPlayer.perfil_fisico || ''} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm outline-none focus:border-green-500 transition" rows="2"></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1">Rol Táctico</label>
+                    <input type="text" name="rol_tactico" value={previewPlayer.rol_tactico || ''} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm outline-none focus:border-green-500 transition" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1">Cualidades Técnicas (separadas por coma)</label>
+                    <input type="text" name="cualidades_tecnicas" value={previewPlayer.cualidades_tecnicas || ''} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm outline-none focus:border-green-500 transition" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1">Fortalezas (separadas por coma)</label>
+                    <input type="text" name="fortalezas" value={previewPlayer.fortalezas || ''} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm outline-none focus:border-green-500 transition" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1">Debilidades (separadas por coma)</label>
+                    <input type="text" name="debilidades" value={previewPlayer.debilidades || ''} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm outline-none focus:border-green-500 transition" />
+                  </div>
+                </div>
+              </div>
+
               <div className="mt-auto border-t border-slate-800 pt-6">
                 <button 
                   onClick={handleSavePlayer} 
@@ -489,6 +618,85 @@ export default function AdminPage() {
           </table>
         </div>
       </div>
+      </>
+      )}
+
+      {activeTab === 'equipos' && (
+        <div className="flex flex-col gap-8">
+          <div className="glass-panel p-6 rounded-xl">
+            <h2 className="text-2xl font-bold font-outfit text-white mb-6">
+              {previewTeam?.id ? '✏️ Editar Equipo' : '✨ Crear Nuevo Equipo'}
+            </h2>
+            <div className="flex gap-4 mb-4">
+              <input type="text" value={previewTeam?.name || ''} onChange={(e) => setPreviewTeam({ ...previewTeam, name: e.target.value })} placeholder="Nombre del Equipo" className="flex-1 bg-slate-800 border border-slate-700 rounded p-3 text-white outline-none focus:border-green-500" />
+              <input type="text" value={previewTeam?.logo_url || ''} onChange={(e) => setPreviewTeam({ ...previewTeam, logo_url: e.target.value })} placeholder="URL del Logo (Opcional)" className="flex-1 bg-slate-800 border border-slate-700 rounded p-3 text-white outline-none focus:border-green-500" />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              {previewTeam?.id && (
+                <button onClick={() => { setPreviewTeam(null); setSelectedPlayersForTeam([]); }} className="px-6 py-2 bg-slate-700 text-white rounded hover:bg-slate-600 font-bold transition">Cancelar</button>
+              )}
+              <button onClick={handleSaveTeam} disabled={loading} className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-500 font-bold transition shadow-lg">
+                {loading ? 'Guardando...' : (previewTeam?.id ? 'Actualizar Equipo' : 'Crear Equipo')}
+              </button>
+            </div>
+            
+            {previewTeam?.id && (
+              <div className="mt-6 border-t border-slate-700 pt-6">
+                <h3 className="text-lg font-bold text-white mb-4">Plantilla del Equipo</h3>
+                <p className="text-sm text-slate-400 mb-4">Selecciona los jugadores que pertenecen a este equipo:</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-60 overflow-y-auto custom-scrollbar bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                  {players.map(player => (
+                    <label key={player.id} className={`flex items-center gap-3 p-2 rounded cursor-pointer transition ${selectedPlayersForTeam.includes(player.id) ? 'bg-green-500/10 border border-green-500/30' : 'hover:bg-slate-800 border border-transparent'}`}>
+                      <input 
+                        type="checkbox" 
+                        className="w-4 h-4 accent-green-500"
+                        checked={selectedPlayersForTeam.includes(player.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedPlayersForTeam([...selectedPlayersForTeam, player.id]);
+                          } else {
+                            setSelectedPlayersForTeam(selectedPlayersForTeam.filter(id => id !== player.id));
+                          }
+                        }}
+                      />
+                      <span className="text-sm font-bold text-white">{player.nombre} <span className="text-slate-500 font-normal">({player.overall_rating})</span></span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="glass-panel rounded-xl overflow-hidden shadow-2xl">
+            <table className="w-full text-left text-sm text-slate-300">
+              <thead className="bg-slate-900 text-slate-400 font-outfit">
+                <tr>
+                  <th className="p-4">EQUIPO</th>
+                  <th className="p-4">ACCIONES</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {teams.map(team => (
+                  <tr key={team.id} className="hover:bg-slate-800/50 transition">
+                    <td className="p-4 font-bold text-white text-lg">{team.name}</td>
+                    <td className="p-4">
+                      <div className="flex gap-2">
+                        <button onClick={() => handleEditTeam(team)} className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30 font-bold transition text-xs">Editar</button>
+                        <button onClick={() => handleDeleteTeam(team.id)} className="px-3 py-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 font-bold transition text-xs">Eliminar</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {teams.length === 0 && (
+                  <tr>
+                    <td colSpan="2" className="p-12 text-center text-slate-500 text-lg">No hay equipos registrados.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
