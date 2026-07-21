@@ -1,12 +1,12 @@
 export function calculateOVR(stats, position) {
   if (!stats) return 0;
   
-  const pac = Number(stats.ritmo) || 0;
-  const sho = Number(stats.tiro) || 0;
-  const pas = Number(stats.pase) || 0;
-  const dri = Number(stats.regate) || 0;
-  const def = Number(stats.defensa) || 0;
-  const phy = Number(stats.fisico) || 0;
+  const pac = Number(stats.pace) || Number(stats.ritmo) || 0;
+  const sho = Number(stats.shooting) || Number(stats.tiro) || 0;
+  const pas = Number(stats.passing) || Number(stats.pase) || 0;
+  const dri = Number(stats.dribbling) || Number(stats.regate) || 0;
+  const def = Number(stats.defending) || Number(stats.defensa) || 0;
+  const phy = Number(stats.physical) || Number(stats.fisico) || 0;
 
   const pos = (position || 'DEL').toUpperCase().substring(0, 3);
   let ovr = 0;
