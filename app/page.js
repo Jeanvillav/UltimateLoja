@@ -1,19 +1,22 @@
-import { supabase } from '@/utils/supabase/client';
+import { createClient } from '@/utils/supabase/server';
+import { cookies } from 'next/headers';
 import FifaCard from '@/components/FifaCard';
 import fs from 'fs';
 import path from 'path';
 
-// Force dynamic rendering to avoid build-time Supabase errors if env vars are missing
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   let players = [];
   
   try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    
     const { data, error } = await supabase.from('players').select('*').order('overall_rating', { ascending: false });
     
     if (error) {
-      console.warn("Supabase no configurado o tabla no existe. Usando datos locales.", error.message);
+      console.warn("Error leyendo de Supabase. Usando datos locales.", error.message);
       throw error;
     }
     
@@ -23,7 +26,6 @@ export default async function Home() {
       throw new Error("No hay datos en Supabase");
     }
   } catch (err) {
-    // Fallback to local JSON if Supabase is not set up
     try {
       const filePath = path.join(process.cwd(), 'seed_data.json');
       const fileData = fs.readFileSync(filePath, 'utf8');

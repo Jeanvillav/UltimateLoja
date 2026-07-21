@@ -1,4 +1,5 @@
-import { supabase } from '@/utils/supabase/client';
+import { createClient } from '@/utils/supabase/server';
+import { cookies } from 'next/headers';
 import RadarChart from '@/components/RadarChart';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
@@ -8,11 +9,13 @@ import path from 'path';
 export const dynamic = 'force-dynamic';
 
 export default async function PlayerPage({ params }) {
-  const { id } = params;
+  const { id } = await params;
   let player = null;
 
   try {
-    // Intentar buscar por UUID si la BD está conectada
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
     const { data, error } = await supabase.from('players').select('*').eq('id', id).single();
     if (data) {
       player = data;
@@ -20,7 +23,6 @@ export default async function PlayerPage({ params }) {
       throw new Error("No encontrado en DB");
     }
   } catch (err) {
-    // Fallback: buscar en el JSON local por nombre si falla Supabase
     try {
       const filePath = path.join(process.cwd(), 'seed_data.json');
       const fileData = fs.readFileSync(filePath, 'utf8');
@@ -49,7 +51,6 @@ export default async function PlayerPage({ params }) {
       </Link>
       
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3rem' }}>
-        {/* Left Column: Card */}
         <div style={{ flex: '1 1 300px', display: 'flex', justifyContent: 'center' }}>
           <div className="fifa-card" style={{ 
             background: player.overall_rating >= 75 ? "linear-gradient(135deg, #fbbf24 0%, #d97706 100%)" : 
@@ -82,7 +83,6 @@ export default async function PlayerPage({ params }) {
           </div>
         </div>
 
-        {/* Right Column: Details & Chart */}
         <div style={{ flex: '2 1 500px' }} className="glass">
           <div style={{ padding: '2rem' }}>
             <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{player.nombre}</h1>
