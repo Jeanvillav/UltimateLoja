@@ -378,6 +378,14 @@ export default function AdminPage() {
                     </select>
                     <input type="number" name="edad" value={previewPlayer.edad || 0} onChange={handleInputChange} placeholder="Edad" className="w-1/2 bg-slate-800 border border-slate-700 rounded p-2 text-white text-sm font-bold text-center focus:border-green-500 outline-none transition" />
                   </div>
+                  <div className="flex gap-2">
+                    <select name="team_id" value={previewPlayer.team_id || ''} onChange={handleInputChange} className="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-sm font-bold focus:border-green-500 outline-none transition cursor-pointer">
+                      <option value="">Sin Equipo (Agente Libre)</option>
+                      {teams.map(team => (
+                        <option key={team.id} value={team.id}>{team.name}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
               
