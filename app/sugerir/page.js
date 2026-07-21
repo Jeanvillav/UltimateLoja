@@ -27,10 +27,15 @@ export default function SugerirJugador() {
   const [teams, setTeams] = useState([]);
   const [generatedJson, setGeneratedJson] = useState('');
   const [copied, setCopied] = useState(false);
+  
+  // Storage states
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchTeams = async () => {
-      const supabase = createClient();
       const { data } = await supabase.from('teams').select('id, name').order('name');
       if (data) {
         setTeams(data);
@@ -40,7 +45,7 @@ export default function SugerirJugador() {
       }
     };
     fetchTeams();
-  }, []);
+  }, [supabase]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,10 +56,39 @@ export default function SugerirJugador() {
     }));
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError('');
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      const filePath = `sugerencias/${fileName}`; // Guardar en subcarpeta
+
+      // 1. Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from('photos')
+        .upload(filePath, file, { upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      // 2. Get public URL
+      const { data } = supabase.storage.from('photos').getPublicUrl(filePath);
+      
+      setFormData(prev => ({ ...prev, foto_url: data.publicUrl }));
+    } catch (err) {
+      setUploadError(err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleGenerate = (e) => {
     e.preventDefault();
     
-    // Parse arrays correctly
     const playerToExport = {
       ...formData,
       cualidades_tecnicas: formData.cualidades_tecnicas.split(',').map(s => s.trim()).filter(Boolean),
@@ -109,9 +143,24 @@ export default function SugerirJugador() {
             </div>
           </div>
           
-          <div>
-            <label className="block text-sm text-slate-400 mb-1">URL de Foto (Opcional - ej: imgur.com)</label>
-            <input type="url" name="foto_url" value={formData.foto_url} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white placeholder:text-slate-600" placeholder="https://..." />
+          <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+            <label className="block text-sm font-bold text-green-400 mb-2">Foto del Jugador</label>
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleFileUpload} 
+              disabled={uploading}
+              className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-green-500/20 file:text-green-400 hover:file:bg-green-500/30 transition cursor-pointer"
+            />
+            {uploading && <p className="text-xs text-yellow-500 mt-2">Subiendo imagen a Supabase...</p>}
+            {uploadError && <p className="text-xs text-red-500 mt-2">{uploadError}</p>}
+            {formData.foto_url && !uploading && (
+              <div className="mt-3 flex items-center gap-3">
+                 {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={formData.foto_url} alt="Preview" className="w-12 h-12 rounded-full object-cover border-2 border-green-500" />
+                <p className="text-xs text-green-400 font-bold">¡Imagen lista!</p>
+              </div>
+            )}
           </div>
 
           <div className="border-t border-slate-700 pt-4 mt-4">
@@ -129,16 +178,16 @@ export default function SugerirJugador() {
           <div className="border-t border-slate-700 pt-4 mt-4">
             <h3 className="text-lg font-bold text-green-400 mb-2">Análisis (Opcional)</h3>
             <label className="block text-xs text-slate-400 mb-1">Perfil Físico</label>
-            <textarea name="perfil_fisico" value={formData.perfil_fisico} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" rows="2" placeholder="Ej: Alto, robusto..."></textarea>
+            <textarea name="perfil_fisico" value={formData.perfil_fisico} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" rows="2"></textarea>
             
             <label className="block text-xs text-slate-400 mb-1">Fortalezas (separadas por coma)</label>
-            <input type="text" name="fortalezas" value={formData.fortalezas} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" placeholder="Ej: Cabezazo, barridas..." />
+            <input type="text" name="fortalezas" value={formData.fortalezas} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" />
             
             <label className="block text-xs text-slate-400 mb-1">Debilidades (separadas por coma)</label>
-            <input type="text" name="debilidades" value={formData.debilidades} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" placeholder="Ej: Velocidad, mal pie..." />
+            <input type="text" name="debilidades" value={formData.debilidades} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" />
           </div>
 
-          <button type="submit" className="w-full py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold rounded-xl transition-all shadow-lg mt-4">
+          <button type="submit" disabled={uploading} className="w-full py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold rounded-xl transition-all shadow-lg mt-4 disabled:opacity-50">
             Generar Código JSON
           </button>
         </form>

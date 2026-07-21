@@ -72,3 +72,36 @@ CREATE POLICY "Solo admin puede actualizar players"
 
 CREATE POLICY "Solo admin puede eliminar players" 
   ON players FOR DELETE USING (auth.role() = 'authenticated');
+
+-- =========================================================================
+-- SUPABASE STORAGE (BUCKETS)
+-- =========================================================================
+
+-- Creamos el bucket para las fotos de los jugadores
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('photos', 'photos', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Habilitar RLS en la tabla de storage.objects
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+-- Políticas de Storage
+
+-- Todo el mundo puede ver las fotos (Select)
+CREATE POLICY "Public Access" 
+ON storage.objects FOR SELECT 
+USING ( bucket_id = 'photos' );
+
+-- Todo el mundo puede subir fotos (para el sistema de sugerencias)
+CREATE POLICY "Public Upload" 
+ON storage.objects FOR INSERT 
+WITH CHECK ( bucket_id = 'photos' );
+
+-- Solo el admin (autenticado) puede borrar/actualizar fotos
+CREATE POLICY "Admin Update Storage" 
+ON storage.objects FOR UPDATE 
+USING ( auth.role() = 'authenticated' AND bucket_id = 'photos' );
+
+CREATE POLICY "Admin Delete Storage" 
+ON storage.objects FOR DELETE 
+USING ( auth.role() = 'authenticated' AND bucket_id = 'photos' );

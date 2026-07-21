@@ -16,6 +16,7 @@ export default function AdminPage() {
   // Import state
   const [jsonInput, setJsonInput] = useState('');
   const [previewPlayer, setPreviewPlayer] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const supabase = createClient();
 
@@ -80,6 +81,32 @@ export default function AdminPage() {
     } catch (err) {
       setErrorMsg("JSON Inválido: " + err.message);
       setPreviewPlayer(null);
+    }
+  };
+
+  const handleAdminFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !previewPlayer) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      const filePath = `admin_uploads/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('photos')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('photos').getPublicUrl(filePath);
+      
+      setPreviewPlayer(prev => ({ ...prev, foto_url: data.publicUrl }));
+    } catch (err) {
+      alert("Error subiendo foto: " + err.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -154,14 +181,14 @@ export default function AdminPage() {
         </div>
 
         {/* Preview Section */}
-        <div className="glass-panel p-6 rounded-xl">
+        <div className="glass-panel p-6 rounded-xl flex flex-col">
           <h2 className="text-2xl font-bold font-outfit text-green-400 mb-4">Vista Previa</h2>
           {!previewPlayer ? (
-            <div className="h-40 flex items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded-lg">
+            <div className="flex-1 min-h-[150px] flex items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded-lg">
               Carga un JSON para ver la previsualización
             </div>
           ) : (
-            <div className="bg-slate-900 p-4 rounded-lg border border-green-500/30">
+            <div className="bg-slate-900 p-4 rounded-lg border border-green-500/30 flex-1 flex flex-col">
               <div className="flex items-center gap-4 mb-4">
                  {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={previewPlayer.foto_url || `https://placehold.co/100x100/111827/22c55e?text=${previewPlayer.nombre.charAt(0)}`} alt="Preview" className="w-16 h-16 rounded-full object-cover" />
@@ -173,19 +200,30 @@ export default function AdminPage() {
               </div>
               
               <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-                <div className="text-slate-300">Equipo ID: <span className="text-slate-500 text-xs">{previewPlayer.team_id}</span></div>
                 <div className="text-slate-300">Físico: <span className="text-green-400">{previewPlayer.physical}</span></div>
                 <div className="text-slate-300">Pase: <span className="text-green-400">{previewPlayer.passing}</span></div>
                 <div className="text-slate-300">Tiro: <span className="text-green-400">{previewPlayer.shooting}</span></div>
+                <div className="text-slate-300">Ritmo: <span className="text-green-400">{previewPlayer.pace}</span></div>
               </div>
 
-              <button 
-                onClick={handleCreatePlayer} 
-                disabled={loading}
-                className="w-full py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white font-bold rounded transition shadow-lg disabled:opacity-50"
-              >
-                {loading ? 'Guardando...' : 'Confirmar y Guardar Jugador'}
-              </button>
+              <div className="mt-auto pt-4 border-t border-slate-800">
+                <label className="block text-xs font-bold text-slate-400 mb-2">Cambiar Foto (Opcional)</label>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleAdminFileUpload} 
+                  disabled={uploading}
+                  className="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white hover:file:bg-slate-700 transition cursor-pointer mb-4"
+                />
+                
+                <button 
+                  onClick={handleCreatePlayer} 
+                  disabled={loading || uploading}
+                  className="w-full py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white font-bold rounded transition shadow-lg disabled:opacity-50"
+                >
+                  {loading ? 'Guardando...' : 'Confirmar y Guardar Jugador'}
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -208,7 +246,7 @@ export default function AdminPage() {
                 <tr key={player.id} className="border-t border-white/5 hover:bg-white/5">
                   <td className="p-4 font-bold text-white flex items-center gap-3">
                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={player.foto_url || `https://placehold.co/30x30/111827/22c55e?text=${player.nombre.charAt(0)}`} alt="" className="w-8 h-8 rounded-full" />
+                    <img src={player.foto_url || `https://placehold.co/30x30/111827/22c55e?text=${player.nombre.charAt(0)}`} alt="" className="w-8 h-8 rounded-full object-cover" />
                     {player.nombre}
                   </td>
                   <td className="p-4 text-slate-300">{player.posicion}</td>
