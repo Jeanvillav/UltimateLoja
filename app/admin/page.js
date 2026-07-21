@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import Cropper from 'react-cropper';
+import 'cropperjs/dist/cropper.css';
 
 export default function AdminPage() {
   const [session, setSession] = useState(null);
@@ -16,8 +18,13 @@ export default function AdminPage() {
   // Import / Edit state
   const [jsonInput, setJsonInput] = useState('');
   const [previewPlayer, setPreviewPlayer] = useState(null);
+  
+  // Cropper State
   const [uploading, setUploading] = useState(false);
-
+  const [cropImageSrc, setCropImageSrc] = useState(null); // The original image selected
+  const [showCropper, setShowCropper] = useState(false); // Modal visibility
+  const cropperRef = useRef(null);
+  
   const supabase = createClient();
 
   useEffect(() => {
@@ -38,7 +45,7 @@ export default function AdminPage() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [supabase.auth]);
 
   const fetchPlayers = async () => {
     const { data } = await supabase.from('players').select('*').order('nombre');
@@ -74,14 +81,11 @@ export default function AdminPage() {
   };
 
   const handleEdit = (player) => {
-    // Remove created_at if it exists to avoid update conflicts
     const { created_at, ...playerToEdit } = player;
     const jsonStr = JSON.stringify(playerToEdit, null, 2);
     setJsonInput(jsonStr);
     setPreviewPlayer(playerToEdit);
     setSuccessMsg('Jugador cargado para edición. Revisa el panel de arriba.');
-    
-    // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -96,33 +100,69 @@ export default function AdminPage() {
     }
   };
 
-  const handleAdminFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !previewPlayer) return;
+  // STEP 1: Handle File Selection and load into Cropper Modal
+  const onFileChange = (e) => {
+    e.preventDefault();
+    let files;
+    if (e.dataTransfer) {
+      files = e.dataTransfer.files;
+    } else if (e.target) {
+      files = e.target.files;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result);
+      setShowCropper(true);
+    };
+    if (files && files.length > 0) {
+      reader.readAsDataURL(files[0]);
+    }
+    // Reset file input so same file can be selected again if cancelled
+    e.target.value = '';
+  };
 
-    setUploading(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `admin_uploads/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('photos')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from('photos').getPublicUrl(filePath);
+  // STEP 2: Extract Blob from Cropper and upload to Supabase
+  const handleCropAndUpload = async () => {
+    if (typeof cropperRef.current?.cropper !== "undefined") {
+      setUploading(true);
+      setErrorMsg('');
       
-      setPreviewPlayer(prev => ({ ...prev, foto_url: data.publicUrl }));
+      const cropper = cropperRef.current.cropper;
       
-      // Update JSON input as well so it reflects the new photo URL
-      setJsonInput(JSON.stringify({ ...previewPlayer, foto_url: data.publicUrl }, null, 2));
+      // Get a canvas of the cropped area
+      cropper.getCroppedCanvas({
+        maxWidth: 1024, // Optional: scale down if it's too huge
+        maxHeight: 1024,
+      }).toBlob(async (blob) => {
+        if (!blob) {
+          setErrorMsg("Error al recortar la imagen.");
+          setUploading(false);
+          return;
+        }
 
-    } catch (err) {
-      alert("Error subiendo foto: " + err.message);
-    } finally {
-      setUploading(false);
+        try {
+          const fileName = `admin_uploads/cropped_${Math.random().toString(36).substring(2, 15)}_${Date.now()}.jpeg`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('photos')
+            .upload(fileName, blob, { contentType: 'image/jpeg' });
+
+          if (uploadError) throw uploadError;
+
+          const { data } = supabase.storage.from('photos').getPublicUrl(fileName);
+          
+          setPreviewPlayer(prev => ({ ...prev, foto_url: data.publicUrl }));
+          setJsonInput(JSON.stringify({ ...previewPlayer, foto_url: data.publicUrl }, null, 2));
+          
+          setShowCropper(false);
+          setCropImageSrc(null);
+          
+        } catch (err) {
+          alert("Error subiendo foto: " + err.message);
+        } finally {
+          setUploading(false);
+        }
+      }, 'image/jpeg', 0.9);
     }
   };
 
@@ -133,13 +173,10 @@ export default function AdminPage() {
     setSuccessMsg('');
 
     let error;
-
-    // Si tiene ID, es una actualización
     if (previewPlayer.id) {
       const res = await supabase.from('players').update(previewPlayer).eq('id', previewPlayer.id);
       error = res.error;
     } else {
-      // Si no, es una creación nueva
       const res = await supabase.from('players').insert([previewPlayer]);
       error = res.error;
     }
@@ -178,7 +215,48 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-8 max-w-6xl relative">
+      {/* Cropper Modal */}
+      {showCropper && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
+          <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-3xl border border-slate-700 shadow-2xl flex flex-col max-h-[90vh]">
+            <h2 className="text-2xl font-bold font-outfit text-white mb-4">Recortar Foto</h2>
+            
+            <div className="flex-1 bg-black rounded-lg overflow-hidden min-h-[300px]">
+              <Cropper
+                src={cropImageSrc}
+                style={{ height: "100%", width: "100%" }}
+                initialAspectRatio={1} // Square default
+                guides={true}
+                ref={cropperRef}
+                viewMode={1}
+                background={false}
+                responsive={true}
+                autoCropArea={0.8}
+                checkOrientation={false}
+              />
+            </div>
+            
+            <div className="flex justify-end gap-4 mt-6">
+              <button 
+                onClick={() => { setShowCropper(false); setCropImageSrc(null); }}
+                className="px-6 py-2 rounded text-slate-300 hover:text-white hover:bg-slate-800 transition"
+                disabled={uploading}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={handleCropAndUpload}
+                disabled={uploading}
+                className="px-6 py-2 rounded bg-gradient-to-r from-green-600 to-green-700 text-white font-bold hover:from-green-500 hover:to-green-600 transition disabled:opacity-50 shadow-lg"
+              >
+                {uploading ? 'Recortando y Subiendo...' : 'Confirmar Recorte'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold font-outfit text-white">Panel de Administración</h1>
         <button onClick={handleLogout} className="px-4 py-2 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition">
@@ -195,7 +273,6 @@ export default function AdminPage() {
           <h2 className="text-2xl font-bold font-outfit text-yellow-400 mb-4">Crear / Editar Jugador (JSON)</h2>
           <p className="text-sm text-slate-400 mb-4">
             Pega el código JSON generado o haz clic en "Editar" en un jugador de la tabla para cargarlo aquí. 
-            Modifica los valores directamente y pulsa Revisar.
           </p>
           
           <textarea 
@@ -231,7 +308,7 @@ export default function AdminPage() {
               
               <div className="flex items-center gap-4 mb-4 mt-2">
                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={previewPlayer.foto_url || `https://placehold.co/100x100/111827/22c55e?text=${previewPlayer.nombre.charAt(0)}`} alt="Preview" className="w-16 h-16 rounded-full object-cover" />
+                <img src={previewPlayer.foto_url || `https://placehold.co/100x100/111827/22c55e?text=${previewPlayer.nombre.charAt(0)}`} alt="Preview" className="w-16 h-16 rounded-full object-cover border-2 border-slate-700" />
                 <div>
                   <h3 className="text-xl font-bold text-white">{previewPlayer.nombre}</h3>
                   <p className="text-slate-400">{previewPlayer.posicion} • {previewPlayer.edad} años</p>
@@ -247,11 +324,11 @@ export default function AdminPage() {
               </div>
 
               <div className="mt-auto pt-4 border-t border-slate-800">
-                <label className="block text-xs font-bold text-slate-400 mb-2">Cambiar Foto Oficial</label>
+                <label className="block text-xs font-bold text-slate-400 mb-2">Cambiar / Recortar Foto Oficial</label>
                 <input 
                   type="file" 
                   accept="image/*" 
-                  onChange={handleAdminFileUpload} 
+                  onChange={onFileChange} 
                   disabled={uploading}
                   className="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white hover:file:bg-slate-700 transition cursor-pointer mb-4"
                 />
