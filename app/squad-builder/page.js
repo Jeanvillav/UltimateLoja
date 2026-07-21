@@ -1,0 +1,45 @@
+import { createClient } from '@/utils/supabase/server';
+import { cookies } from 'next/headers';
+import SquadBuilderClient from './SquadBuilderClient';
+import fs from 'fs';
+import path from 'path';
+
+export const dynamic = 'force-dynamic';
+
+export default async function SquadBuilderPage() {
+  let teams = [];
+  let players = [];
+
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    const teamsRes = await supabase.from('teams').select('*');
+    if (teamsRes.data) teams = teamsRes.data;
+
+    const playersRes = await supabase.from('players').select('*').order('overall_rating', { ascending: false });
+    if (playersRes.data) players = playersRes.data;
+
+    if (!teams.length && !players.length) throw new Error("No data in DB");
+  } catch (err) {
+    try {
+      const filePath = path.join(process.cwd(), 'seed_data.json');
+      const fileData = fs.readFileSync(filePath, 'utf8');
+      const data = JSON.parse(fileData);
+      teams = data.teams || [];
+      players = data.players || [];
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-4xl font-black font-outfit text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-yellow-500">
+        Squad Builder
+      </h1>
+      
+      <SquadBuilderClient teams={teams} players={players} />
+    </div>
+  );
+}

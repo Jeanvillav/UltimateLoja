@@ -1,15 +1,29 @@
--- Tabla de jugadores para Futbol Stats
+-- Tablas para Futbol Stats (Ultimate Loja)
 
+-- 1. Tabla de Equipos
+CREATE TABLE IF NOT EXISTS teams (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  name text NOT NULL,
+  logo_url text,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 2. Tabla de Jugadores
 CREATE TABLE IF NOT EXISTS players (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   nombre text NOT NULL,
   edad integer NOT NULL,
   posicion text NOT NULL,
+  team_id uuid REFERENCES teams(id) ON DELETE SET NULL,
+  foto_url text,
+  
+  -- Campos de análisis
   perfil_fisico text,
   cualidades_tecnicas text[] DEFAULT '{}'::text[],
   fortalezas text[] DEFAULT '{}'::text[],
   debilidades text[] DEFAULT '{}'::text[],
   rol_tactico text,
+  
   -- Estadísticas estilo FIFA
   overall_rating integer CHECK (overall_rating >= 1 AND overall_rating <= 99),
   pace integer CHECK (pace >= 1 AND pace <= 99),
@@ -22,21 +36,39 @@ CREATE TABLE IF NOT EXISTS players (
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Habilitar RLS (Row Level Security) - por ahora permitimos lectura a todos y escritura a todos para pruebas
+-- Habilitar RLS
+ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
 ALTER TABLE players ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Permitir lectura a todos" 
-  ON players FOR SELECT 
-  USING (true);
+-- Políticas para Teams
+CREATE POLICY "Permitir lectura a todos en teams" 
+  ON teams FOR SELECT USING (true);
 
-CREATE POLICY "Permitir insertar a todos" 
-  ON players FOR INSERT 
-  WITH CHECK (true);
+CREATE POLICY "Solo admin puede insertar teams" 
+  ON teams FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
-CREATE POLICY "Permitir actualizar a todos" 
-  ON players FOR UPDATE 
-  USING (true);
+CREATE POLICY "Solo admin puede actualizar teams" 
+  ON teams FOR UPDATE USING (auth.role() = 'authenticated');
 
-CREATE POLICY "Permitir eliminar a todos" 
-  ON players FOR DELETE 
-  USING (true);
+CREATE POLICY "Solo admin puede eliminar teams" 
+  ON teams FOR DELETE USING (auth.role() = 'authenticated');
+
+
+-- Políticas para Players
+-- Como vamos a recrear las políticas, primero eliminamos las anteriores si existen
+DROP POLICY IF EXISTS "Permitir lectura a todos" ON players;
+DROP POLICY IF EXISTS "Permitir insertar a todos" ON players;
+DROP POLICY IF EXISTS "Permitir actualizar a todos" ON players;
+DROP POLICY IF EXISTS "Permitir eliminar a todos" ON players;
+
+CREATE POLICY "Permitir lectura a todos en players" 
+  ON players FOR SELECT USING (true);
+
+CREATE POLICY "Solo admin puede insertar players" 
+  ON players FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "Solo admin puede actualizar players" 
+  ON players FOR UPDATE USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Solo admin puede eliminar players" 
+  ON players FOR DELETE USING (auth.role() = 'authenticated');

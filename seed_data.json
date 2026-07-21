@@ -1,166 +1,135 @@
-[
-  {
-    "nombre": "Jean",
-    "edad": 21,
-    "posicion": "Defensa Central (Cierre)",
-    "perfil_fisico": "Corpulento, sabe utilizar su envergadura, agilidad funcional, pero con velocidad de carrera limitada.",
-    "cualidades_tecnicas": [
-      "Gambeta",
-      "Precisión en el pase en corto",
-      "Pase largo efectivo",
-      "Excelente visión de juego"
-    ],
-    "fortalezas": [
-      "Salida limpia de balón",
-      "Distribución y construcción de juego desde el fondo",
-      "Uso del cuerpo para ganar posición"
-    ],
-    "debilidades": [
-      "Velocidad punta y retroceso en transiciones rápidas del rival"
-    ],
-    "rol_tactico": "Defensa constructor. Eje en la salida del equipo, ideal para romper líneas con pases o conducción.",
-    "overall_rating": 78,
-    "pace": 55,
-    "shooting": 60,
-    "passing": 82,
-    "dribbling": 70,
-    "defending": 80,
-    "physical": 85
-  },
-  {
-    "nombre": "Sebastián 'Choclo' Mendieta",
-    "edad": 21,
-    "posicion": "Defensa",
-    "perfil_fisico": "Corpulento, poca agilidad.",
-    "cualidades_tecnicas": [
-      "Corte de jugada",
-      "Despeje contundente"
-    ],
-    "fortalezas": [
-      "Recuperación mediante intercepción o choque",
-      "Juego físico y contundencia defensiva"
-    ],
-    "debilidades": [
-      "Posicionamiento táctico",
-      "Timing en las entradas",
-      "Salida con el balón (recurso limitado al pelotazo)",
-      "Baja agilidad"
-    ],
-    "rol_tactico": "Defensor de contención pura. Su función debe limitarse a la destrucción de la jugada y entrega rápida a un compañero creativo.",
-    "overall_rating": 70,
-    "pace": 45,
-    "shooting": 40,
-    "passing": 50,
-    "dribbling": 40,
-    "defending": 78,
-    "physical": 88
-  },
-  {
-    "nombre": "Derek",
-    "edad": 15,
-    "posicion": "Atacante / Ala",
-    "perfil_fisico": "Alta velocidad, el jugador más rápido del equipo.",
-    "cualidades_tecnicas": [
-      "Buen disparo",
-      "Capacidad defensiva funcional"
-    ],
-    "fortalezas": [
-      "Desborde y velocidad punta",
-      "Aporte en el retroceso defensivo",
-      "Peligro constante en ataque"
-    ],
-    "debilidades": [
-      "Toma de decisiones (exceso de dudas)",
-      "Falta de agresividad/determinación de cara al arco (timidez)"
-    ],
-    "rol_tactico": "Atacante de transiciones rápidas. Ideal para explotar espacios a la espalda del rival, requiere trabajo de confianza en la definición.",
-    "overall_rating": 72,
-    "pace": 92,
-    "shooting": 75,
-    "passing": 65,
-    "dribbling": 78,
-    "defending": 55,
-    "physical": 60
-  },
-  {
-    "nombre": "Michelin",
-    "edad": 13,
-    "posicion": "Mediocampista Ofensivo",
-    "perfil_fisico": "Estatura pequeña, alta agilidad.",
-    "cualidades_tecnicas": [
-      "Visión de juego periférica",
-      "Disparo de larga distancia",
-      "Protección y escondite del balón",
-      "Capacidad goleadora"
-    ],
-    "fortalezas": [
-      "Creatividad en el último tercio",
-      "Retención de balón bajo presión",
-      "Amenaza constante desde fuera del área"
-    ],
-    "debilidades": [
-      "Fase defensiva",
-      "Desventaja en duelos físicos debido a su estatura y edad"
-    ],
-    "rol_tactico": "Enganche o creador principal. Debe ser liberado de responsabilidades defensivas estrictas para maximizar su aporte ofensivo.",
-    "overall_rating": 76,
-    "pace": 75,
-    "shooting": 80,
-    "passing": 82,
-    "dribbling": 85,
-    "defending": 40,
-    "physical": 45
-  },
-  {
-    "nombre": "Keith",
-    "edad": 13,
-    "posicion": "Defensa",
-    "perfil_fisico": "Alto, delgado, velocidad promedio.",
-    "cualidades_tecnicas": [
-      "Lectura básica del juego",
-      "Fundamentos defensivos naturales"
-    ],
-    "fortalezas": [
-      "Inteligencia táctica (entendedor del juego)",
-      "Biotipo favorable para la posición"
-    ],
-    "debilidades": [
-      "Falta de experiencia competitiva",
-      "Carencia de algunos conceptos técnicos",
-      "Timidez en el campo"
-    ],
-    "rol_tactico": "Defensor de apoyo. Jugador en desarrollo que necesita minutos para ganar confianza y consolidar sus conceptos tácticos.",
-    "overall_rating": 68,
-    "pace": 65,
-    "shooting": 45,
-    "passing": 55,
-    "dribbling": 55,
-    "defending": 72,
-    "physical": 65
-  },
-  {
-    "nombre": "Iblame",
-    "edad": 16,
-    "posicion": "Arquero",
-    "perfil_fisico": "Alto, delgado, alta agilidad.",
-    "cualidades_tecnicas": [
-      "Reflejos",
-      "Buena técnica de atajada"
-    ],
-    "fortalezas": [
-      "Cobertura del arco gracias a su envergadura",
-      "Velocidad de reacción"
-    ],
-    "debilidades": [
-      "No especificadas (se requiere evaluación en juego aéreo y juego con los pies)"
-    ],
-    "rol_tactico": "Guardameta titular. Aporta seguridad bajo los tres palos mediante sus condiciones físicas y reflejos.",
-    "overall_rating": 74,
-    "pace": 50,
-    "shooting": 30,
-    "passing": 55,
-    "dribbling": 45,
-    "defending": 75,
-    "physical": 70
-  }
-]
+{
+  "teams": [
+    {
+      "id": "11111111-1111-1111-1111-111111111111",
+      "name": "Equipo Suco",
+      "logo_url": "https://placehold.co/100x100/111827/f59e0b?text=SUCO"
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222222",
+      "name": "Equipo Babau",
+      "logo_url": "https://placehold.co/100x100/111827/22c55e?text=BABAU"
+    },
+    {
+      "id": "33333333-3333-3333-3333-333333333333",
+      "name": "UltimateTeam",
+      "logo_url": "https://placehold.co/100x100/000000/ffffff?text=UT"
+    }
+  ],
+  "players": [
+    {
+      "nombre": "Jean",
+      "edad": 21,
+      "posicion": "Defensa Central",
+      "team_id": "11111111-1111-1111-1111-111111111111",
+      "foto_url": "https://placehold.co/150x150/transparent/fff?text=J",
+      "perfil_fisico": "Corpulento, sabe utilizar su envergadura, agilidad funcional.",
+      "cualidades_tecnicas": ["Gambeta", "Precisión pase corto"],
+      "fortalezas": ["Salida limpia", "Uso del cuerpo"],
+      "debilidades": ["Velocidad punta"],
+      "rol_tactico": "Defensa constructor.",
+      "overall_rating": 78,
+      "pace": 55,
+      "shooting": 60,
+      "passing": 82,
+      "dribbling": 70,
+      "defending": 80,
+      "physical": 85
+    },
+    {
+      "nombre": "Choclo",
+      "edad": 21,
+      "posicion": "Defensa",
+      "team_id": "11111111-1111-1111-1111-111111111111",
+      "foto_url": "https://placehold.co/150x150/transparent/fff?text=C",
+      "perfil_fisico": "Corpulento, poca agilidad.",
+      "cualidades_tecnicas": ["Corte de jugada"],
+      "fortalezas": ["Recuperación", "Juego físico"],
+      "debilidades": ["Posicionamiento táctico"],
+      "rol_tactico": "Defensor de contención pura.",
+      "overall_rating": 70,
+      "pace": 45,
+      "shooting": 40,
+      "passing": 50,
+      "dribbling": 40,
+      "defending": 78,
+      "physical": 88
+    },
+    {
+      "nombre": "Derek",
+      "edad": 15,
+      "posicion": "Atacante",
+      "team_id": "11111111-1111-1111-1111-111111111111",
+      "foto_url": "https://placehold.co/150x150/transparent/fff?text=D",
+      "perfil_fisico": "Alta velocidad, muy rápido.",
+      "cualidades_tecnicas": ["Buen disparo"],
+      "fortalezas": ["Desborde"],
+      "debilidades": ["Toma de decisiones"],
+      "rol_tactico": "Atacante de transiciones rápidas.",
+      "overall_rating": 72,
+      "pace": 92,
+      "shooting": 75,
+      "passing": 65,
+      "dribbling": 78,
+      "defending": 55,
+      "physical": 60
+    },
+    {
+      "nombre": "Michelin",
+      "edad": 13,
+      "posicion": "Mediocampista",
+      "team_id": "22222222-2222-2222-2222-222222222222",
+      "foto_url": "https://placehold.co/150x150/transparent/fff?text=M",
+      "perfil_fisico": "Estatura pequeña, agilidad.",
+      "cualidades_tecnicas": ["Visión de juego"],
+      "fortalezas": ["Creatividad"],
+      "debilidades": ["Fase defensiva"],
+      "rol_tactico": "Enganche principal.",
+      "overall_rating": 76,
+      "pace": 75,
+      "shooting": 80,
+      "passing": 82,
+      "dribbling": 85,
+      "defending": 40,
+      "physical": 45
+    },
+    {
+      "nombre": "Keith",
+      "edad": 13,
+      "posicion": "Defensa",
+      "team_id": "22222222-2222-2222-2222-222222222222",
+      "foto_url": "https://placehold.co/150x150/transparent/fff?text=K",
+      "perfil_fisico": "Alto, delgado.",
+      "cualidades_tecnicas": ["Lectura básica"],
+      "fortalezas": ["Inteligencia táctica"],
+      "debilidades": ["Falta experiencia"],
+      "rol_tactico": "Defensor de apoyo.",
+      "overall_rating": 68,
+      "pace": 65,
+      "shooting": 45,
+      "passing": 55,
+      "dribbling": 55,
+      "defending": 72,
+      "physical": 65
+    },
+    {
+      "nombre": "Iblame",
+      "edad": 16,
+      "posicion": "Arquero",
+      "team_id": "33333333-3333-3333-3333-333333333333",
+      "foto_url": "https://placehold.co/150x150/transparent/fff?text=I",
+      "perfil_fisico": "Alto, delgado, ágil.",
+      "cualidades_tecnicas": ["Reflejos"],
+      "fortalezas": ["Cobertura del arco"],
+      "debilidades": ["Juego aéreo"],
+      "rol_tactico": "Guardameta titular.",
+      "overall_rating": 74,
+      "pace": 50,
+      "shooting": 30,
+      "passing": 55,
+      "dribbling": 45,
+      "defending": 75,
+      "physical": 70
+    }
+  ]
+}
