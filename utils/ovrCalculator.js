@@ -13,8 +13,9 @@ export function calculateOVR(stats, position) {
 
   switch(pos) {
     case 'POR':
+    case 'ARQ':
       // GKs usually have specific stats, but we use what we have
-      ovr = (def * 0.5) + (phy * 0.3) + (pas * 0.2);
+      ovr = (def * 0.55) + (phy * 0.35) + (pas * 0.1);
       break;
     case 'DEF':
       ovr = (def * 0.6) + (phy * 0.3) + (pac * 0.1);
