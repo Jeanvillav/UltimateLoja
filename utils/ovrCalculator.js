@@ -14,8 +14,14 @@ export function calculateOVR(stats, position) {
   switch(pos) {
     case 'POR':
     case 'ARQ':
-      // GKs usually have specific stats, but we use what we have
-      ovr = (def * 0.55) + (phy * 0.35) + (pas * 0.1);
+      // pace -> DIV, dribbling -> REF, shooting -> HAN, defending -> SPD, passing -> KIC, physical -> POS
+      const div = pac; // Diving
+      const han = sho; // Handling
+      const kic = pas; // Kicking
+      const ref = dri; // Reflexes
+      const spd = def; // Speed
+      const gkPos = phy; // Positioning
+      ovr = (div * 0.22) + (ref * 0.22) + (gkPos * 0.22) + (han * 0.22) + (kic * 0.06) + (spd * 0.06);
       break;
     case 'DEF':
       ovr = (def * 0.6) + (phy * 0.3) + (pac * 0.1);

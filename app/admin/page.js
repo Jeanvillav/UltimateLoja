@@ -507,12 +507,25 @@ export default function AdminPage() {
               </div>
               
               <div className="grid grid-cols-2 gap-3 mb-8">
-                {['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].map(stat => (
-                  <div key={stat} className="flex flex-col bg-slate-800/50 p-2 rounded-lg border border-slate-700/50 focus-within:border-green-500/50 transition">
-                    <label className="text-[10px] text-slate-400 uppercase font-bold text-center mb-1">{stat}</label>
-                    <input type="number" name={stat} value={previewPlayer[stat] || 0} onChange={handleInputChange} className="w-full bg-transparent text-center text-green-400 font-bold text-lg outline-none" />
-                  </div>
-                ))}
+                {['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].map(stat => {
+                  let label = stat;
+                  const isGK = previewPlayer.posicion === 'Portero (POR)';
+                  if (isGK) {
+                    if (stat === 'pace') label = 'DIV (Estirada)';
+                    if (stat === 'shooting') label = 'HAN (Manejo)';
+                    if (stat === 'passing') label = 'KIC (Saque)';
+                    if (stat === 'dribbling') label = 'REF (Reflejos)';
+                    if (stat === 'defending') label = 'SPD (Velocidad)';
+                    if (stat === 'physical') label = 'POS (Colocación)';
+                  }
+                  
+                  return (
+                    <div key={stat} className="flex flex-col bg-slate-800/50 p-2 rounded-lg border border-slate-700/50 focus-within:border-green-500/50 transition">
+                      <label className="text-[10px] text-slate-400 uppercase font-bold text-center mb-1">{label}</label>
+                      <input type="number" name={stat} value={previewPlayer[stat] || 0} onChange={handleInputChange} className="w-full bg-transparent text-center text-green-400 font-bold text-lg outline-none" />
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="mb-6 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">

@@ -232,12 +232,25 @@ export default function SugerirJugador() {
           <div className="border-t border-slate-700 pt-4 mt-4">
             <h3 className="text-lg font-bold text-yellow-400 mb-2">Estadísticas FC 26</h3>
             <div className="grid grid-cols-3 gap-3">
-              {['overall_rating', 'pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].map(stat => (
-                <div key={stat}>
-                  <label className="block text-xs text-slate-400 mb-1 uppercase">{stat.replace('_rating', ' (OVR)')}</label>
-                  <input type="number" name={stat} min="1" max="99" value={formData[stat]} onChange={handleChange} required className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white font-bold text-center" />
-                </div>
-              ))}
+              {['overall_rating', 'pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].map(stat => {
+                let label = stat.replace('_rating', ' (OVR)');
+                const isGK = formData.posicion === 'Portero (POR)';
+                if (isGK) {
+                  if (stat === 'pace') label = 'DIV (Estirada)';
+                  if (stat === 'shooting') label = 'HAN (Manejo)';
+                  if (stat === 'passing') label = 'KIC (Saque)';
+                  if (stat === 'dribbling') label = 'REF (Reflejos)';
+                  if (stat === 'defending') label = 'SPD (Velocidad)';
+                  if (stat === 'physical') label = 'POS (Colocación)';
+                }
+
+                return (
+                  <div key={stat}>
+                    <label className="block text-xs text-slate-400 mb-1 uppercase">{label}</label>
+                    <input type="number" name={stat} min="1" max="99" value={formData[stat]} onChange={handleChange} required className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white font-bold text-center" />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
