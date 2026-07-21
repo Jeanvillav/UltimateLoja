@@ -3,7 +3,8 @@
 @theme {
   --color-primary: #111827;
   --color-secondary: #1f2937;
-  --color-accent: #f59e0b; /* FC 26 Gold */
+  --color-accent: #e5ff00; /* FIFA 15 Yellow/Lime */
+  --color-highlight: #00d2ff; /* FIFA 15 Cyan */
   --color-neon-green: #22c55e;
   --color-dark-green: #14532d;
 }
@@ -17,6 +18,10 @@
 
 body {
   background-color: var(--background);
+  background-image: url('/fondo.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-inter), sans-serif;
   min-height: 100vh;
@@ -30,16 +35,32 @@ main {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-outfit), sans-serif;
+  text-transform: uppercase; /* FIFA styling usually uses strong uppercase headers */
+  letter-spacing: 0.05em;
 }
 
-/* Glassmorphism utility */
+/* FIFA 15 UI Style Panel */
 .glass-panel {
-  background: rgba(31, 41, 55, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(10, 10, 15, 0.85); /* Dark solid base */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid var(--color-highlight); /* Cyan top highlight typical in old FIFA menus */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  border-radius: 0; /* FIFA 15 was very blocky and geometric */
 }
 
 .fc-card {
   clip-path: polygon(10% 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0 90%, 0 10%);
+}
+
+/* Custom Scrollbar for FIFA vibe */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.5);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-highlight);
 }
