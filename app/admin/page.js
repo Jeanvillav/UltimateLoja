@@ -265,7 +265,7 @@ export default function AdminPage() {
                 <Cropper
                   src={cropImageSrc}
                   style={{ height: "100%", width: "100%" }}
-                  initialAspectRatio={1}
+                  aspectRatio={1}
                   guides={true}
                   ref={cropperRef}
                   viewMode={1}
