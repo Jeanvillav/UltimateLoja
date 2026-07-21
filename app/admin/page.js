@@ -13,7 +13,7 @@ export default function AdminPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Import state
+  // Import / Edit state
   const [jsonInput, setJsonInput] = useState('');
   const [previewPlayer, setPreviewPlayer] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -73,6 +73,18 @@ export default function AdminPage() {
     }
   };
 
+  const handleEdit = (player) => {
+    // Remove created_at if it exists to avoid update conflicts
+    const { created_at, ...playerToEdit } = player;
+    const jsonStr = JSON.stringify(playerToEdit, null, 2);
+    setJsonInput(jsonStr);
+    setPreviewPlayer(playerToEdit);
+    setSuccessMsg('Jugador cargado para edición. Revisa el panel de arriba.');
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleParseJSON = () => {
     try {
       const parsed = JSON.parse(jsonInput);
@@ -103,6 +115,10 @@ export default function AdminPage() {
       const { data } = supabase.storage.from('photos').getPublicUrl(filePath);
       
       setPreviewPlayer(prev => ({ ...prev, foto_url: data.publicUrl }));
+      
+      // Update JSON input as well so it reflects the new photo URL
+      setJsonInput(JSON.stringify({ ...previewPlayer, foto_url: data.publicUrl }, null, 2));
+
     } catch (err) {
       alert("Error subiendo foto: " + err.message);
     } finally {
@@ -110,18 +126,28 @@ export default function AdminPage() {
     }
   };
 
-  const handleCreatePlayer = async () => {
+  const handleSavePlayer = async () => {
     if (!previewPlayer) return;
     setLoading(true);
     setErrorMsg('');
     setSuccessMsg('');
 
-    const { error } = await supabase.from('players').insert([previewPlayer]);
+    let error;
+
+    // Si tiene ID, es una actualización
+    if (previewPlayer.id) {
+      const res = await supabase.from('players').update(previewPlayer).eq('id', previewPlayer.id);
+      error = res.error;
+    } else {
+      // Si no, es una creación nueva
+      const res = await supabase.from('players').insert([previewPlayer]);
+      error = res.error;
+    }
     
     if (error) {
-      setErrorMsg("Error al crear jugador: " + error.message);
+      setErrorMsg("Error al guardar jugador: " + error.message);
     } else {
-      setSuccessMsg("¡Jugador creado exitosamente!");
+      setSuccessMsg(previewPlayer.id ? "¡Jugador actualizado exitosamente!" : "¡Jugador creado exitosamente!");
       setJsonInput('');
       setPreviewPlayer(null);
       fetchPlayers();
@@ -164,19 +190,22 @@ export default function AdminPage() {
       {successMsg && <div className="bg-green-500/20 border border-green-500 text-green-400 p-4 rounded-lg mb-6">{successMsg}</div>}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        {/* Import JSON Section */}
+        {/* Import / Edit JSON Section */}
         <div className="glass-panel p-6 rounded-xl">
-          <h2 className="text-2xl font-bold font-outfit text-yellow-400 mb-4">Crear Jugador (Importar JSON)</h2>
-          <p className="text-sm text-slate-400 mb-4">Pega el código JSON que generó tu amigo en la pantalla de Sugerencias para crearlo instantáneamente.</p>
+          <h2 className="text-2xl font-bold font-outfit text-yellow-400 mb-4">Crear / Editar Jugador (JSON)</h2>
+          <p className="text-sm text-slate-400 mb-4">
+            Pega el código JSON generado o haz clic en "Editar" en un jugador de la tabla para cargarlo aquí. 
+            Modifica los valores directamente y pulsa Revisar.
+          </p>
           
           <textarea 
             value={jsonInput}
             onChange={(e) => setJsonInput(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-green-400 font-mono text-xs h-40 mb-4 outline-none focus:border-yellow-500"
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-green-400 font-mono text-xs h-64 mb-4 outline-none focus:border-yellow-500"
             placeholder='{"nombre": "Jugador", "overall_rating": 80...}'
           />
           <button onClick={handleParseJSON} className="w-full py-2 bg-slate-800 text-white rounded hover:bg-slate-700 transition border border-slate-600">
-            Revisar JSON
+            Revisar JSON y Previsualizar
           </button>
         </div>
 
@@ -189,7 +218,18 @@ export default function AdminPage() {
             </div>
           ) : (
             <div className="bg-slate-900 p-4 rounded-lg border border-green-500/30 flex-1 flex flex-col">
-              <div className="flex items-center gap-4 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className={`text-xs font-bold px-2 py-1 rounded ${previewPlayer.id ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
+                  {previewPlayer.id ? 'MODO EDICIÓN' : 'MODO CREACIÓN NUEVA'}
+                </span>
+                {previewPlayer.id && (
+                  <button onClick={() => { setPreviewPlayer(null); setJsonInput(''); }} className="text-xs text-red-400 hover:underline">
+                    Cancelar Edición
+                  </button>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-4 mb-4 mt-2">
                  {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={previewPlayer.foto_url || `https://placehold.co/100x100/111827/22c55e?text=${previewPlayer.nombre.charAt(0)}`} alt="Preview" className="w-16 h-16 rounded-full object-cover" />
                 <div>
@@ -207,7 +247,7 @@ export default function AdminPage() {
               </div>
 
               <div className="mt-auto pt-4 border-t border-slate-800">
-                <label className="block text-xs font-bold text-slate-400 mb-2">Cambiar Foto (Opcional)</label>
+                <label className="block text-xs font-bold text-slate-400 mb-2">Cambiar Foto Oficial</label>
                 <input 
                   type="file" 
                   accept="image/*" 
@@ -217,11 +257,15 @@ export default function AdminPage() {
                 />
                 
                 <button 
-                  onClick={handleCreatePlayer} 
+                  onClick={handleSavePlayer} 
                   disabled={loading || uploading}
-                  className="w-full py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white font-bold rounded transition shadow-lg disabled:opacity-50"
+                  className={`w-full py-3 font-bold rounded transition shadow-lg disabled:opacity-50 ${
+                    previewPlayer.id 
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white' 
+                    : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white'
+                  }`}
                 >
-                  {loading ? 'Guardando...' : 'Confirmar y Guardar Jugador'}
+                  {loading ? 'Guardando...' : (previewPlayer.id ? 'Actualizar Jugador' : 'Crear Nuevo Jugador')}
                 </button>
               </div>
             </div>
@@ -251,10 +295,16 @@ export default function AdminPage() {
                   </td>
                   <td className="p-4 text-slate-300">{player.posicion}</td>
                   <td className="p-4 text-yellow-400 font-bold">{player.overall_rating}</td>
-                  <td className="p-4">
+                  <td className="p-4 flex gap-2">
+                    <button 
+                      onClick={() => handleEdit(player)}
+                      className="text-blue-400 hover:text-blue-300 text-sm font-bold bg-blue-400/10 px-3 py-1 rounded transition"
+                    >
+                      Editar
+                    </button>
                     <button 
                       onClick={() => handleDelete(player.id)}
-                      className="text-red-400 hover:text-red-300 text-sm font-bold bg-red-400/10 px-3 py-1 rounded"
+                      className="text-red-400 hover:text-red-300 text-sm font-bold bg-red-400/10 px-3 py-1 rounded transition"
                     >
                       Eliminar
                     </button>
