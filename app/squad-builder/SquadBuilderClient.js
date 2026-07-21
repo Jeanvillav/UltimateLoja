@@ -142,7 +142,12 @@ export default function SquadBuilderClient({ teams, players }) {
   const exportImage = async () => {
     if (pitchRef.current) {
       try {
-        const canvas = await html2canvas(pitchRef.current, { backgroundColor: '#111827', scale: 2 });
+        const canvas = await html2canvas(pitchRef.current, { 
+          backgroundColor: '#111827', 
+          scale: 2,
+          useCORS: true,
+          allowTaint: true
+        });
         const image = canvas.toDataURL("image/jpeg", 0.9);
         const link = document.createElement('a');
         link.href = image;
