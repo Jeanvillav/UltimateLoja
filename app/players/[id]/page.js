@@ -32,20 +32,9 @@ export default async function PlayerPage({ params }) {
     const { data, error } = await query.single();
     if (data) {
       player = data;
-    } else {
-      throw new Error("No encontrado en DB: " + (error?.message || ""));
     }
   } catch (err) {
-    try {
-      const filePath = path.join(process.cwd(), 'seed_data.json');
-      const fileData = fs.readFileSync(filePath, 'utf8');
-      const players = JSON.parse(fileData);
-      
-      const decodedId = decodeURIComponent(id);
-      player = players.find(p => p.id === decodedId || p.nombre === decodedId);
-    } catch (e) {
-      console.error(e);
-    }
+    console.error("Error fetching player from Supabase", err);
   }
 
   if (!player) {

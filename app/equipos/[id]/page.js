@@ -22,18 +22,8 @@ export default async function EquipoPage({ params }) {
 
     const playersRes = await supabase.from('players').select('*').eq('team_id', id).order('overall_rating', { ascending: false });
     if (playersRes.data) players = playersRes.data;
-
-    if (!team && !players.length) throw new Error("Not found in DB");
   } catch (err) {
-    try {
-      const filePath = path.join(process.cwd(), 'seed_data.json');
-      const fileData = fs.readFileSync(filePath, 'utf8');
-      const data = JSON.parse(fileData);
-      team = data.teams?.find(t => t.id === id);
-      players = data.players?.filter(p => p.team_id === id) || [];
-    } catch (e) {
-      console.error(e);
-    }
+    console.error("Error fetching team/players from Supabase", err);
   }
 
   if (!team) {

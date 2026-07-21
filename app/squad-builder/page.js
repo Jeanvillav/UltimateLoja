@@ -19,18 +19,8 @@ export default async function SquadBuilderPage() {
 
     const playersRes = await supabase.from('players').select('*').order('overall_rating', { ascending: false });
     if (playersRes.data) players = playersRes.data;
-
-    if (!teams.length && !players.length) throw new Error("No data in DB");
   } catch (err) {
-    try {
-      const filePath = path.join(process.cwd(), 'seed_data.json');
-      const fileData = fs.readFileSync(filePath, 'utf8');
-      const data = JSON.parse(fileData);
-      teams = data.teams || [];
-      players = data.players || [];
-    } catch (e) {
-      console.error(e);
-    }
+    console.error("Error fetching squad data from Supabase", err);
   }
 
   return (

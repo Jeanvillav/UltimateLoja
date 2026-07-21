@@ -206,7 +206,7 @@ export default function SquadBuilderClient({ teams, players }) {
                 <div className="flex items-center gap-2">
                   <label className="text-sm text-slate-400 font-bold">Formación:</label>
                   <select 
-                    value={activeFormation || '4-3-3'}
+                    value={activeFormation || 'Fútbol 6 (2-2-1)'}
                     onChange={(e) => setFormation(e.target.value)}
                     className="bg-slate-800 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-green-500 font-bold"
                   >

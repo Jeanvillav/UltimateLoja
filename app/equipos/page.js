@@ -16,19 +16,11 @@ export default async function Equipos() {
     const { data, error } = await supabase.from('teams').select('*').order('name');
     
     if (error) throw error;
-    if (data && data.length > 0) {
+    if (data) {
       teams = data;
-    } else {
-      throw new Error("No hay equipos en Supabase");
     }
   } catch (err) {
-    try {
-      const filePath = path.join(process.cwd(), 'seed_data.json');
-      const fileData = fs.readFileSync(filePath, 'utf8');
-      teams = JSON.parse(fileData).teams || [];
-    } catch (e) {
-      console.error("Error reading local data", e);
-    }
+    console.error("Error fetching teams from Supabase", err);
   }
 
   return (
