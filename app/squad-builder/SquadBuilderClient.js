@@ -221,6 +221,7 @@ export default function SquadBuilderClient({ teams, players }) {
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         {/* Drag Overlay for smooth animation outside constraints */}
