@@ -37,27 +37,27 @@ export default function FifaCard({ player }) {
 
         <div className="fifa-stats-grid">
           <div className="fifa-stat-row">
-            <span className="fifa-stat-label">{shortPos === 'POR' ? 'DIV' : 'PAC'}</span>
+            <span className="fifa-stat-label">{['POR', 'ARQ'].includes(shortPos) ? 'DIV' : 'PAC'}</span>
             <span className="fifa-stat-val">{player.pace}</span>
           </div>
           <div className="fifa-stat-row">
-            <span className="fifa-stat-label">{shortPos === 'POR' ? 'REF' : 'DRI'}</span>
+            <span className="fifa-stat-label">{['POR', 'ARQ'].includes(shortPos) ? 'REF' : 'DRI'}</span>
             <span className="fifa-stat-val">{player.dribbling}</span>
           </div>
           <div className="fifa-stat-row">
-            <span className="fifa-stat-label">{shortPos === 'POR' ? 'HAN' : 'SHO'}</span>
+            <span className="fifa-stat-label">{['POR', 'ARQ'].includes(shortPos) ? 'HAN' : 'SHO'}</span>
             <span className="fifa-stat-val">{player.shooting}</span>
           </div>
           <div className="fifa-stat-row">
-            <span className="fifa-stat-label">{shortPos === 'POR' ? 'SPD' : 'DEF'}</span>
+            <span className="fifa-stat-label">{['POR', 'ARQ'].includes(shortPos) ? 'SPD' : 'DEF'}</span>
             <span className="fifa-stat-val">{player.defending}</span>
           </div>
           <div className="fifa-stat-row">
-            <span className="fifa-stat-label">{shortPos === 'POR' ? 'KIC' : 'PAS'}</span>
+            <span className="fifa-stat-label">{['POR', 'ARQ'].includes(shortPos) ? 'KIC' : 'PAS'}</span>
             <span className="fifa-stat-val">{player.passing}</span>
           </div>
           <div className="fifa-stat-row">
-            <span className="fifa-stat-label">{shortPos === 'POR' ? 'POS' : 'PHY'}</span>
+            <span className="fifa-stat-label">{['POR', 'ARQ'].includes(shortPos) ? 'POS' : 'PHY'}</span>
             <span className="fifa-stat-val">{player.physical}</span>
           </div>
         </div>

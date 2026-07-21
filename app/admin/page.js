@@ -317,8 +317,12 @@ export default function AdminPage() {
   };
 
   const handleEditPlayer = (player) => {
-    // Map player_teams to team_ids for the editor
-    const mappedPlayer = { ...player, team_ids: player.player_teams?.map(pt => pt.team_id) || [] };
+    // Map player_teams to team_ids for the editor, fallback to legacy team_id if not migrated
+    let teamIds = player.player_teams?.map(pt => pt.team_id) || [];
+    if (teamIds.length === 0 && player.team_id) {
+      teamIds = [player.team_id];
+    }
+    const mappedPlayer = { ...player, team_ids: teamIds };
     setPreviewPlayer(mappedPlayer);
     setJsonInput(JSON.stringify(mappedPlayer, null, 2));
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -544,7 +548,8 @@ export default function AdminPage() {
               <div className="grid grid-cols-2 gap-3 mb-8">
                 {['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].map(stat => {
                   let label = stat;
-                  const isGK = previewPlayer.posicion === 'POR';
+                  const posStr = (previewPlayer.posicion || '').toUpperCase();
+                  const isGK = posStr === 'POR' || posStr === 'ARQ' || posStr.includes('PORTERO') || posStr.includes('ARQUERO');
                   if (isGK) {
                     if (stat === 'pace') label = 'DIV (Estirada)';
                     if (stat === 'shooting') label = 'HAN (Manejo)';

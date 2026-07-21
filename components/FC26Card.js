@@ -64,22 +64,22 @@ export default function FC26Card({ player, asPreview = false, livePhotoUrl = nul
         
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm font-bold">
           <div className="flex justify-between">
-            <span className="opacity-75">{shortPos === 'POR' ? 'DIV' : 'PAC'}</span> <span>{player.pace || 0}</span>
+            <span className="opacity-75">{['POR', 'ARQ'].includes(shortPos) ? 'DIV' : 'PAC'}</span> <span>{player.pace || 0}</span>
           </div>
           <div className="flex justify-between">
-            <span className="opacity-75">{shortPos === 'POR' ? 'REF' : 'DRI'}</span> <span>{player.dribbling || 0}</span>
+            <span className="opacity-75">{['POR', 'ARQ'].includes(shortPos) ? 'REF' : 'DRI'}</span> <span>{player.dribbling || 0}</span>
           </div>
           <div className="flex justify-between">
-            <span className="opacity-75">{shortPos === 'POR' ? 'HAN' : 'SHO'}</span> <span>{player.shooting || 0}</span>
+            <span className="opacity-75">{['POR', 'ARQ'].includes(shortPos) ? 'HAN' : 'SHO'}</span> <span>{player.shooting || 0}</span>
           </div>
           <div className="flex justify-between">
-            <span className="opacity-75">{shortPos === 'POR' ? 'SPD' : 'DEF'}</span> <span>{player.defending || 0}</span>
+            <span className="opacity-75">{['POR', 'ARQ'].includes(shortPos) ? 'SPD' : 'DEF'}</span> <span>{player.defending || 0}</span>
           </div>
           <div className="flex justify-between">
-            <span className="opacity-75">{shortPos === 'POR' ? 'KIC' : 'PAS'}</span> <span>{player.passing || 0}</span>
+            <span className="opacity-75">{['POR', 'ARQ'].includes(shortPos) ? 'KIC' : 'PAS'}</span> <span>{player.passing || 0}</span>
           </div>
           <div className="flex justify-between">
-            <span className="opacity-75">{shortPos === 'POR' ? 'POS' : 'PHY'}</span> <span>{player.physical || 0}</span>
+            <span className="opacity-75">{['POR', 'ARQ'].includes(shortPos) ? 'POS' : 'PHY'}</span> <span>{player.physical || 0}</span>
           </div>
         </div>
       </div>
