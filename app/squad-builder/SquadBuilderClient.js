@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { DndContext, useDraggable, useDroppable, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
 import { useSquadStore, FORMATIONS } from '@/store/squadStore';
 import html2canvas from 'html2canvas';
+import { Copy } from 'lucide-react';
 import { calculateOVR, getDynamicRating } from '@/utils/ovrCalculator';
 import { createClient } from '@/utils/supabase/client';
 import { useSearchParams } from 'next/navigation';
@@ -166,8 +167,42 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
     return p.team_id === tId;
   };
 
-  const teamPlayers = players.filter(p => isPlayerInTeam(p, selectedTeam));
-  const otherPlayers = players.filter(p => !isPlayerInTeam(p, selectedTeam));
+  const paramPlayers = searchParams.get('players');
+  const isConvocatoria = !!paramPlayers;
+  const convocadoIds = isConvocatoria ? paramPlayers.split(',') : [];
+
+  const teamPlayers = isConvocatoria ? [] : players.filter(p => isPlayerInTeam(p, selectedTeam));
+  const otherPlayers = isConvocatoria ? [] : players.filter(p => !isPlayerInTeam(p, selectedTeam));
+  const displayConvocados = isConvocatoria ? players.filter(p => convocadoIds.includes(p.id)) : [];
+
+  const [isExporting, setIsExporting] = useState(false);
+  const handleExportToClipboard = async () => {
+    if (!pitchRef.current) return;
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(pitchRef.current, { backgroundColor: null, useCORS: true, scale: 2 });
+      canvas.toBlob(async (blob) => {
+        if (!blob) throw new Error("Could not generate image blob");
+        try {
+          const item = new ClipboardItem({ "image/png": blob });
+          await navigator.clipboard.write([item]);
+          alert("¡Alineación copiada al portapapeles! Ya puedes pegarla en WhatsApp u otra app.");
+        } catch (err) {
+          console.error("Clipboard API failed, fallback to download", err);
+          const link = document.createElement('a');
+          link.download = 'alineacion.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          alert("No se pudo copiar directamente. Se ha descargado la imagen.");
+        }
+      }, 'image/png');
+    } catch (err) {
+      console.error(err);
+      alert("Hubo un error al exportar la imagen.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Compute Squad OVR
   const activePlayers = pitch.filter(pos => pos.player);
@@ -186,35 +221,51 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
           <div className="w-full lg:w-1/3 glass-panel rounded-2xl p-6 h-[80vh] flex flex-col z-20">
             <h2 className="text-2xl font-bold font-outfit mb-4 text-green-400">Jugadores</h2>
             
-            <div className="mb-4">
-              <label className="block text-sm text-slate-400 mb-2">Plantilla Base:</label>
-              <select 
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-green-500"
-                value={selectedTeam}
-                onChange={(e) => setSelectedTeam(e.target.value)}
-              >
-                {teams.map(t => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-              </select>
-            </div>
+            {!isConvocatoria && (
+              <div className="mb-4">
+                <label className="block text-sm text-slate-400 mb-2">Plantilla Base:</label>
+                <select 
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-green-500"
+                  value={selectedTeam}
+                  onChange={(e) => setSelectedTeam(e.target.value)}
+                >
+                  {teams.map(t => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar" style={{ scrollbarWidth: 'thin', scrollbarColor: '#22c55e transparent' }}>
-              <div className="mb-6">
-                <h3 className="text-sm font-bold text-slate-500 mb-3 uppercase tracking-wider">De tu equipo</h3>
-                {teamPlayers.length === 0 && <p className="text-xs text-slate-500 italic">No hay jugadores</p>}
-                {teamPlayers.map(p => (
-                  <SidebarDraggablePlayer key={p.id || p.nombre} player={p} />
-                ))}
-              </div>
+              {isConvocatoria ? (
+                <div className="mb-6">
+                  <h3 className="text-sm font-bold text-[var(--color-highlight)] mb-3 uppercase tracking-wider flex justify-between items-center bg-[var(--color-highlight)]/10 p-2 rounded-lg border border-[var(--color-highlight)]/30">
+                    <span>Lista de Convocados</span>
+                    <span className="bg-[var(--color-highlight)] text-black px-2 py-0.5 rounded-full">{displayConvocados.length}</span>
+                  </h3>
+                  {displayConvocados.map(p => (
+                    <SidebarDraggablePlayer key={p.id || p.nombre} player={p} />
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <div className="mb-6">
+                    <h3 className="text-sm font-bold text-slate-500 mb-3 uppercase tracking-wider">De tu equipo</h3>
+                    {teamPlayers.length === 0 && <p className="text-xs text-slate-500 italic">No hay jugadores</p>}
+                    {teamPlayers.map(p => (
+                      <SidebarDraggablePlayer key={p.id || p.nombre} player={p} />
+                    ))}
+                  </div>
 
-              <div>
-                <h3 className="text-sm font-bold text-slate-500 mb-3 uppercase tracking-wider">Otros equipos</h3>
-                {otherPlayers.length === 0 && <p className="text-xs text-slate-500 italic">No hay jugadores</p>}
-                {otherPlayers.map(p => (
-                  <SidebarDraggablePlayer key={p.id || p.nombre} player={p} />
-                ))}
-              </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-500 mb-3 uppercase tracking-wider">Otros equipos</h3>
+                    {otherPlayers.length === 0 && <p className="text-xs text-slate-500 italic">No hay jugadores</p>}
+                    {otherPlayers.map(p => (
+                      <SidebarDraggablePlayer key={p.id || p.nombre} player={p} />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -257,7 +308,16 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
                   </div>
                 )}
                 
-                <button onClick={clearSquad} className="px-4 py-2 bg-red-500/20 text-red-400 font-bold rounded-lg hover:bg-red-500/30 transition border border-red-500/30">
+                <button 
+                  onClick={handleExportToClipboard} 
+                  disabled={isExporting}
+                  className="px-4 py-2 bg-green-500/20 text-green-400 font-bold rounded-lg hover:bg-green-500/30 transition border border-green-500/30 flex items-center gap-2 flex-shrink-0"
+                >
+                  <Copy size={16} />
+                  {isExporting ? 'Copiando...' : 'Copiar Imagen'}
+                </button>
+                
+                <button onClick={clearSquad} className="px-4 py-2 bg-red-500/20 text-red-400 font-bold rounded-lg hover:bg-red-500/30 transition border border-red-500/30 flex-shrink-0">
                   Limpiar
                 </button>
               </div>
