@@ -21,16 +21,19 @@ export function calculateOVR(stats, position) {
       const ref = dri; // Reflexes
       const spd = def; // Speed
       const gkPos = phy; // Positioning
-      ovr = (div * 0.22) + (ref * 0.22) + (gkPos * 0.22) + (han * 0.22) + (kic * 0.06) + (spd * 0.06);
+      ovr = (div * 0.21) + (han * 0.21) + (kic * 0.05) + (ref * 0.21) + (spd * 0.11) + (gkPos * 0.21);
       break;
     case 'DEF':
-      ovr = (def * 0.6) + (phy * 0.3) + (pac * 0.1);
+      // Defensa y Físico son los más importantes, Tiro importa poco
+      ovr = (def * 0.35) + (phy * 0.20) + (pac * 0.15) + (pas * 0.15) + (dri * 0.10) + (sho * 0.05);
       break;
     case 'MED':
-      ovr = (pas * 0.4) + (dri * 0.3) + (def * 0.1) + (sho * 0.1) + (phy * 0.1);
+      // Pase y Regate son clave, equilibrado en lo demás
+      ovr = (pas * 0.30) + (dri * 0.25) + (pac * 0.15) + (phy * 0.15) + (sho * 0.10) + (def * 0.05);
       break;
     case 'DEL':
-      ovr = (sho * 0.45) + (pac * 0.25) + (dri * 0.2) + (phy * 0.1);
+      // Tiro y Ritmo importan mucho, Defensa no importa
+      ovr = (sho * 0.35) + (pac * 0.25) + (dri * 0.20) + (phy * 0.10) + (pas * 0.10) + (def * 0.0);
       break;
     default:
       ovr = (pac + sho + pas + dri + def + phy) / 6;

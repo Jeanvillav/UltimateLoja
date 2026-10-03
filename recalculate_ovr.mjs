@@ -26,16 +26,23 @@ function calculateOVR(stats, position) {
   switch(pos) {
     case 'POR':
     case 'ARQ':
-      ovr = (def * 0.55) + (phy * 0.35) + (pas * 0.1);
+      // pace -> DIV, dribbling -> REF, shooting -> HAN, defending -> SPD, passing -> KIC, physical -> POS
+      const div = pac;
+      const han = sho;
+      const kic = pas;
+      const ref = dri;
+      const spd = def;
+      const gkPos = phy;
+      ovr = (div * 0.21) + (han * 0.21) + (kic * 0.05) + (ref * 0.21) + (spd * 0.11) + (gkPos * 0.21);
       break;
     case 'DEF':
-      ovr = (def * 0.6) + (phy * 0.3) + (pac * 0.1);
+      ovr = (def * 0.35) + (phy * 0.20) + (pac * 0.15) + (pas * 0.15) + (dri * 0.10) + (sho * 0.05);
       break;
     case 'MED':
-      ovr = (pas * 0.4) + (dri * 0.3) + (def * 0.1) + (sho * 0.1) + (phy * 0.1);
+      ovr = (pas * 0.30) + (dri * 0.25) + (pac * 0.15) + (phy * 0.15) + (sho * 0.10) + (def * 0.05);
       break;
     case 'DEL':
-      ovr = (sho * 0.45) + (pac * 0.25) + (dri * 0.2) + (phy * 0.1);
+      ovr = (sho * 0.35) + (pac * 0.25) + (dri * 0.20) + (phy * 0.10) + (pas * 0.10) + (def * 0.0);
       break;
     default:
       ovr = (pac + sho + pas + dri + def + phy) / 6;
