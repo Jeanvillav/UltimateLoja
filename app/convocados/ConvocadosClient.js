@@ -7,15 +7,20 @@ import { calculateOVR } from '@/utils/ovrCalculator';
 
 export default function ConvocadosClient({ initialPlayers }) {
   const [selectedPlayers, setSelectedPlayers] = useState([]);
+  const [statuses, setStatuses] = useState({});
   const router = useRouter();
   
   const togglePlayerSelection = (player) => {
     const isSelected = selectedPlayers.some(p => p.id === player.id);
     if (isSelected) {
       setSelectedPlayers(selectedPlayers.filter(p => p.id !== player.id));
+      const newStatuses = { ...statuses };
+      delete newStatuses[player.id];
+      setStatuses(newStatuses);
     } else {
       if (selectedPlayers.length < 14) {
         setSelectedPlayers([...selectedPlayers, player]);
+        setStatuses({ ...statuses, [player.id]: 'pendiente' });
       } else {
         alert("Ya has seleccionado el máximo de 14 jugadores.");
       }
@@ -28,7 +33,9 @@ export default function ConvocadosClient({ initialPlayers }) {
 
   const handleConfirm = () => {
     if (isValidConvocatoria) {
-      const ids = selectedPlayers.map(p => p.id).join(',');
+      // Pasamos al Squad Builder solo a los que pueden jugar (Confirmados o Pendientes)
+      const availablePlayers = selectedPlayers.filter(p => statuses[p.id] !== 'ausente');
+      const ids = availablePlayers.map(p => p.id).join(',');
       router.push(`/squad-builder?players=${ids}`);
     }
   };
@@ -64,12 +71,14 @@ export default function ConvocadosClient({ initialPlayers }) {
               {selectedPlayers.map(p => {
                 const shortPos = (p.posicion || 'DEL').split(' ')[0].substring(0, 3).toUpperCase();
                 const ovr = calculateOVR(p, shortPos);
+                const currentStatus = statuses[p.id] || 'pendiente';
+                
                 return (
                   <div 
                     key={p.id} 
-                    className="flex items-center gap-4 bg-slate-900/60 p-3 rounded-xl border border-slate-700 cursor-pointer hover:border-red-500 hover:bg-slate-800/80 group transition-all" 
+                    className="flex items-center gap-4 bg-slate-900/60 p-3 rounded-xl border border-slate-700 cursor-pointer hover:border-[var(--color-highlight)] hover:bg-slate-800/80 group transition-all" 
                     onClick={() => togglePlayerSelection(p)}
-                    title={`Eliminar a ${p.nombre}`}
+                    title={`Quitar a ${p.nombre} de la convocatoria`}
                   >
                     <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[var(--color-highlight)] shadow-[0_0_10px_rgba(0,229,255,0.4)] flex-shrink-0">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -81,7 +90,26 @@ export default function ConvocadosClient({ initialPlayers }) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-white font-bold text-sm leading-tight truncate">{p.nombre}</h4>
-                      <span className="text-slate-400 text-xs">{shortPos}</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-slate-400 text-[10px] font-bold">{shortPos}</span>
+                        <select 
+                          value={currentStatus} 
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            setStatuses({...statuses, [p.id]: e.target.value});
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className={`text-[10px] font-bold rounded px-2 py-0.5 outline-none border cursor-pointer ${
+                            currentStatus === 'confirmado' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                            currentStatus === 'ausente' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                            'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                          }`}
+                        >
+                          <option value="pendiente" className="bg-slate-900 text-yellow-400">Por confirmar</option>
+                          <option value="confirmado" className="bg-slate-900 text-green-400">Confirmado</option>
+                          <option value="ausente" className="bg-slate-900 text-red-400">No puede</option>
+                        </select>
+                      </div>
                     </div>
                     <div className="bg-black text-[var(--color-highlight)] font-black text-lg px-3 py-1 rounded-lg border border-slate-700 shadow-inner flex-shrink-0">
                       {ovr}
@@ -114,12 +142,13 @@ export default function ConvocadosClient({ initialPlayers }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
             {initialPlayers.map((player) => {
               const selected = isSelected(player.id);
+              const status = statuses[player.id];
               return (
                 <div 
                   key={player.id} 
                   className={`relative cursor-pointer transition-all duration-300 ${
                     selected 
-                      ? 'ring-4 ring-[var(--color-highlight)] rounded-xl transform scale-105 shadow-[0_0_20px_rgba(0,229,255,0.4)]' 
+                      ? `ring-4 rounded-xl transform scale-105 ${status === 'ausente' ? 'ring-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.2)]' : status === 'confirmado' ? 'ring-green-500 shadow-[0_0_20px_rgba(34,197,94,0.4)]' : 'ring-[var(--color-highlight)] shadow-[0_0_20px_rgba(0,229,255,0.4)]'}` 
                       : 'hover:-translate-y-2 hover:scale-105 hover:shadow-xl'
                   }`}
                   onClick={() => togglePlayerSelection(player)}
@@ -131,14 +160,33 @@ export default function ConvocadosClient({ initialPlayers }) {
                   
                   {/* Overlay for selected state */}
                   {selected && (
-                    <div className="absolute inset-0 bg-[var(--color-highlight)]/10 rounded-xl backdrop-blur-[1px] flex flex-col items-center justify-center z-20">
-                      <div className="bg-[var(--color-highlight)] text-black rounded-full w-12 h-12 flex items-center justify-center shadow-[0_0_20px_rgba(0,229,255,0.8)] mb-2 transform scale-110">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 font-bold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
+                    <div className={`absolute inset-0 rounded-xl backdrop-blur-[1px] flex flex-col items-center justify-center z-20 ${
+                      status === 'ausente' ? 'bg-red-900/40' : 
+                      status === 'confirmado' ? 'bg-green-900/30' : 
+                      'bg-[var(--color-highlight)]/10'
+                    }`}>
+                      <div className={`rounded-full w-12 h-12 flex items-center justify-center mb-2 transform scale-110 shadow-lg ${
+                        status === 'ausente' ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.8)]' : 
+                        status === 'confirmado' ? 'bg-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.8)]' : 
+                        'bg-[var(--color-highlight)] text-black shadow-[0_0_20px_rgba(0,229,255,0.8)]'
+                      }`}>
+                        {status === 'ausente' ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 font-bold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 font-bold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
                       </div>
-                      <span className="bg-black/80 text-[var(--color-highlight)] font-black uppercase px-3 py-1 rounded-full text-sm border border-[var(--color-highlight)]">
-                        Convocado
+                      <span className={`bg-black/80 font-black uppercase px-3 py-1 rounded-full text-sm border ${
+                        status === 'ausente' ? 'text-red-400 border-red-500' : 
+                        status === 'confirmado' ? 'text-green-400 border-green-500' : 
+                        'text-[var(--color-highlight)] border-[var(--color-highlight)]'
+                      }`}>
+                        {status === 'ausente' ? 'No puede' : 
+                         status === 'confirmado' ? 'Confirmado' : 'Convocado'}
                       </span>
                     </div>
                   )}
