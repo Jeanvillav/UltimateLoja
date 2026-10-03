@@ -40,6 +40,42 @@ export default function ConvocadosClient({ initialPlayers }) {
     }
   };
 
+  const handleCopyList = async () => {
+    if (selectedPlayers.length === 0) return;
+    
+    const confirmados = selectedPlayers.filter(p => statuses[p.id] === 'confirmado');
+    const pendientes = selectedPlayers.filter(p => (statuses[p.id] || 'pendiente') === 'pendiente');
+    const ausentes = selectedPlayers.filter(p => statuses[p.id] === 'ausente');
+
+    let text = `📋 *CONVOCATORIA DEL PARTIDO*\nTotal Convocados: ${selectedPlayers.length}/14\n\n`;
+
+    if (confirmados.length > 0) {
+      text += `🟢 *Confirmados (${confirmados.length}):*\n`;
+      confirmados.forEach(p => text += `- ${p.nombre}\n`);
+      text += '\n';
+    }
+
+    if (pendientes.length > 0) {
+      text += `🟡 *Por Confirmar (${pendientes.length}):*\n`;
+      pendientes.forEach(p => text += `- ${p.nombre}\n`);
+      text += '\n';
+    }
+
+    if (ausentes.length > 0) {
+      text += `🔴 *No Pueden (${ausentes.length}):*\n`;
+      ausentes.forEach(p => text += `- ${p.nombre}\n`);
+      text += '\n';
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      alert("¡Lista copiada al portapapeles!");
+    } catch (err) {
+      console.error(err);
+      alert("Error al copiar la lista.");
+    }
+  };
+
   return (
     <div className="flex flex-col lg:flex-row-reverse gap-8 relative items-start">
       {/* Resumen de convocados (Sidebar derecha) */}
@@ -53,17 +89,27 @@ export default function ConvocadosClient({ initialPlayers }) {
               </h2>
               <p className="text-sm text-slate-400 mt-1">Mínimo 5, máximo 14 jugadores.</p>
             </div>
-            <button 
-              disabled={!isValidConvocatoria}
-              className={`w-full py-3 rounded-xl font-black uppercase tracking-wider transition-all ${
-                isValidConvocatoria 
-                  ? 'bg-[var(--color-highlight)] text-black hover:bg-white hover:scale-105 shadow-[0_0_20px_rgba(0,229,255,0.6)] cursor-pointer' 
-                  : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-              }`}
-              onClick={handleConfirm}
-            >
-              {selectedPlayers.length < 5 ? `Faltan ${5 - selectedPlayers.length}` : 'Confirmar'}
-            </button>
+            <div className="flex gap-2">
+              <button 
+                disabled={selectedPlayers.length === 0}
+                onClick={handleCopyList}
+                className="w-12 h-12 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 hover:text-white transition flex items-center justify-center border border-slate-700 flex-shrink-0 disabled:opacity-50"
+                title="Copiar lista de texto"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              </button>
+              <button 
+                disabled={!isValidConvocatoria}
+                className={`flex-1 py-3 rounded-xl font-black uppercase tracking-wider transition-all ${
+                  isValidConvocatoria 
+                    ? 'bg-[var(--color-highlight)] text-black hover:bg-white hover:scale-105 shadow-[0_0_20px_rgba(0,229,255,0.6)] cursor-pointer' 
+                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                }`}
+                onClick={handleConfirm}
+              >
+                {selectedPlayers.length < 5 ? `Faltan ${5 - selectedPlayers.length}` : 'Confirmar'}
+              </button>
+            </div>
           </div>
           
           {selectedPlayers.length > 0 ? (
