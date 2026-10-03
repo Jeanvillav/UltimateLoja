@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Home, Users, Search, ClipboardList, Shield, PlusCircle } from 'lucide-react';
+import { Home, Users, Search, ClipboardList, Shield, PlusCircle, ListChecks } from 'lucide-react';
 
 export default function Navbar() {
   return (
@@ -27,6 +27,9 @@ export default function Navbar() {
             <Link href="/squad-builder" className="flex items-center h-full px-4 gap-2 text-slate-200 font-bold uppercase tracking-widest text-xs hover:text-white border-t-[3px] border-transparent hover:border-[var(--color-accent)] hover:bg-white/5 transition-all">
               Squad Builder
             </Link>
+            <Link href="/convocados" className="flex items-center h-full px-4 gap-2 text-slate-200 font-bold uppercase tracking-widest text-xs hover:text-white border-t-[3px] border-transparent hover:border-[#00e5ff] hover:bg-white/5 transition-all">
+              Convocados
+            </Link>
             <Link href="/sugerir" className="flex items-center h-full px-4 gap-2 text-slate-200 font-bold uppercase tracking-widest text-xs hover:text-black border-t-[3px] border-transparent hover:border-[var(--color-highlight)] hover:bg-[var(--color-highlight)] transition-all">
               Sugerir
             </Link>
@@ -46,6 +49,7 @@ export default function Navbar() {
          <Link href="/equipos" className="flex-1 py-3 text-center text-slate-300 hover:text-white hover:bg-white/5 border-t-[3px] border-transparent hover:border-[var(--color-highlight)]"><Shield size={20} className="mx-auto" /></Link>
          <Link href="/jugadores" className="flex-1 py-3 text-center text-slate-300 hover:text-white hover:bg-white/5 border-t-[3px] border-transparent hover:border-[var(--color-highlight)]"><Users size={20} className="mx-auto" /></Link>
          <Link href="/squad-builder" className="flex-1 py-3 text-center text-slate-300 hover:text-white hover:bg-white/5 border-t-[3px] border-transparent hover:border-[var(--color-accent)]"><ClipboardList size={20} className="mx-auto" /></Link>
+         <Link href="/convocados" className="flex-1 py-3 text-center text-slate-300 hover:text-white hover:bg-white/5 border-t-[3px] border-transparent hover:border-[#00e5ff]"><ListChecks size={20} className="mx-auto" /></Link>
          <Link href="/sugerir" className="flex-1 py-3 text-center text-slate-300 hover:text-black hover:bg-[var(--color-highlight)] border-t-[3px] border-transparent hover:border-[var(--color-highlight)]"><PlusCircle size={20} className="mx-auto" /></Link>
       </div>
     </nav>
