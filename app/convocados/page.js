@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import { Suspense } from 'react';
 import ConvocadosClient from './ConvocadosClient';
 
 export const dynamic = 'force-dynamic';
@@ -37,7 +38,9 @@ export default async function ConvocadosPage() {
         Elige la cancha, fecha, hora y convoca a tus amigos (5 a 14 jugadores) con cálculo de cuotas y exportación a WhatsApp.
       </p>
 
-      <ConvocadosClient initialPlayers={players} />
+      <Suspense fallback={<div className="text-center text-slate-400 py-12">Cargando organizador de sintética...</div>}>
+        <ConvocadosClient initialPlayers={players} />
+      </Suspense>
     </div>
   );
 }

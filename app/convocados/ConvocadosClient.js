@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import FC26Card from '@/components/FC26Card';
 import { calculateOVR } from '@/utils/ovrCalculator';
+import { Users, Shield, Copy, ArrowRight } from 'lucide-react';
 
 export default function ConvocadosClient({ initialPlayers }) {
   const CANCHAS_LOJA = [
@@ -22,30 +23,59 @@ export default function ConvocadosClient({ initialPlayers }) {
   const [matchTime, setMatchTime] = useState('20:00');
   const [canchaCost, setCanchaCost] = useState(20);
 
+  const searchParams = useSearchParams();
+  const initialMode = searchParams.get('modo') === 'single_team' ? 'single_team' : 'two_teams';
+  const [matchMode, setMatchMode] = useState(initialMode); // 'two_teams' | 'single_team'
+
+  const isTwoTeams = matchMode === 'two_teams';
+  const minPlayers = isTwoTeams ? 10 : 5;
+  const maxPlayers = isTwoTeams ? 14 : 7;
+
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   const [statuses, setStatuses] = useState({});
   const router = useRouter();
+
+  const handleModeChange = (newMode) => {
+    if (newMode === matchMode) return;
+    setMatchMode(newMode);
+    const newMax = newMode === 'two_teams' ? 14 : 7;
+    if (selectedPlayers.length > newMax) {
+      alert(`Has cambiado a "${newMode === 'two_teams' ? '2 Equipos' : 'Un Solo Equipo'}". Se redujo la lista a los primeros ${newMax} jugadores convocados.`);
+      const trimmed = selectedPlayers.slice(0, newMax);
+      setSelectedPlayers(trimmed);
+      const trimmedIds = new Set(trimmed.map(p => p.id));
+      const newStatuses = {};
+      Object.keys(statuses).forEach(id => {
+        if (trimmedIds.has(id)) newStatuses[id] = statuses[id];
+      });
+      setStatuses(newStatuses);
+    }
+  };
   
   const togglePlayerSelection = (player) => {
-    const isSelected = selectedPlayers.some(p => p.id === player.id);
-    if (isSelected) {
+    const isAlreadySelected = selectedPlayers.some(p => p.id === player.id);
+    if (isAlreadySelected) {
       setSelectedPlayers(selectedPlayers.filter(p => p.id !== player.id));
       const newStatuses = { ...statuses };
       delete newStatuses[player.id];
       setStatuses(newStatuses);
     } else {
-      if (selectedPlayers.length < 14) {
+      if (selectedPlayers.length < maxPlayers) {
         setSelectedPlayers([...selectedPlayers, player]);
         setStatuses({ ...statuses, [player.id]: 'pendiente' });
       } else {
-        alert("Ya has seleccionado el máximo de 14 jugadores.");
+        alert(
+          isTwoTeams
+            ? `Ya has seleccionado el máximo de 14 jugadores para armar 2 equipos (máximo 7 vs 7).`
+            : `Ya has seleccionado el máximo de 7 jugadores para un solo equipo.`
+        );
       }
     }
   };
 
   const isSelected = (playerId) => selectedPlayers.some(p => p.id === playerId);
   
-  const isValidConvocatoria = selectedPlayers.length >= 5 && selectedPlayers.length <= 14;
+  const isValidConvocatoria = selectedPlayers.length >= minPlayers && selectedPlayers.length <= maxPlayers;
 
   const confirmedPlayers = selectedPlayers.filter(p => statuses[p.id] === 'confirmado');
   const costPerPerson = confirmedPlayers.length > 0 && canchaCost > 0 
@@ -72,7 +102,8 @@ export default function ConvocadosClient({ initialPlayers }) {
         players: ids,
         cancha: finalCancha,
         hora: matchTime,
-        fecha: matchDate
+        fecha: matchDate,
+        modo: matchMode,
       });
       router.push(`/squad-builder?${params.toString()}`);
     }
@@ -87,6 +118,7 @@ export default function ConvocadosClient({ initialPlayers }) {
     const finalCancha = selectedCancha === 'Otro' ? (customCancha || 'Cancha por definir') : selectedCancha;
 
     let text = `⚽ *PARTIDO DE SINTÉTICA - LOJA* ⚽\n`;
+    text += `🏆 *Modalidad:* ${isTwoTeams ? 'Armar 2 Equipos (Partido Completo)' : 'Un Solo Equipo (Mi Plantilla)'}\n`;
     text += `🏟️ *Cancha:* ${finalCancha}\n`;
     if (matchDate) text += `📅 *Fecha:* ${getFormattedDate(matchDate)}\n`;
     if (matchTime) text += `⏰ *Hora:* ${matchTime}\n`;
@@ -98,7 +130,7 @@ export default function ConvocadosClient({ initialPlayers }) {
         text += `\n`;
       }
     }
-    text += `\n📋 *CONVOCATORIA* (${selectedPlayers.length}/14 Jugadores)\n\n`;
+    text += `\n📋 *CONVOCATORIA* (${selectedPlayers.length}/${maxPlayers} Jugadores • Mín. ${minPlayers})\n\n`;
 
     if (confirmados.length > 0) {
       text += `🟢 *Confirmados (${confirmados.length}):*\n`;
@@ -142,7 +174,7 @@ export default function ConvocadosClient({ initialPlayers }) {
               Organizador del Partido
             </h2>
             <p className="text-sm text-slate-400">
-              Elige la sintética, horario y calcula la cuota automática para tus convocados.
+              Elige si deseas armar 2 equipos (10-14 jug.) o un solo equipo (5-7 jug.), horario y cuotas.
             </p>
           </div>
 
@@ -161,6 +193,65 @@ export default function ConvocadosClient({ initialPlayers }) {
                 {confirmedPlayers.length} / {selectedPlayers.length}
               </span>
             </div>
+          </div>
+        </div>
+
+        {/* Selector de Modo: 2 Equipos vs 1 Equipo */}
+        <div className="mb-6 pb-6 border-b border-white/10">
+          <label className="block text-xs font-black text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <span>🏆 Formato de Convocatoria</span>
+            <span className="text-[10px] text-slate-400 font-normal normal-case">(Selecciona cómo deseas armar la pichanga)</span>
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => handleModeChange('two_teams')}
+              className={`p-4 rounded-2xl border text-left transition-all flex items-start gap-3.5 cursor-pointer ${
+                isTwoTeams
+                  ? 'bg-gradient-to-br from-blue-950/70 via-slate-900 to-black border-cyan-400 shadow-[0_0_20px_rgba(0,229,255,0.3)] ring-1 ring-cyan-400/80 scale-[1.01]'
+                  : 'bg-slate-900/50 border-slate-700/80 hover:bg-slate-800/80 hover:border-slate-600 text-slate-400'
+              }`}
+            >
+              <div className={`p-2.5 rounded-xl flex-shrink-0 ${isTwoTeams ? 'bg-cyan-400 text-black shadow-md shadow-cyan-400/30' : 'bg-slate-800 text-slate-400'}`}>
+                <Users size={22} />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-outfit font-black text-base uppercase text-white">Armar 2 Equipos</span>
+                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 border border-cyan-400/40">
+                    10 - 14 Jugadores
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                  Partido completo. Convoca entre 10 y 14 jugadores para dividir dos escuadras rivales (5v5 a 7v7).
+                </p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleModeChange('single_team')}
+              className={`p-4 rounded-2xl border text-left transition-all flex items-start gap-3.5 cursor-pointer ${
+                !isTwoTeams
+                  ? 'bg-gradient-to-br from-green-950/70 via-slate-900 to-black border-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)] ring-1 ring-green-400/80 scale-[1.01]'
+                  : 'bg-slate-900/50 border-slate-700/80 hover:bg-slate-800/80 hover:border-slate-600 text-slate-400'
+              }`}
+            >
+              <div className={`p-2.5 rounded-xl flex-shrink-0 ${!isTwoTeams ? 'bg-[var(--color-highlight)] text-black shadow-md shadow-green-400/30' : 'bg-slate-800 text-slate-400'}`}>
+                <Shield size={22} />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-outfit font-black text-base uppercase text-white">Un Solo Equipo</span>
+                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-green-400/20 text-green-300 border border-green-400/40">
+                    5 - 7 Jugadores
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                  Convoca a tu propia plantilla o alineación titular (mínimo 5, máximo 7 jugadores).
+                </p>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -249,29 +340,34 @@ export default function ConvocadosClient({ initialPlayers }) {
               <div>
                 <h2 className="text-2xl font-bold font-outfit text-white flex items-center gap-2">
                   Convocados 
-                  <span className="text-[var(--color-highlight)]">({selectedPlayers.length}/14)</span>
+                  <span className="text-[var(--color-highlight)]">({selectedPlayers.length}/{maxPlayers})</span>
                 </h2>
-                <p className="text-sm text-slate-400 mt-1">Mínimo 5, máximo 14 jugadores.</p>
+                <p className="text-xs text-slate-400 mt-1">
+                  Mínimo {minPlayers}, máximo {maxPlayers} jugadores ({isTwoTeams ? '2 Equipos' : '1 Equipo'}).
+                </p>
               </div>
               <div className="flex gap-2">
                 <button 
                   disabled={selectedPlayers.length === 0}
                   onClick={handleCopyList}
-                  className="w-12 h-12 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 hover:text-white transition flex items-center justify-center border border-slate-700 flex-shrink-0 disabled:opacity-50"
+                  className="w-12 h-12 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 hover:text-white transition flex items-center justify-center border border-slate-700 flex-shrink-0 disabled:opacity-50 cursor-pointer"
                   title="Copiar lista de texto con detalles del partido"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                  <Copy size={20} />
                 </button>
                 <button 
                   disabled={!isValidConvocatoria}
-                  className={`flex-1 py-3 rounded-xl font-black uppercase tracking-wider transition-all ${
+                  className={`flex-1 py-3 px-3 rounded-xl font-black uppercase tracking-wider text-xs sm:text-sm transition-all flex items-center justify-center gap-2 ${
                     isValidConvocatoria 
                       ? 'bg-[var(--color-highlight)] text-black hover:bg-white hover:scale-105 shadow-[0_0_20px_rgba(0,229,255,0.6)] cursor-pointer' 
                       : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                   }`}
                   onClick={handleConfirm}
                 >
-                  {selectedPlayers.length < 5 ? `Faltan ${5 - selectedPlayers.length}` : 'Armar Táctica'}
+                  {selectedPlayers.length < minPlayers 
+                    ? `Faltan ${minPlayers - selectedPlayers.length}` 
+                    : (isTwoTeams ? 'Armar 2 Equipos' : 'Armar Táctica')}
+                  {isValidConvocatoria && <ArrowRight size={16} />}
                 </button>
               </div>
             </div>

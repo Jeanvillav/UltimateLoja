@@ -98,6 +98,7 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
   const canchaParam = searchParams.get('cancha');
   const horaParam = searchParams.get('hora');
   const fechaParam = searchParams.get('fecha');
+  const modoParam = searchParams.get('modo');
   
   const [activePlayer, setActivePlayer] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(baseTeamId || (teams[0]?.id || ''));
@@ -242,10 +243,21 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar" style={{ scrollbarWidth: 'thin', scrollbarColor: '#22c55e transparent' }}>
               {isConvocatoria ? (
                 <div className="mb-6">
-                  <h3 className="text-sm font-bold text-[var(--color-highlight)] mb-3 uppercase tracking-wider flex justify-between items-center bg-[var(--color-highlight)]/10 p-2 rounded-lg border border-[var(--color-highlight)]/30">
-                    <span>Lista de Convocados</span>
-                    <span className="bg-[var(--color-highlight)] text-black px-2 py-0.5 rounded-full">{displayConvocados.length}</span>
-                  </h3>
+                  <div className="mb-3">
+                    {modoParam && (
+                      <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border inline-block mb-2 ${
+                        modoParam === 'two_teams'
+                          ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
+                          : 'bg-green-500/20 text-green-300 border-green-500/30'
+                      }`}>
+                        {modoParam === 'two_teams' ? '🏆 Modo: 2 Equipos (10-14)' : '🛡️ Modo: 1 Equipo (5-7)'}
+                      </span>
+                    )}
+                    <h3 className="text-sm font-bold text-[var(--color-highlight)] uppercase tracking-wider flex justify-between items-center bg-[var(--color-highlight)]/10 p-2 rounded-lg border border-[var(--color-highlight)]/30">
+                      <span>Lista de Convocados</span>
+                      <span className="bg-[var(--color-highlight)] text-black px-2 py-0.5 rounded-full">{displayConvocados.length}</span>
+                    </h3>
+                  </div>
                   {displayConvocados.map(p => (
                     <SidebarDraggablePlayer key={p.id || p.nombre} player={p} />
                   ))}
@@ -346,9 +358,14 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
               <div className="absolute top-[50%] left-[50%] w-[20%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30"></div>
               
               {/* Match info banner on pitch */}
-              {canchaParam && (
+              {(canchaParam || modoParam) && (
                 <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-black/85 backdrop-blur-md px-4 py-1.5 rounded-full border border-yellow-400/50 flex items-center gap-2.5 shadow-2xl text-xs font-black text-white pointer-events-none">
-                  <span className="text-yellow-400">🏟️ {canchaParam}</span>
+                  {modoParam && (
+                    <span className={modoParam === 'two_teams' ? 'text-cyan-400' : 'text-green-400'}>
+                      {modoParam === 'two_teams' ? '🏆 2 Equipos' : '🛡️ 1 Equipo'}
+                    </span>
+                  )}
+                  {canchaParam && <span className="text-yellow-400">{modoParam ? '• ' : ''}🏟️ {canchaParam}</span>}
                   {horaParam && <span className="text-slate-300">• ⏰ {horaParam}</span>}
                   {fechaParam && <span className="text-slate-400 text-[10px]">• 📅 {fechaParam}</span>}
                 </div>
