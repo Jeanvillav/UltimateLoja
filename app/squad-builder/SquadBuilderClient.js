@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useSyncExternalStore, Suspense } from 'react';
 import { DndContext, useDraggable, useDroppable, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
 import { useSquadStore, FORMATIONS } from '@/store/squadStore';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import { Copy } from 'lucide-react';
 import { calculateOVR, getDynamicRating } from '@/utils/ovrCalculator';
 import { createClient } from '@/utils/supabase/client';
