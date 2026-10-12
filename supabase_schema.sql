@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS teams (
 CREATE TABLE IF NOT EXISTS players (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   nombre text NOT NULL,
-  edad integer NOT NULL,
+  fecha_nacimiento date,
+  edad integer,
   posicion text NOT NULL,
   team_id uuid REFERENCES teams(id) ON DELETE SET NULL,
   foto_url text,

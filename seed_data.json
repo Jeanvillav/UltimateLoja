@@ -19,6 +19,7 @@
   "players": [
     {
       "nombre": "Jean",
+      "fecha_nacimiento": "2005-04-10",
       "edad": 21,
       "posicion": "Defensa Central",
       "team_id": "11111111-1111-1111-1111-111111111111",
@@ -38,6 +39,7 @@
     },
     {
       "nombre": "Choclo",
+      "fecha_nacimiento": "2005-02-18",
       "edad": 21,
       "posicion": "Defensa",
       "team_id": "11111111-1111-1111-1111-111111111111",
@@ -57,6 +59,7 @@
     },
     {
       "nombre": "Derek",
+      "fecha_nacimiento": "2011-08-20",
       "edad": 15,
       "posicion": "Atacante",
       "team_id": "11111111-1111-1111-1111-111111111111",
@@ -76,6 +79,7 @@
     },
     {
       "nombre": "Michelin",
+      "fecha_nacimiento": "2013-06-12",
       "edad": 13,
       "posicion": "Mediocampista",
       "team_id": "22222222-2222-2222-2222-222222222222",
@@ -95,6 +99,7 @@
     },
     {
       "nombre": "Keith",
+      "fecha_nacimiento": "2013-11-05",
       "edad": 13,
       "posicion": "Defensa",
       "team_id": "22222222-2222-2222-2222-222222222222",
@@ -114,6 +119,7 @@
     },
     {
       "nombre": "Iblame",
+      "fecha_nacimiento": "2010-09-15",
       "edad": 16,
       "posicion": "Arquero",
       "team_id": "33333333-3333-3333-3333-333333333333",

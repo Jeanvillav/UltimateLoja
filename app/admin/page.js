@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
 import { calculateOVR } from '@/utils/ovrCalculator';
+import { calculateAge } from '@/utils/dateUtils';
 import FC26Card from '@/components/FC26Card';
 
 export default function AdminPage() {
@@ -114,6 +115,9 @@ export default function AdminPage() {
   const handleParseJSON = () => {
     try {
       const parsed = JSON.parse(jsonInput);
+      if (parsed.fecha_nacimiento) {
+        parsed.edad = calculateAge(parsed.fecha_nacimiento, parsed.edad);
+      }
       setPreviewPlayer(parsed);
       setErrorMsg('');
     } catch (err) {
@@ -124,11 +128,17 @@ export default function AdminPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const isNumber = ['edad', 'overall_rating', 'pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].includes(name);
+    const isNumber = ['overall_rating', 'pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].includes(name);
     const updatedValue = isNumber ? parseInt(value) || 0 : value;
     
     setPreviewPlayer(prev => {
-      const updated = { ...prev, [name]: updatedValue };
+      let updated = { ...prev, [name]: updatedValue };
+      if (name === 'fecha_nacimiento') {
+        const derivedAge = calculateAge(value);
+        if (derivedAge !== null) {
+          updated.edad = derivedAge;
+        }
+      }
       setJsonInput(JSON.stringify(updated, null, 2));
       return updated;
     });
@@ -239,13 +249,28 @@ export default function AdminPage() {
       restPlayerToSave.debilidades = restPlayerToSave.debilidades.split(',').map(s => s.trim()).filter(Boolean);
     }
 
+    if (previewPlayer.fecha_nacimiento) {
+      const derivedAge = calculateAge(previewPlayer.fecha_nacimiento, previewPlayer.edad);
+      if (derivedAge !== null) {
+        restPlayerToSave.edad = derivedAge;
+      }
+    }
+
     let newPlayerId = restPlayerToSave.id;
 
     if (newPlayerId) {
-      const res = await supabase.from('players').update(restPlayerToSave).eq('id', newPlayerId);
+      let res = await supabase.from('players').update(restPlayerToSave).eq('id', newPlayerId);
+      if (res.error && res.error.code === '42703' && restPlayerToSave.fecha_nacimiento) {
+        const { fecha_nacimiento, ...withoutBirthdate } = restPlayerToSave;
+        res = await supabase.from('players').update(withoutBirthdate).eq('id', newPlayerId);
+      }
       error = res.error;
     } else {
-      const res = await supabase.from('players').insert([restPlayerToSave]).select().single();
+      let res = await supabase.from('players').insert([restPlayerToSave]).select().single();
+      if (res.error && res.error.code === '42703' && restPlayerToSave.fecha_nacimiento) {
+        const { fecha_nacimiento, ...withoutBirthdate } = restPlayerToSave;
+        res = await supabase.from('players').insert([withoutBirthdate]).select().single();
+      }
       error = res.error;
       if (res.data) newPlayerId = res.data.id;
     }
@@ -451,7 +476,7 @@ export default function AdminPage() {
           <h2 className="text-2xl font-bold font-outfit text-yellow-400 mb-4">Importar JSON Bruto</h2>
           <p className="text-sm text-slate-400 mb-4">
             Pega aquí el código que te mandó un amigo y haz clic en revisar. También puedes iniciar una carta vacía: 
-            <button onClick={() => setJsonInput('{"nombre":"","edad":20,"posicion":"DEL","overall_rating":70,"pace":70,"shooting":70,"passing":70,"dribbling":70,"defending":70,"physical":70}')} className="text-yellow-400 underline ml-2 hover:text-yellow-300">Plantilla en Blanco</button>
+            <button onClick={() => setJsonInput('{"nombre":"","fecha_nacimiento":"2003-05-15","posicion":"DEL","overall_rating":70,"pace":70,"shooting":70,"passing":70,"dribbling":70,"defending":70,"physical":70}')} className="text-yellow-400 underline ml-2 hover:text-yellow-300">Plantilla en Blanco</button>
           </p>
           <textarea 
             value={jsonInput}
@@ -503,7 +528,19 @@ export default function AdminPage() {
                       <option value="MED">Medio (MED)</option>
                       <option value="DEL">Delantero (DEL)</option>
                     </select>
-                    <input type="number" name="edad" value={previewPlayer.edad || 0} onChange={handleInputChange} placeholder="Edad" className="w-1/2 bg-slate-800 border border-slate-700 rounded p-2 text-white text-sm font-bold text-center focus:border-green-500 outline-none transition" />
+                    <div className="w-1/2 flex flex-col">
+                      <label className="text-[10px] text-slate-400 font-bold mb-1 flex items-center justify-between">
+                        <span>F. Nacimiento</span>
+                        <span className="text-yellow-400">({calculateAge(previewPlayer.fecha_nacimiento, previewPlayer.edad) || '--'} años)</span>
+                      </label>
+                      <input 
+                        type="date" 
+                        name="fecha_nacimiento" 
+                        value={previewPlayer.fecha_nacimiento || ''} 
+                        onChange={handleInputChange} 
+                        className="w-full bg-slate-800 border border-slate-700 rounded p-2 text-white text-xs font-bold text-center focus:border-green-500 outline-none transition" 
+                      />
+                    </div>
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-bold text-slate-400">Equipos:</label>

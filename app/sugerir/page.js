@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { calculateAge } from '@/utils/dateUtils';
 
 export default function SugerirJugador() {
   const initialFormState = {
     nombre: '',
-    edad: 20,
+    fecha_nacimiento: '2003-05-15',
+    edad: 23,
     posicion: 'DEL',
     team_ids: [],
     foto_url: '',
@@ -62,11 +64,20 @@ export default function SugerirJugador() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const isNumber = ['edad', 'overall_rating', 'pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].includes(name);
-    setFormData(prev => ({
-      ...prev,
-      [name]: isNumber ? parseInt(value) || 0 : value
-    }));
+    const isNumber = ['overall_rating', 'pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'].includes(name);
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        [name]: isNumber ? parseInt(value) || 0 : value
+      };
+      if (name === 'fecha_nacimiento') {
+        const derivedAge = calculateAge(value);
+        if (derivedAge !== null) {
+          updated.edad = derivedAge;
+        }
+      }
+      return updated;
+    });
   };
 
   const handleModeChange = (newMode) => {
@@ -87,6 +98,8 @@ export default function SugerirJugador() {
       setFormData({
         ...initialFormState,
         ...selectedPlayer,
+        fecha_nacimiento: selectedPlayer.fecha_nacimiento || '',
+        edad: calculateAge(selectedPlayer.fecha_nacimiento, selectedPlayer.edad) || 20,
         team_ids: selectedPlayer.player_teams?.map(pt => pt.team_id) || [],
         cualidades_tecnicas: selectedPlayer.cualidades_tecnicas?.join(', ') || '',
         fortalezas: selectedPlayer.fortalezas?.join(', ') || '',
@@ -156,8 +169,11 @@ export default function SugerirJugador() {
     if (!formData.nombre || formData.nombre.trim().length < 2) {
       errors.push('El nombre debe tener al menos 2 letras.');
     }
-    if (formData.edad < 10 || formData.edad > 75) {
-      errors.push('La edad debe ser entre 10 y 75 años.');
+    const derivedAge = calculateAge(formData.fecha_nacimiento, formData.edad);
+    if (!formData.fecha_nacimiento && !formData.edad) {
+      errors.push('Debes ingresar la fecha de nacimiento.');
+    } else if (derivedAge !== null && (derivedAge < 10 || derivedAge > 75)) {
+      errors.push('La fecha de nacimiento debe corresponder a una edad entre 10 y 75 años.');
     }
     const statKeys = ['overall_rating', 'pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'];
     statKeys.forEach(k => {
@@ -173,7 +189,10 @@ export default function SugerirJugador() {
     }
     
     // Prepare data
-    const dataToSave = { ...formData };
+    const dataToSave = { 
+      ...formData, 
+      edad: derivedAge || formData.edad || 20 
+    };
     
     // Array parsing
     if (typeof dataToSave.cualidades_tecnicas === 'string') {
@@ -269,8 +288,20 @@ export default function SugerirJugador() {
               <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} required className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white" />
             </div>
             <div>
-              <label className="block text-sm text-slate-400 mb-1">Edad</label>
-              <input type="number" name="edad" value={formData.edad} onChange={handleChange} required className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white" />
+              <label className="block text-sm text-slate-400 mb-1 flex items-center justify-between">
+                <span>Fecha de Nacimiento</span>
+                <span className="text-xs text-yellow-400 font-bold">
+                  ({calculateAge(formData.fecha_nacimiento, formData.edad) || '--'} años)
+                </span>
+              </label>
+              <input 
+                type="date" 
+                name="fecha_nacimiento" 
+                value={formData.fecha_nacimiento || ''} 
+                onChange={handleChange} 
+                required 
+                className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white font-bold" 
+              />
             </div>
             <div>
               <label className="block text-sm text-slate-400 mb-1">Posición Principal</label>

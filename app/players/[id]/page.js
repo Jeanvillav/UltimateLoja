@@ -4,6 +4,7 @@ import RadarChart from '@/components/RadarChart';
 import FC26Card from '@/components/FC26Card';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
+import { calculateAge, formatBirthdate } from '@/utils/dateUtils';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,7 +94,18 @@ export default async function PlayerPage({ params }) {
         <div className="flex-grow w-full max-w-4xl bg-black/60 backdrop-blur-md rounded-3xl p-8 border border-white/10 shadow-2xl text-white">
           <div className="mb-8 border-b border-white/10 pb-6">
             <h1 className="text-5xl font-black mb-2 drop-shadow-lg text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">{player.nombre}</h1>
-            <p className="text-xl text-green-400 font-bold uppercase tracking-widest">{player.posicion} <span className="text-slate-400 mx-2">•</span> <span className="text-yellow-400">{player.edad} años</span></p>
+            <p className="text-xl text-green-400 font-bold uppercase tracking-widest flex flex-wrap items-center gap-2">
+              <span>{player.posicion}</span>
+              <span className="text-slate-400">•</span>
+              <span className="text-yellow-400">
+                {calculateAge(player.fecha_nacimiento, player.edad)} años
+              </span>
+              {player.fecha_nacimiento && (
+                <span className="text-xs text-slate-400 font-normal normal-case">
+                  ({formatBirthdate(player.fecha_nacimiento)})
+                </span>
+              )}
+            </p>
           </div>
 
             <RadarChart stats={player} />
