@@ -4,6 +4,11 @@ import ConvocadosClient from './ConvocadosClient';
 
 export const dynamic = 'force-dynamic';
 
+export const metadata = {
+  title: 'Convocados & Organizador de Cancha Sintética',
+  description: 'Organiza partidos en canchas sintéticas de Loja: La Sede, Colegio de Ingenieros, Calva y Calva. Cuotas por persona y exportación a WhatsApp.',
+};
+
 export default async function ConvocadosPage() {
   let players = [];
   

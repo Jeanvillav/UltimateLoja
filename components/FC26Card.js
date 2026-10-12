@@ -38,7 +38,7 @@ export default function FC26Card({ player, asPreview = false, livePhotoUrl = nul
          {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
           src={foto} 
-          alt={player.nombre} 
+          alt={`Carta de fútbol de ${player.nombre || 'Jugador'} - Posición ${shortPos} OVR ${calculatedOvr}`} 
           className="w-full h-full object-cover object-center drop-shadow-xl filter contrast-125" 
           style={{ 
             maskImage: 'radial-gradient(circle at center, black 45%, transparent 75%)', 

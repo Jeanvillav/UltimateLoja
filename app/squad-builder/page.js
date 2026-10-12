@@ -1,10 +1,13 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import SquadBuilderClient from './SquadBuilderClient';
-import fs from 'fs';
-import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata = {
+  title: 'Squad Builder | Constructor de Plantillas Tácticas',
+  description: 'Diseña tu alineación ideal para fútbol 5, 6 y 7 en cancha sintética con valoraciones y químicas de jugadores de Loja.',
+};
 
 export default async function SquadBuilderPage() {
   let teams = [];

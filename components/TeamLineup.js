@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { calculateOVR, getDynamicRating } from '@/utils/ovrCalculator';
 
 export default function TeamLineup({ team }) {
@@ -53,10 +54,13 @@ export default function TeamLineup({ team }) {
                   className="absolute w-24 h-32 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-10"
                   style={{ top: pos.top, left: pos.left }}
                 >
-                  <img 
-                    src={pos.player.foto_url || `https://placehold.co/100x100/111827/22c55e?text=${pos.player.nombre.charAt(0)}`} 
-                    alt={pos.player.nombre} 
+                  <Image 
+                    src={pos.player.foto_url || `https://placehold.co/100x100/111827/22c55e?text=${encodeURIComponent(pos.player.nombre.charAt(0))}`} 
+                    alt={`Foto de ${pos.player.nombre} en posición ${pos.name}`} 
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-full object-cover drop-shadow-lg mb-1" 
+                    unoptimized={!pos.player.foto_url}
                   />
                   <div className={`bg-slate-900/80 px-2 py-0.5 rounded text-[10px] font-bold text-center w-full truncate border ${isPenalized ? 'border-red-500/50 text-red-400' : 'border-yellow-500/30 text-yellow-400'}`}>
                     {dynamicRating} {pos.player.nombre.split(' ')[0]}
@@ -87,7 +91,14 @@ export default function TeamLineup({ team }) {
                   <span className="w-8 h-8 flex items-center justify-center bg-black/50 rounded text-xs font-bold text-slate-400 border border-slate-700">
                     {pos.name}
                   </span>
-                  <img src={p.foto_url || `https://placehold.co/40x40/111827/22c55e?text=${p.nombre.charAt(0)}`} alt={p.nombre} className="w-10 h-10 rounded-full object-cover" />
+                  <Image 
+                    src={p.foto_url || `https://placehold.co/40x40/111827/22c55e?text=${encodeURIComponent(p.nombre.charAt(0))}`} 
+                    alt={`Avatar de ${p.nombre}`} 
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full object-cover" 
+                    unoptimized={!p.foto_url}
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-white truncate text-sm">{p.nombre}</p>
                     <p className="text-xs text-slate-400">{p.posicion}</p>

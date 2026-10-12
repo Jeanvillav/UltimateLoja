@@ -4,6 +4,11 @@ import FC26Card from '@/components/FC26Card';
 
 export const dynamic = 'force-dynamic';
 
+export const metadata = {
+  title: 'Jugadores | Base de Datos y Cartas FC',
+  description: 'Conoce a todos los jugadores de las canchas sintéticas de Loja con sus estadísticas completas de ritmo, tiro, pase, regate, defensa y físico.',
+};
+
 export default async function JugadoresPage() {
   let players = [];
   

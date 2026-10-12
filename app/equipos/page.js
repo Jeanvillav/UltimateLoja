@@ -1,10 +1,13 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import fs from 'fs';
-import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata = {
+  title: 'Equipos de Loja | Plantillas y Escudos',
+  description: 'Explora todos los equipos de las canchas sintéticas de Loja, sus alineaciones oficiales y estadísticas colectivas.',
+};
 
 export default async function Equipos() {
   let teams = [];
@@ -42,7 +45,7 @@ export default async function Equipos() {
                  {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                   src={team.logo_url || `https://placehold.co/150x150/111827/22c55e?text=${team.name.charAt(0)}`} 
-                  alt={team.name} 
+                  alt={`Escudo oficial de ${team.name}`} 
                   className="w-32 h-32 rounded-full mb-6 object-cover shadow-xl group-hover:scale-110 transition-transform"
                 />
                 <h2 className="text-2xl font-bold font-outfit text-white group-hover:text-green-400 transition-colors">

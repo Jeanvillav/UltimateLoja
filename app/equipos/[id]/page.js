@@ -4,10 +4,28 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import FC26Card from '@/components/FC26Card';
 import TeamLineup from '@/components/TeamLineup';
-import fs from 'fs';
-import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    const { data: team } = await supabase.from('teams').select('name').eq('id', id).single();
+    if (team) {
+      return {
+        title: `${team.name} - Plantilla y Alineación`,
+        description: `Plantilla oficial, jugadores y alineación de ${team.name} en Ultimate Loja.`,
+      };
+    }
+  } catch {
+    // Fallback
+  }
+  return {
+    title: 'Equipo | Ultimate Loja',
+  };
+}
 
 export default async function EquipoPage({ params }) {
   const { id } = await params;

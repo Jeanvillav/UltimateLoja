@@ -36,6 +36,11 @@ export default function SugerirJugador() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
 
+  // Anti-spam & Validation states
+  const [honeypot, setHoneypot] = useState('');
+  const [formErrors, setFormErrors] = useState([]);
+  const [lastSubmitted, setLastSubmitted] = useState(0);
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -94,6 +99,16 @@ export default function SugerirJugador() {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setUploadError('Formato no permitido. Solo se admiten archivos JPG, PNG o WEBP.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('La imagen no debe superar los 5MB.');
+      return;
+    }
+
     setUploading(true);
     setUploadError('');
 
@@ -122,6 +137,40 @@ export default function SugerirJugador() {
 
   const handleGenerate = (e) => {
     e.preventDefault();
+    setFormErrors([]);
+
+    // Anti-spam Honeypot
+    if (honeypot) {
+      return; // Silently abort for spam bots
+    }
+
+    // Rate Limiting Cooldown (2s)
+    const now = Date.now();
+    if (now - lastSubmitted < 2000) {
+      return;
+    }
+    setLastSubmitted(now);
+
+    // Validation
+    const errors = [];
+    if (!formData.nombre || formData.nombre.trim().length < 2) {
+      errors.push('El nombre debe tener al menos 2 letras.');
+    }
+    if (formData.edad < 10 || formData.edad > 75) {
+      errors.push('La edad debe ser entre 10 y 75 años.');
+    }
+    const statKeys = ['overall_rating', 'pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'];
+    statKeys.forEach(k => {
+      const num = Number(formData[k]);
+      if (isNaN(num) || num < 1 || num > 99) {
+        errors.push(`El atributo ${k} debe estar entre 1 y 99.`);
+      }
+    });
+
+    if (errors.length > 0) {
+      setFormErrors(errors);
+      return;
+    }
     
     // Prepare data
     const dataToSave = { ...formData };
@@ -193,6 +242,27 @@ export default function SugerirJugador() {
           )}
 
           <form onSubmit={handleGenerate} className="space-y-4">
+            {/* Honeypot field (invisible to humans, trapped by bots) */}
+            <input 
+              type="text" 
+              name="website_url_hp" 
+              value={honeypot} 
+              onChange={(e) => setHoneypot(e.target.value)} 
+              tabIndex={-1} 
+              autoComplete="off" 
+              className="hidden" 
+              aria-hidden="true" 
+            />
+
+            {/* Error notifications */}
+            {formErrors.length > 0 && (
+              <div className="p-4 bg-red-950/60 border border-red-500/50 rounded-xl text-red-200 text-xs space-y-1">
+                <p className="font-bold text-red-400">Por favor corrige los siguientes campos:</p>
+                {formErrors.map((err, i) => (
+                  <p key={i}>• {err}</p>
+                ))}
+              </div>
+            )}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-slate-400 mb-1">Nombre</label>

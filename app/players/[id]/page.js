@@ -4,10 +4,42 @@ import RadarChart from '@/components/RadarChart';
 import FC26Card from '@/components/FC26Card';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
-import fs from 'fs';
-import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    const decodedId = decodeURIComponent(id);
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const isUuid = uuidRegex.test(decodedId);
+    let query = supabase.from('players').select('nombre, posicion, overall_rating, foto_url');
+    if (isUuid) {
+      query = query.eq('id', decodedId);
+    } else {
+      query = query.eq('nombre', decodedId);
+    }
+    const { data: player } = await query.single();
+    if (player) {
+      return {
+        title: `${player.nombre} (OVR ${player.overall_rating}) - Ficha Técnica`,
+        description: `Estadísticas y perfil futbolístico de ${player.nombre} (${player.posicion}) con media general de ${player.overall_rating} en Ultimate Loja.`,
+        openGraph: {
+          title: `${player.nombre} - ${player.overall_rating} OVR`,
+          description: `Carta FC de ${player.nombre} en Ultimate Loja.`,
+          images: player.foto_url ? [player.foto_url] : ['/fondo.jpeg'],
+        },
+      };
+    }
+  } catch {
+    // Fallback
+  }
+  return {
+    title: 'Ficha de Jugador | Ultimate Loja',
+  };
+}
 
 export default async function PlayerPage({ params }) {
   const { id } = await params;
