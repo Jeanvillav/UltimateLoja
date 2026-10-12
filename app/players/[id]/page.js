@@ -29,7 +29,7 @@ export async function generateMetadata({ params }) {
         openGraph: {
           title: `${player.nombre} - ${player.overall_rating} OVR`,
           description: `Carta FC de ${player.nombre} en Ultimate Loja.`,
-          images: player.foto_url ? [player.foto_url] : ['/fondo.jpeg'],
+          images: player.foto_url ? [player.foto_url] : ['/FondoUltimateLoja.jpg'],
         },
       };
     }

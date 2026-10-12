@@ -45,7 +45,7 @@ export const metadata = {
     description: 'Arma tu equipo ideal, analiza las estadísticas de tus amigos y convoca pichangas en las canchas sintéticas de Loja.',
     images: [
       {
-        url: '/fondo.jpeg',
+        url: '/FondoUltimateLoja.jpg',
         width: 1200,
         height: 630,
         alt: 'Ultimate Loja - Canchas Sintéticas y Estadísticas',
@@ -56,7 +56,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Ultimate Loja | Fútbol Sintética & Stats estilo FC',
     description: 'Arma tu equipo ideal y organiza partidos en las canchas de Loja al puro estilo Ultimate Team.',
-    images: ['/fondo.jpeg'],
+    images: ['/FondoUltimateLoja.jpg'],
   },
   icons: {
     icon: '/favicon.ico',

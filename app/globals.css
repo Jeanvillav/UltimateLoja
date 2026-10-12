@@ -18,10 +18,11 @@
 
 body {
   background-color: var(--background);
-  background-image: url('/fondo.jpeg');
+  background-image: url('/FondoUltimateLoja.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--foreground);
   font-family: var(--font-inter), sans-serif;
   min-height: 100vh;
