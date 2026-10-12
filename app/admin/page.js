@@ -6,6 +6,7 @@ import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
 import { calculateOVR } from '@/utils/ovrCalculator';
 import { calculateAge } from '@/utils/dateUtils';
+import { getPlayerPhoto } from '@/utils/playerUtils';
 import FC26Card from '@/components/FC26Card';
 
 export default function AdminPage() {
@@ -512,7 +513,7 @@ export default function AdminPage() {
               <div className="flex gap-4 mb-6 bg-black/40 p-4 rounded-xl border border-slate-800">
                 <div className="relative group cursor-pointer w-24 h-24 flex-shrink-0">
                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={previewPlayer.foto_url || `https://placehold.co/100x100/111827/22c55e?text=${previewPlayer.nombre.charAt(0)}`} alt="Preview" className="w-24 h-24 rounded-full object-cover border-2 border-slate-600 group-hover:border-green-500 transition shadow-lg" />
+                  <img src={getPlayerPhoto(previewPlayer.foto_url)} alt="Preview" className="w-24 h-24 rounded-full object-cover border-2 border-slate-600 group-hover:border-green-500 transition shadow-lg" />
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none rounded-full bg-black/60 backdrop-blur-sm">
                     <span className="text-[10px] font-bold text-white uppercase tracking-wider">Cambiar Foto</span>
                   </div>
@@ -668,7 +669,7 @@ export default function AdminPage() {
                 <tr key={player.id} className="border-t border-white/5 hover:bg-white/5 transition">
                   <td className="p-4 font-bold text-white flex items-center gap-3">
                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={player.foto_url || `https://placehold.co/30x30/111827/22c55e?text=${player.nombre.charAt(0)}`} alt="" className="w-10 h-10 rounded-full object-cover border border-slate-700" />
+                    <img src={getPlayerPhoto(player.foto_url)} alt="" className="w-10 h-10 rounded-full object-cover border border-slate-700" />
                     {player.nombre}
                   </td>
                   <td className="p-4 text-slate-300">

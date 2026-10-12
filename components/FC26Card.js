@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { calculateOVR } from '@/utils/ovrCalculator';
+import { getPlayerPhoto } from '@/utils/playerUtils';
 
 export default function FC26Card({ player, asPreview = false, livePhotoUrl = null }) {
   const shortPos = (player.posicion || 'DEL').split(' ')[0].substring(0, 3).toUpperCase();
@@ -24,8 +25,8 @@ export default function FC26Card({ player, asPreview = false, livePhotoUrl = nul
 
   const idOrName = player.id || player.nombre || 'Nuevo';
   
-  // Use livePhotoUrl if provided (for live preview in cropper), otherwise use db foto_url
-  const foto = livePhotoUrl || player.foto_url || `https://placehold.co/150x150/transparent/fff?text=${(player.nombre || 'N').charAt(0)}`;
+  // Use livePhotoUrl if provided (for live preview in cropper), otherwise use db foto_url with fallback to silhouette
+  const foto = livePhotoUrl || getPlayerPhoto(player.foto_url);
 
   const CardContent = (
     <div className={`fc-card relative w-64 h-96 bg-gradient-to-br ${bgGradient} ${textColor} p-4 flex flex-col justify-between overflow-hidden ${borderGlow} ${asPreview ? 'shadow-2xl scale-100' : ''}`}>

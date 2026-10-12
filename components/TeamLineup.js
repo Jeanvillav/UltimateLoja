@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { calculateOVR, getDynamicRating } from '@/utils/ovrCalculator';
+import { getPlayerPhoto } from '@/utils/playerUtils';
 
 export default function TeamLineup({ team }) {
   if (!team.lineup || !Array.isArray(team.lineup)) return null;
@@ -55,12 +56,12 @@ export default function TeamLineup({ team }) {
                   style={{ top: pos.top, left: pos.left }}
                 >
                   <Image 
-                    src={pos.player.foto_url || `https://placehold.co/100x100/111827/22c55e?text=${encodeURIComponent(pos.player.nombre.charAt(0))}`} 
+                    src={getPlayerPhoto(pos.player.foto_url)} 
                     alt={`Foto de ${pos.player.nombre} en posición ${pos.name}`} 
                     width={64}
                     height={64}
                     className="w-16 h-16 rounded-full object-cover drop-shadow-lg mb-1" 
-                    unoptimized={!pos.player.foto_url}
+                    unoptimized={true}
                   />
                   <div className={`bg-slate-900/80 px-2 py-0.5 rounded text-[10px] font-bold text-center w-full truncate border ${isPenalized ? 'border-red-500/50 text-red-400' : 'border-yellow-500/30 text-yellow-400'}`}>
                     {dynamicRating} {pos.player.nombre.split(' ')[0]}
@@ -92,12 +93,12 @@ export default function TeamLineup({ team }) {
                     {pos.name}
                   </span>
                   <Image 
-                    src={p.foto_url || `https://placehold.co/40x40/111827/22c55e?text=${encodeURIComponent(p.nombre.charAt(0))}`} 
+                    src={getPlayerPhoto(p.foto_url)} 
                     alt={`Avatar de ${p.nombre}`} 
                     width={40}
                     height={40}
                     className="w-10 h-10 rounded-full object-cover" 
-                    unoptimized={!p.foto_url}
+                    unoptimized={true}
                   />
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-white truncate text-sm">{p.nombre}</p>

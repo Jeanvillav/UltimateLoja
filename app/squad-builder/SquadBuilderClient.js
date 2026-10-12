@@ -6,6 +6,7 @@ import { useSquadStore, FORMATIONS } from '@/store/squadStore';
 import html2canvas from 'html2canvas-pro';
 import { Copy } from 'lucide-react';
 import { calculateOVR, getDynamicRating } from '@/utils/ovrCalculator';
+import { getPlayerPhoto } from '@/utils/playerUtils';
 import { createClient } from '@/utils/supabase/client';
 import { useSearchParams } from 'next/navigation';
 
@@ -36,7 +37,7 @@ function PitchDraggablePlayer({ player, posId, removePlayer, pitchPosName }) {
         ×
       </button>
        {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={player.foto_url || `https://placehold.co/100x100/111827/22c55e?text=${player.nombre.charAt(0)}`} alt={player.nombre} className="w-16 h-16 rounded-full object-cover drop-shadow-lg mb-1 pointer-events-none" />
+      <img src={getPlayerPhoto(player.foto_url)} alt={player.nombre} className="w-16 h-16 rounded-full object-cover drop-shadow-lg mb-1 pointer-events-none" />
       <div className={`bg-slate-900/80 px-2 py-0.5 rounded text-[10px] font-bold text-center w-full truncate border ${isPenalized ? 'border-red-500/50 text-red-400' : 'border-yellow-500/30 text-yellow-400'}`}>
         {dynamicRating} {player.nombre.split(' ')[0]}
       </div>
@@ -61,7 +62,7 @@ function SidebarDraggablePlayer({ player }) {
       className={`glass-panel p-2 rounded-lg cursor-grab mb-2 flex items-center gap-3 hover:bg-slate-700/50 transition-colors ${isDragging ? 'opacity-50' : 'opacity-100'}`}
     >
        {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={player.foto_url || `https://placehold.co/50x50/111827/22c55e?text=${player.nombre.charAt(0)}`} alt={player.nombre} className="w-10 h-10 rounded-full object-cover pointer-events-none" />
+      <img src={getPlayerPhoto(player.foto_url)} alt={player.nombre} className="w-10 h-10 rounded-full object-cover pointer-events-none" />
       <div>
         <div className="font-bold font-outfit">{player.nombre}</div>
         <div className="text-xs text-slate-400">OVR: {calculatedOvr} • {player.posicion.split(' ')[0]}</div>
@@ -390,7 +391,7 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
           {activePlayer ? (
             <div className="bg-slate-800 p-2 rounded-lg flex items-center gap-3 border border-green-500 shadow-2xl opacity-90 scale-105 pointer-events-none">
                {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={activePlayer.foto_url || `https://placehold.co/50x50/111827/22c55e?text=${activePlayer.nombre.charAt(0)}`} alt={activePlayer.nombre} className="w-10 h-10 rounded-full object-cover" />
+              <img src={getPlayerPhoto(activePlayer.foto_url)} alt={activePlayer.nombre} className="w-10 h-10 rounded-full object-cover" />
               <div className="font-bold text-white">{activePlayer.nombre}</div>
             </div>
           ) : null}

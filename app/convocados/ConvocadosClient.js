@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import FC26Card from '@/components/FC26Card';
 import { calculateOVR } from '@/utils/ovrCalculator';
+import { getPlayerPhoto } from '@/utils/playerUtils';
 import { Users, Shield, Copy, ArrowRight } from 'lucide-react';
 
 export default function ConvocadosClient({ initialPlayers }) {
@@ -389,7 +390,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                     <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[var(--color-highlight)] shadow-[0_0_10px_rgba(0,229,255,0.4)] flex-shrink-0">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img 
-                        src={p.foto_url || `https://placehold.co/150x150/transparent/fff?text=${(p.nombre || 'N').charAt(0)}`} 
+                        src={getPlayerPhoto(p.foto_url)} 
                         alt={p.nombre}
                         className="w-full h-full object-cover object-top"
                       />
