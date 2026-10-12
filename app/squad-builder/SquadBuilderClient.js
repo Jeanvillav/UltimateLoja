@@ -95,6 +95,9 @@ function DroppablePosition({ pos }) {
 export default function SquadBuilderClient({ teams, players, isAdmin }) {
   const searchParams = useSearchParams();
   const baseTeamId = searchParams.get('base');
+  const canchaParam = searchParams.get('cancha');
+  const horaParam = searchParams.get('hora');
+  const fechaParam = searchParams.get('fecha');
   
   const [activePlayer, setActivePlayer] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(baseTeamId || (teams[0]?.id || ''));
@@ -342,6 +345,15 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
               <div className="absolute top-[50%] left-0 w-full h-[2px] bg-white/30"></div>
               <div className="absolute top-[50%] left-[50%] w-[20%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30"></div>
               
+              {/* Match info banner on pitch */}
+              {canchaParam && (
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-black/85 backdrop-blur-md px-4 py-1.5 rounded-full border border-yellow-400/50 flex items-center gap-2.5 shadow-2xl text-xs font-black text-white pointer-events-none">
+                  <span className="text-yellow-400">🏟️ {canchaParam}</span>
+                  {horaParam && <span className="text-slate-300">• ⏰ {horaParam}</span>}
+                  {fechaParam && <span className="text-slate-400 text-[10px]">• 📅 {fechaParam}</span>}
+                </div>
+              )}
+
               {/* Render Drop Zones */}
               {pitch.map(pos => (
                 <DroppablePosition key={pos.id} pos={pos} />

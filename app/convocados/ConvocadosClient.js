@@ -6,6 +6,22 @@ import FC26Card from '@/components/FC26Card';
 import { calculateOVR } from '@/utils/ovrCalculator';
 
 export default function ConvocadosClient({ initialPlayers }) {
+  const CANCHAS_LOJA = [
+    'La Sede',
+    'Colegio De Ingenieros',
+    'Calva y Calva',
+    'The Forest'
+  ];
+
+  const [selectedCancha, setSelectedCancha] = useState('La Sede');
+  const [customCancha, setCustomCancha] = useState('');
+  const [matchDate, setMatchDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+  const [matchTime, setMatchTime] = useState('20:00');
+  const [canchaCost, setCanchaCost] = useState(20);
+
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   const [statuses, setStatuses] = useState({});
   const router = useRouter();
@@ -31,12 +47,34 @@ export default function ConvocadosClient({ initialPlayers }) {
   
   const isValidConvocatoria = selectedPlayers.length >= 5 && selectedPlayers.length <= 14;
 
+  const confirmedPlayers = selectedPlayers.filter(p => statuses[p.id] === 'confirmado');
+  const costPerPerson = confirmedPlayers.length > 0 && canchaCost > 0 
+    ? (canchaCost / confirmedPlayers.length).toFixed(2) 
+    : null;
+
+  const getFormattedDate = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      const [year, month, day] = dateStr.split('-');
+      const d = new Date(year, month - 1, day);
+      return d.toLocaleDateString('es-EC', { weekday: 'long', day: 'numeric', month: 'long' });
+    } catch {
+      return dateStr;
+    }
+  };
+
   const handleConfirm = () => {
     if (isValidConvocatoria) {
-      // Pasamos al Squad Builder solo a los que pueden jugar (Confirmados o Pendientes)
       const availablePlayers = selectedPlayers.filter(p => statuses[p.id] !== 'ausente');
       const ids = availablePlayers.map(p => p.id).join(',');
-      router.push(`/squad-builder?players=${ids}`);
+      const finalCancha = selectedCancha === 'Otro' ? (customCancha || 'Sintética') : selectedCancha;
+      const params = new URLSearchParams({
+        players: ids,
+        cancha: finalCancha,
+        hora: matchTime,
+        fecha: matchDate
+      });
+      router.push(`/squad-builder?${params.toString()}`);
     }
   };
 
@@ -46,30 +84,45 @@ export default function ConvocadosClient({ initialPlayers }) {
     const confirmados = selectedPlayers.filter(p => statuses[p.id] === 'confirmado');
     const pendientes = selectedPlayers.filter(p => (statuses[p.id] || 'pendiente') === 'pendiente');
     const ausentes = selectedPlayers.filter(p => statuses[p.id] === 'ausente');
+    const finalCancha = selectedCancha === 'Otro' ? (customCancha || 'Cancha por definir') : selectedCancha;
 
-    let text = `📋 *CONVOCATORIA DEL PARTIDO*\nTotal Convocados: ${selectedPlayers.length}/14\n\n`;
+    let text = `⚽ *PARTIDO DE SINTÉTICA - LOJA* ⚽\n`;
+    text += `🏟️ *Cancha:* ${finalCancha}\n`;
+    if (matchDate) text += `📅 *Fecha:* ${getFormattedDate(matchDate)}\n`;
+    if (matchTime) text += `⏰ *Hora:* ${matchTime}\n`;
+    if (canchaCost > 0) {
+      text += `💵 *Costo Cancha:* $${Number(canchaCost).toFixed(2)}`;
+      if (confirmados.length > 0) {
+        text += ` ($${costPerPerson} c/u entre los ${confirmados.length} confirmados)\n`;
+      } else {
+        text += `\n`;
+      }
+    }
+    text += `\n📋 *CONVOCATORIA* (${selectedPlayers.length}/14 Jugadores)\n\n`;
 
     if (confirmados.length > 0) {
       text += `🟢 *Confirmados (${confirmados.length}):*\n`;
-      confirmados.forEach(p => text += `- ${p.nombre}\n`);
+      confirmados.forEach(p => text += `✔ ${p.nombre}\n`);
       text += '\n';
     }
 
     if (pendientes.length > 0) {
       text += `🟡 *Por Confirmar (${pendientes.length}):*\n`;
-      pendientes.forEach(p => text += `- ${p.nombre}\n`);
+      pendientes.forEach(p => text += `⏳ ${p.nombre}\n`);
       text += '\n';
     }
 
     if (ausentes.length > 0) {
       text += `🔴 *No Pueden (${ausentes.length}):*\n`;
-      ausentes.forEach(p => text += `- ${p.nombre}\n`);
+      ausentes.forEach(p => text += `✖ ${p.nombre}\n`);
       text += '\n';
     }
 
+    text += `¡Pilas a confirmar los que faltan! 🔥⚽`;
+
     try {
       await navigator.clipboard.writeText(text);
-      alert("¡Lista copiada al portapapeles!");
+      alert("¡Lista copiada al portapapeles con los datos del partido!");
     } catch (err) {
       console.error(err);
       alert("Error al copiar la lista.");
@@ -77,40 +130,151 @@ export default function ConvocadosClient({ initialPlayers }) {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row-reverse gap-8 relative items-start">
-      {/* Resumen de convocados (Sidebar derecha) */}
-      <div className="w-full lg:w-1/3 lg:sticky lg:top-24 z-40">
-        <div className="glass-panel p-6 shadow-2xl border-t border-[var(--color-highlight)]/50 backdrop-blur-xl bg-black/40 rounded-2xl">
-          <div className="flex flex-col gap-4 mb-6">
-            <div>
-              <h2 className="text-2xl font-bold font-outfit text-white flex items-center gap-2">
-                Convocados 
-                <span className="text-[var(--color-highlight)]">({selectedPlayers.length}/14)</span>
-              </h2>
-              <p className="text-sm text-slate-400 mt-1">Mínimo 5, máximo 14 jugadores.</p>
+    <div className="flex flex-col gap-8">
+      {/* Selector de Cancha y Detalles del Partido */}
+      <div className="glass-panel p-6 rounded-2xl border-t border-[var(--color-highlight)]/40 shadow-2xl bg-black/40 backdrop-blur-xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
+          <div>
+            <span className="text-[11px] font-black uppercase tracking-widest text-[var(--color-highlight)] bg-[var(--color-highlight)]/10 px-3 py-1 rounded-full border border-[var(--color-highlight)]/30">
+              📍 Loja, Ecuador
+            </span>
+            <h2 className="text-2xl font-black font-outfit text-white mt-2">
+              Organizador del Partido
+            </h2>
+            <p className="text-sm text-slate-400">
+              Elige la sintética, horario y calcula la cuota automática para tus convocados.
+            </p>
+          </div>
+
+          {/* Resumen rápido de cuota */}
+          <div className="bg-slate-900/90 border border-slate-700/80 p-3 rounded-xl flex items-center gap-4 self-start md:self-auto shadow-inner">
+            <div className="text-right">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">Cuota por Confirmado</span>
+              <span className="text-lg font-black text-green-400 font-outfit">
+                {costPerPerson ? `$${costPerPerson}` : '--'}
+              </span>
             </div>
-            <div className="flex gap-2">
-              <button 
-                disabled={selectedPlayers.length === 0}
-                onClick={handleCopyList}
-                className="w-12 h-12 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 hover:text-white transition flex items-center justify-center border border-slate-700 flex-shrink-0 disabled:opacity-50"
-                title="Copiar lista de texto"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-              </button>
-              <button 
-                disabled={!isValidConvocatoria}
-                className={`flex-1 py-3 rounded-xl font-black uppercase tracking-wider transition-all ${
-                  isValidConvocatoria 
-                    ? 'bg-[var(--color-highlight)] text-black hover:bg-white hover:scale-105 shadow-[0_0_20px_rgba(0,229,255,0.6)] cursor-pointer' 
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                }`}
-                onClick={handleConfirm}
-              >
-                {selectedPlayers.length < 5 ? `Faltan ${5 - selectedPlayers.length}` : 'Confirmar'}
-              </button>
+            <div className="h-8 w-px bg-slate-700"></div>
+            <div>
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">Confirmados</span>
+              <span className="text-lg font-black text-white font-outfit">
+                {confirmedPlayers.length} / {selectedPlayers.length}
+              </span>
             </div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Canchas de Loja */}
+          <div className="md:col-span-2">
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              🏟️ Cancha en Loja
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {CANCHAS_LOJA.map(cancha => (
+                <button
+                  key={cancha}
+                  type="button"
+                  onClick={() => setSelectedCancha(cancha)}
+                  className={`py-3 px-3 rounded-xl font-bold text-xs transition-all text-center flex flex-col items-center justify-center gap-1 border ${
+                    selectedCancha === cancha
+                      ? 'bg-[var(--color-highlight)] text-black border-[var(--color-highlight)] shadow-[0_0_15px_rgba(0,229,255,0.4)] scale-[1.02]'
+                      : 'bg-slate-900/70 text-slate-300 border-slate-700/80 hover:border-slate-500 hover:bg-slate-800'
+                  }`}
+                >
+                  <span className="truncate w-full">{cancha}</span>
+                </button>
+              ))}
+            </div>
+
+            {selectedCancha === 'Otro' && (
+              <input
+                type="text"
+                placeholder="Nombre de la cancha o ubicación..."
+                value={customCancha}
+                onChange={(e) => setCustomCancha(e.target.value)}
+                className="mt-3 w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:border-[var(--color-highlight)]"
+              />
+            )}
+          </div>
+
+          {/* Fecha, Hora y Costo */}
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">
+                📅 Fecha
+              </label>
+              <input
+                type="date"
+                value={matchDate}
+                onChange={(e) => setMatchDate(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-white outline-none focus:border-[var(--color-highlight)] font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">
+                ⏰ Hora
+              </label>
+              <input
+                type="time"
+                value={matchTime}
+                onChange={(e) => setMatchTime(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-white outline-none focus:border-[var(--color-highlight)] font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">
+                💵 Costo ($)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={canchaCost}
+                onChange={(e) => setCanchaCost(Number(e.target.value) || 0)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-green-400 font-bold outline-none focus:border-green-500 text-center"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row-reverse gap-8 relative items-start">
+        {/* Resumen de convocados (Sidebar derecha) */}
+        <div className="w-full lg:w-1/3 lg:sticky lg:top-24 z-40">
+          <div className="glass-panel p-6 shadow-2xl border-t border-[var(--color-highlight)]/50 backdrop-blur-xl bg-black/40 rounded-2xl">
+            <div className="flex flex-col gap-4 mb-6">
+              <div>
+                <h2 className="text-2xl font-bold font-outfit text-white flex items-center gap-2">
+                  Convocados 
+                  <span className="text-[var(--color-highlight)]">({selectedPlayers.length}/14)</span>
+                </h2>
+                <p className="text-sm text-slate-400 mt-1">Mínimo 5, máximo 14 jugadores.</p>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  disabled={selectedPlayers.length === 0}
+                  onClick={handleCopyList}
+                  className="w-12 h-12 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 hover:text-white transition flex items-center justify-center border border-slate-700 flex-shrink-0 disabled:opacity-50"
+                  title="Copiar lista de texto con detalles del partido"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                </button>
+                <button 
+                  disabled={!isValidConvocatoria}
+                  className={`flex-1 py-3 rounded-xl font-black uppercase tracking-wider transition-all ${
+                    isValidConvocatoria 
+                      ? 'bg-[var(--color-highlight)] text-black hover:bg-white hover:scale-105 shadow-[0_0_20px_rgba(0,229,255,0.6)] cursor-pointer' 
+                      : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                  }`}
+                  onClick={handleConfirm}
+                >
+                  {selectedPlayers.length < 5 ? `Faltan ${5 - selectedPlayers.length}` : 'Armar Táctica'}
+                </button>
+              </div>
+            </div>
           
           {selectedPlayers.length > 0 ? (
             <div className="flex flex-col gap-3 max-h-[50vh] lg:max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
@@ -243,5 +407,6 @@ export default function ConvocadosClient({ initialPlayers }) {
         )}
       </div>
     </div>
+  </div>
   );
 }

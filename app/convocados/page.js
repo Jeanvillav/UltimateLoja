@@ -25,11 +25,11 @@ export default async function ConvocadosPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 relative min-h-screen">
-      <h1 className="text-4xl md:text-5xl font-black font-outfit text-center mb-4 text-white drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]">
-        Convocatoria del Partido
+      <h1 className="text-4xl md:text-5xl font-black font-outfit text-center mb-3 text-white drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]">
+        Organizador de Sintética en Loja
       </h1>
-      <p className="text-center text-slate-400 mb-8 max-w-2xl mx-auto text-lg">
-        Selecciona entre 5 y 14 jugadores para armar la lista de convocados del partido de hoy.
+      <p className="text-center text-slate-400 mb-8 max-w-2xl mx-auto text-base">
+        Elige la cancha, fecha, hora y convoca a tus amigos (5 a 14 jugadores) con cálculo de cuotas y exportación a WhatsApp.
       </p>
 
       <ConvocadosClient initialPlayers={players} />
