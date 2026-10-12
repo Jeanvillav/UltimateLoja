@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
@@ -37,6 +37,16 @@ export default function AdminPage() {
   
   const supabase = createClient();
 
+  const fetchPlayers = useCallback(async () => {
+    const { data } = await supabase.from('players').select('*, player_teams(team_id)').order('nombre');
+    if (data) setPlayers(data);
+  }, [supabase]);
+
+  const fetchTeams = useCallback(async () => {
+    const { data } = await supabase.from('teams').select('*').order('name');
+    if (data) setTeams(data);
+  }, [supabase]);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -55,17 +65,7 @@ export default function AdminPage() {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase.auth]);
-
-  const fetchPlayers = async () => {
-    const { data } = await supabase.from('players').select('*, player_teams(team_id)').order('nombre');
-    if (data) setPlayers(data);
-  };
-
-  const fetchTeams = async () => {
-    const { data } = await supabase.from('teams').select('*').order('name');
-    if (data) setTeams(data);
-  };
+  }, [supabase.auth, fetchPlayers, fetchTeams]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -469,7 +469,7 @@ export default function AdminPage() {
           <h2 className="text-2xl font-bold font-outfit text-green-400 mb-4">Editor Intuitivo</h2>
           {!previewPlayer ? (
             <div className="flex-1 min-h-[250px] flex items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded-lg bg-black/20">
-              Carga un JSON o dale "Editar" a un jugador para empezar
+              Carga un JSON o dale &quot;Editar&quot; a un jugador para empezar
             </div>
           ) : (
             <div className="bg-slate-900 p-4 rounded-lg border border-green-500/30 flex-1 flex flex-col overflow-y-auto max-h-[600px] custom-scrollbar pr-2 relative">

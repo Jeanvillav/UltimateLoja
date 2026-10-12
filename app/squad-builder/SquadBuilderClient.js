@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, Suspense } from 'react';
+import React, { useState, useRef, useEffect, useSyncExternalStore, Suspense } from 'react';
 import { DndContext, useDraggable, useDroppable, DragOverlay, useSensor, useSensors, MouseSensor, TouchSensor } from '@dnd-kit/core';
 import { useSquadStore, FORMATIONS } from '@/store/squadStore';
 import html2canvas from 'html2canvas';
@@ -116,11 +116,11 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
       }
     }
   }, [baseTeamId, teams, loadLineup]);
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const isClient = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const handleDragEnd = (event) => {
     const { over, active } = event;
