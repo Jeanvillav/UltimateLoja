@@ -63,7 +63,7 @@ export const metadata = {
     apple: '/favicon.ico',
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    google: 'tICJmiSz3oiI2g7CWpLUjoO7HEHu1RzQ7ffIx6c2M2c',
   },
 };
 
