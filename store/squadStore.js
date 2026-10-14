@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 export const FORMATIONS = {
   'Fútbol 6 (2-2-1)': [
-    { id: 'pos_1', name: 'DEL', top: '20%', left: '50%' },
+    { id: 'pos_1', name: 'DEL', top: '18%', left: '50%' },
     { id: 'pos_2', name: 'MED', top: '45%', left: '25%' },
     { id: 'pos_3', name: 'MED', top: '45%', left: '75%' },
     { id: 'pos_4', name: 'DEF', top: '75%', left: '25%' },
@@ -11,7 +11,7 @@ export const FORMATIONS = {
     { id: 'pos_6', name: 'POR', top: '90%', left: '50%' },
   ],
   'Fútbol 6 (3-1-1)': [
-    { id: 'pos_1', name: 'DEL', top: '20%', left: '50%' },
+    { id: 'pos_1', name: 'DEL', top: '18%', left: '50%' },
     { id: 'pos_2', name: 'MED', top: '45%', left: '50%' },
     { id: 'pos_3', name: 'DEF', top: '75%', left: '20%' },
     { id: 'pos_4', name: 'DEF', top: '70%', left: '50%' },
@@ -19,7 +19,7 @@ export const FORMATIONS = {
     { id: 'pos_6', name: 'POR', top: '90%', left: '50%' },
   ],
   'Fútbol 6 (1-3-1)': [
-    { id: 'pos_1', name: 'DEL', top: '20%', left: '50%' },
+    { id: 'pos_1', name: 'DEL', top: '18%', left: '50%' },
     { id: 'pos_2', name: 'MED', top: '45%', left: '20%' },
     { id: 'pos_3', name: 'MED', top: '45%', left: '50%' },
     { id: 'pos_4', name: 'MED', top: '45%', left: '80%' },
@@ -27,20 +27,44 @@ export const FORMATIONS = {
     { id: 'pos_6', name: 'POR', top: '90%', left: '50%' },
   ],
   'Fútbol 6 (2-1-2)': [
-    { id: 'pos_1', name: 'DEL', top: '20%', left: '30%' },
-    { id: 'pos_2', name: 'DEL', top: '20%', left: '70%' },
+    { id: 'pos_1', name: 'DEL', top: '18%', left: '30%' },
+    { id: 'pos_2', name: 'DEL', top: '18%', left: '70%' },
     { id: 'pos_3', name: 'MED', top: '45%', left: '50%' },
     { id: 'pos_4', name: 'DEF', top: '75%', left: '25%' },
     { id: 'pos_5', name: 'DEF', top: '75%', left: '75%' },
     { id: 'pos_6', name: 'POR', top: '90%', left: '50%' },
   ],
-  'Fútbol 6 (1-2-2)': [
-    { id: 'pos_1', name: 'DEL', top: '20%', left: '30%' },
-    { id: 'pos_2', name: 'DEL', top: '20%', left: '70%' },
-    { id: 'pos_3', name: 'MED', top: '45%', left: '30%' },
-    { id: 'pos_4', name: 'MED', top: '45%', left: '70%' },
-    { id: 'pos_5', name: 'DEF', top: '75%', left: '50%' },
-    { id: 'pos_6', name: 'POR', top: '90%', left: '50%' },
+  'Fútbol 5 (1-2-1)': [
+    { id: 'pos_1', name: 'DEL', top: '18%', left: '50%' },
+    { id: 'pos_2', name: 'MED', top: '45%', left: '25%' },
+    { id: 'pos_3', name: 'MED', top: '45%', left: '75%' },
+    { id: 'pos_4', name: 'DEF', top: '75%', left: '50%' },
+    { id: 'pos_5', name: 'POR', top: '90%', left: '50%' },
+  ],
+  'Fútbol 5 (2-1-1)': [
+    { id: 'pos_1', name: 'DEL', top: '18%', left: '50%' },
+    { id: 'pos_2', name: 'MED', top: '45%', left: '50%' },
+    { id: 'pos_3', name: 'DEF', top: '75%', left: '25%' },
+    { id: 'pos_4', name: 'DEF', top: '75%', left: '75%' },
+    { id: 'pos_5', name: 'POR', top: '90%', left: '50%' },
+  ],
+  'Fútbol 7 (2-3-1)': [
+    { id: 'pos_1', name: 'DEL', top: '18%', left: '50%' },
+    { id: 'pos_2', name: 'MED', top: '45%', left: '20%' },
+    { id: 'pos_3', name: 'MED', top: '45%', left: '50%' },
+    { id: 'pos_4', name: 'MED', top: '45%', left: '80%' },
+    { id: 'pos_5', name: 'DEF', top: '75%', left: '30%' },
+    { id: 'pos_6', name: 'DEF', top: '75%', left: '70%' },
+    { id: 'pos_7', name: 'POR', top: '90%', left: '50%' },
+  ],
+  'Fútbol 7 (3-2-1)': [
+    { id: 'pos_1', name: 'DEL', top: '18%', left: '50%' },
+    { id: 'pos_2', name: 'MED', top: '45%', left: '30%' },
+    { id: 'pos_3', name: 'MED', top: '45%', left: '70%' },
+    { id: 'pos_4', name: 'DEF', top: '75%', left: '20%' },
+    { id: 'pos_5', name: 'DEF', top: '70%', left: '50%' },
+    { id: 'pos_6', name: 'DEF', top: '75%', left: '80%' },
+    { id: 'pos_7', name: 'POR', top: '90%', left: '50%' },
   ],
 };
 
