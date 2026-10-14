@@ -19,32 +19,35 @@ import {
   MapPin, 
   Check, 
   Search, 
-  Sparkles,
-  ExternalLink
+  ExternalLink,
+  Sparkles
 } from 'lucide-react';
 
 export default function ConvocadosClient({ initialPlayers }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Paso 1: Cancha seleccionada
+  // ==========================================
+  // BLOQUE 1: RESERVA DE CANCHA (Cancha, Fecha, Hora, WhatsApp)
+  // ==========================================
   const [selectedCanchaId, setSelectedCanchaId] = useState('la_sede');
   const [customCanchaName, setCustomCanchaName] = useState('');
   const [customCanchaPhone, setCustomCanchaPhone] = useState('');
   const [copiedPhone, setCopiedPhone] = useState(false);
-
-  // Paso 2: Detalles del partido y modo
-  const initialMode = searchParams.get('modo') === 'single_team' ? 'single_team' : 'two_teams';
-  const [matchMode, setMatchMode] = useState(initialMode); // 'two_teams' | 'single_team'
 
   const [matchDate, setMatchDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split('T')[0];
   });
   const [matchTime, setMatchTime] = useState('20:00');
+
+  // ==========================================
+  // BLOQUE 2: CONVOCATORIA (Modalidad, Costo, Jugadores)
+  // ==========================================
+  const initialMode = searchParams.get('modo') === 'single_team' ? 'single_team' : 'two_teams';
+  const [matchMode, setMatchMode] = useState(initialMode); // 'two_teams' | 'single_team'
   const [canchaCost, setCanchaCost] = useState(20);
 
-  // Paso 3: Jugadores convocados y filtros
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   const [statuses, setStatuses] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,7 +58,7 @@ export default function ConvocadosClient({ initialPlayers }) {
   const minPlayers = isTwoTeams ? 10 : 5;
   const maxPlayers = isTwoTeams ? 14 : 7;
 
-  // Objeto de la cancha actual
+  // Cancha activa
   const currentCancha = useMemo(() => {
     return CANCHAS_LOJA.find(c => c.id === selectedCanchaId) || CANCHAS_LOJA[0];
   }, [selectedCanchaId]);
@@ -71,6 +74,32 @@ export default function ConvocadosClient({ initialPlayers }) {
   const finalCanchaPhoneRaw = selectedCanchaId === 'otro'
     ? (customCanchaPhone ? customCanchaPhone.replace(/\D/g, '') : null)
     : currentCancha.telefonoRaw;
+
+  // Formateador de fecha amigable en español
+  const getFormattedDate = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      const [year, month, day] = dateStr.split('-');
+      const d = new Date(Number(year), Number(month) - 1, Number(day));
+      return d.toLocaleDateString('es-EC', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // Enlace directo de WhatsApp a la cancha con el mensaje estructurado
+  const whatsappReserveUrl = useMemo(() => {
+    if (!finalCanchaPhoneRaw) return null;
+    const msg = `Hola ${finalCanchaName}, buenas. Quisiera consultar disponibilidad para reservar la cancha sintética el día ${getFormattedDate(matchDate)} a las ${matchTime}. ¿Tienen horario libre?`;
+    return `https://wa.me/${finalCanchaPhoneRaw}?text=${encodeURIComponent(msg)}`;
+  }, [finalCanchaName, finalCanchaPhoneRaw, matchDate, matchTime]);
+
+  const handleCopyPhone = () => {
+    if (!finalCanchaPhone) return;
+    navigator.clipboard.writeText(finalCanchaPhone);
+    setCopiedPhone(true);
+    setTimeout(() => setCopiedPhone(false), 2000);
+  };
 
   // Manejador de cambio de modo (2 equipos vs 1 equipo)
   const handleModeChange = (newMode) => {
@@ -120,33 +149,6 @@ export default function ConvocadosClient({ initialPlayers }) {
     ? (canchaCost / confirmedPlayers.length).toFixed(2) 
     : null;
 
-  // Formato amigable de fecha
-  const getFormattedDate = (dateStr) => {
-    if (!dateStr) return '';
-    try {
-      const [year, month, day] = dateStr.split('-');
-      const d = new Date(Number(year), Number(month) - 1, Number(day));
-      return d.toLocaleDateString('es-EC', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    } catch {
-      return dateStr;
-    }
-  };
-
-  // Copiar teléfono de la cancha
-  const handleCopyPhone = () => {
-    if (!finalCanchaPhone) return;
-    navigator.clipboard.writeText(finalCanchaPhone);
-    setCopiedPhone(true);
-    setTimeout(() => setCopiedPhone(false), 2000);
-  };
-
-  // Enlace directo de WhatsApp para reservar la cancha
-  const whatsappReserveUrl = useMemo(() => {
-    if (!finalCanchaPhoneRaw) return null;
-    const msg = `Hola ${finalCanchaName}, buenas. Quisiera consultar disponibilidad para reservar la cancha el día ${getFormattedDate(matchDate)} a las ${matchTime}. ¿Tienen horario disponible?`;
-    return `https://wa.me/${finalCanchaPhoneRaw}?text=${encodeURIComponent(msg)}`;
-  }, [finalCanchaName, finalCanchaPhoneRaw, matchDate, matchTime]);
-
   // Avanzar al Squad Builder
   const handleConfirm = () => {
     if (isValidConvocatoria) {
@@ -163,7 +165,7 @@ export default function ConvocadosClient({ initialPlayers }) {
     }
   };
 
-  // Copiar lista completa formateada para WhatsApp
+  // Copiar lista completa formateada para el grupo de WhatsApp de amigos
   const handleCopyList = async () => {
     if (selectedPlayers.length === 0) return;
     
@@ -219,7 +221,7 @@ export default function ConvocadosClient({ initialPlayers }) {
     }
   };
 
-  // Filtrado de jugadores
+  // Filtrado de jugadores para la cuadrícula
   const filteredPlayers = useMemo(() => {
     return initialPlayers.filter(p => {
       const matchesSearch = !searchQuery || p.nombre.toLowerCase().includes(searchQuery.toLowerCase());
@@ -232,47 +234,47 @@ export default function ConvocadosClient({ initialPlayers }) {
   return (
     <div className="flex flex-col gap-10">
 
-      {/* Indicador de Pasos del Workflow */}
+      {/* Navegación Rápida entre las 2 Fases del Workflow */}
       <div className="glass-panel p-3 sm:p-4 rounded-2xl border border-white/10 bg-black/50 backdrop-blur-xl">
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="flex items-center justify-center gap-2 p-2 rounded-xl bg-gradient-to-r from-cyan-500/20 to-blue-500/10 border border-cyan-400/40 text-cyan-300">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-center">
+          <div className="flex items-center justify-center gap-2.5 p-3 rounded-xl bg-gradient-to-r from-cyan-500/25 to-blue-500/10 border border-cyan-400/40 text-cyan-300 shadow-sm">
             <span className="w-6 h-6 rounded-full bg-cyan-400 text-black text-xs font-black flex items-center justify-center">1</span>
-            <span className="text-xs sm:text-sm font-bold truncate">Elegir Cancha</span>
+            <span className="text-xs sm:text-sm font-black uppercase tracking-wide">Paso 1: Reservar Cancha (Lugar, Fecha, Hora & WhatsApp)</span>
           </div>
-          <div className="flex items-center justify-center gap-2 p-2 rounded-xl bg-gradient-to-r from-green-500/20 to-emerald-500/10 border border-green-400/40 text-green-300">
+          <div className="flex items-center justify-center gap-2.5 p-3 rounded-xl bg-gradient-to-r from-green-500/25 to-emerald-500/10 border border-green-400/40 text-green-300 shadow-sm">
             <span className="w-6 h-6 rounded-full bg-green-400 text-black text-xs font-black flex items-center justify-center">2</span>
-            <span className="text-xs sm:text-sm font-bold truncate">Horario & Costo</span>
-          </div>
-          <div className="flex items-center justify-center gap-2 p-2 rounded-xl bg-gradient-to-r from-yellow-500/20 to-amber-500/10 border border-yellow-400/40 text-yellow-300">
-            <span className="w-6 h-6 rounded-full bg-yellow-400 text-black text-xs font-black flex items-center justify-center">3</span>
-            <span className="text-xs sm:text-sm font-bold truncate">Convocar & Cuotas</span>
+            <span className="text-xs sm:text-sm font-black uppercase tracking-wide">Paso 2: Convocatoria (Modalidad, Cuotas & Jugadores)</span>
           </div>
         </div>
       </div>
 
       {/* ========================================================
-          PASO 1: SELECCIONA LA CANCHA Y CONTACTO DIRECTO
+          BLOQUE 1: RESERVA DE LA CANCHA (Cancha + Fecha + Hora + WhatsApp directo)
       ======================================================== */}
-      <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/10 bg-black/60 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+      <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-cyan-500/30 bg-black/60 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+        {/* Encabezado del Bloque de Reserva */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="w-7 h-7 rounded-full bg-cyan-400 text-black font-black text-sm flex items-center justify-center shadow-lg">1</span>
+            <div className="flex items-center gap-2.5">
+              <span className="w-8 h-8 rounded-full bg-cyan-400 text-black font-black text-sm flex items-center justify-center shadow-lg shadow-cyan-400/30">1</span>
               <h2 className="text-2xl sm:text-3xl font-black font-outfit text-white">
-                Selecciona la Cancha Sintética
+                Reserva de Cancha Sintética
               </h2>
             </div>
-            <p className="text-sm text-slate-300 mt-1 pl-9">
-              Elige el complejo sintético en Loja y contacta directamente para consultar disponibilidad o reservar.
+            <p className="text-sm text-slate-300 mt-1 pl-10">
+              Elige el complejo en Loja, ajusta la fecha y la hora, y escríbeles directamente por WhatsApp para apartar tu turno.
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300 self-start md:self-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-400/10 border border-cyan-400/30 text-xs text-cyan-300 self-start md:self-auto font-bold">
             <MapPin size={14} className="text-cyan-400" />
             <span>Loja, Ecuador</span>
           </div>
         </div>
 
-        {/* Cuadrícula de Canchas Disponibles */}
+        {/* 1.1 Cuadrícula para Elegir la Cancha */}
+        <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
+          1. Selecciona la Cancha:
+        </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
           {CANCHAS_LOJA.map((cancha) => {
             const isSelectedCancha = selectedCanchaId === cancha.id;
@@ -283,7 +285,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                 onClick={() => setSelectedCanchaId(cancha.id)}
                 className={`p-3.5 rounded-2xl border text-left transition-all relative flex flex-col justify-between cursor-pointer group ${
                   isSelectedCancha
-                    ? `bg-gradient-to-b ${cancha.colorBg} ${cancha.colorBorder} shadow-[0_0_20px_rgba(0,229,255,0.3)] ring-2 ring-cyan-400 scale-[1.02]`
+                    ? `bg-gradient-to-b ${cancha.colorBg} ${cancha.colorBorder} shadow-[0_0_20px_rgba(0,229,255,0.4)] ring-2 ring-cyan-400 scale-[1.02]`
                     : 'bg-slate-900/60 border-slate-800 hover:border-slate-600 hover:bg-slate-800/80 text-slate-300'
                 }`}
               >
@@ -316,10 +318,80 @@ export default function ConvocadosClient({ initialPlayers }) {
           })}
         </div>
 
-        {/* Tarjeta de Cancha Activa con Botones de Contacto Directo */}
-        <div className="bg-gradient-to-r from-slate-900/90 via-slate-800/70 to-slate-900/90 border border-cyan-500/30 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        {/* 1.2 Ajustar Fecha y Hora justo debajo de la Cancha */}
+        <div className="bg-slate-900/70 border border-slate-700/80 rounded-2xl p-4 sm:p-5 mb-6">
+          <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
+            2. Horario para la Reserva:
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
+                <Calendar size={14} className="text-cyan-400" />
+                <span>Fecha del Partido</span>
+              </label>
+              <input
+                type="date"
+                value={matchDate}
+                onChange={(e) => setMatchDate(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none focus:border-cyan-400 font-bold"
+              />
+              <span className="text-[11px] text-slate-400 mt-1 block">
+                {getFormattedDate(matchDate)}
+              </span>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
+                <Clock size={14} className="text-cyan-400" />
+                <span>Hora del Partido</span>
+              </label>
+              <input
+                type="time"
+                value={matchTime}
+                onChange={(e) => setMatchTime(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none focus:border-cyan-400 font-bold"
+              />
+              <span className="text-[11px] text-slate-400 mt-1 block">
+                Turno de cancha: {matchTime} hs
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Campos opcionales si eligió "Otra Cancha" */}
+        {selectedCanchaId === 'otro' && (
+          <div className="mb-6 p-4 rounded-2xl bg-purple-950/30 border border-purple-500/40 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                Nombre de la Cancha
+              </label>
+              <input
+                type="text"
+                placeholder="Ej. Sintética El Valle, La Banda..."
+                value={customCanchaName}
+                onChange={(e) => setCustomCanchaName(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:border-purple-400"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                Número de WhatsApp / Teléfono
+              </label>
+              <input
+                type="tel"
+                placeholder="Ej. 099 123 4567 o +593..."
+                value={customCanchaPhone}
+                onChange={(e) => setCustomCanchaPhone(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:border-purple-400"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* 1.3 Tarjeta de Acción Inmediata: Escribir al WhatsApp con el mensaje ya armado */}
+        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-green-500/40 rounded-2xl p-5 sm:p-6 shadow-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex items-start sm:items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-cyan-400/20 border border-cyan-400/40 text-cyan-300 flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-500/10 text-2xl">
+            <div className="w-14 h-14 rounded-2xl bg-green-500/20 border border-green-400/40 text-green-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-green-500/10 text-2xl">
               🏟️
             </div>
             <div>
@@ -333,291 +405,217 @@ export default function ConvocadosClient({ initialPlayers }) {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-300 mt-1 flex items-center gap-2">
-                <MapPin size={12} className="text-cyan-400" />
-                <span>{currentCancha.direccion}</span>
+              <p className="text-xs text-slate-300 mt-1 flex items-center gap-2 flex-wrap">
+                <span className="text-cyan-400 font-bold">📅 {getFormattedDate(matchDate)}</span>
+                <span className="text-slate-600">•</span>
+                <span className="text-cyan-400 font-bold">⏰ {matchTime}</span>
                 {finalCanchaPhone && (
                   <>
                     <span className="text-slate-600">•</span>
-                    <span className="text-yellow-400 font-bold">Tel: {finalCanchaPhone}</span>
+                    <span className="text-yellow-400 font-bold">📞 {finalCanchaPhone}</span>
                   </>
                 )}
               </p>
             </div>
           </div>
 
-          {/* Acciones de Contacto: WhatsApp / Llamar / Copiar */}
-          {finalCanchaPhone ? (
-            <div className="flex flex-wrap items-center gap-3">
-              {whatsappReserveUrl && (
-                <a
-                  href={whatsappReserveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-emerald-400 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(34,197,94,0.4)] hover:scale-105 active:scale-95 cursor-pointer"
-                >
-                  <MessageCircle size={16} />
-                  <span>Consultar por WhatsApp</span>
-                  <ExternalLink size={12} className="opacity-70" />
-                </a>
-              )}
+          {/* Botones de Acción de Reserva */}
+          <div className="flex flex-wrap items-center gap-3">
+            {finalCanchaPhone ? (
+              <>
+                {whatsappReserveUrl && (
+                  <a
+                    href={whatsappReserveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-3 rounded-xl bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-emerald-400 text-white font-black text-xs uppercase tracking-wider flex items-center gap-2.5 transition-all shadow-[0_0_20px_rgba(34,197,94,0.5)] hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    <MessageCircle size={18} />
+                    <span>Escribir al WhatsApp de {finalCanchaName}</span>
+                    <ExternalLink size={14} className="opacity-80" />
+                  </a>
+                )}
 
-              <a
-                href={`tel:${finalCanchaPhoneRaw || finalCanchaPhone}`}
-                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 border border-slate-600 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                <a
+                  href={`tel:${finalCanchaPhoneRaw || finalCanchaPhone}`}
+                  className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 border border-slate-600 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                >
+                  <Phone size={15} className="text-cyan-400" />
+                  <span>Llamar</span>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={handleCopyPhone}
+                  className="px-3 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                  title="Copiar teléfono de la cancha"
+                >
+                  {copiedPhone ? (
+                    <>
+                      <Check size={14} className="text-green-400" />
+                      <span className="text-green-400">¡Copiado!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={14} />
+                      <span>Copiar</span>
+                    </>
+                  )}
+                </button>
+              </>
+            ) : (
+              <span className="text-xs text-slate-400 italic bg-black/40 px-3 py-2 rounded-xl border border-white/5">
+                Puedes contactar directamente al complejo para apartar este turno.
+              </span>
+            )}
+          </div>
+        </div>
+      </section>
+
+
+      {/* ========================================================
+          BLOQUE 2: MODALIDAD Y ORGANIZACIÓN DE LA CONVOCATORIA
+      ======================================================== */}
+      <section className="flex flex-col gap-8">
+        
+        {/* Encabezado del Bloque 2 */}
+        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-green-500/30 bg-black/60 backdrop-blur-2xl shadow-2xl">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-8 h-8 rounded-full bg-green-400 text-black font-black text-sm flex items-center justify-center shadow-lg shadow-green-400/30">2</span>
+                <h2 className="text-2xl sm:text-3xl font-black font-outfit text-white">
+                  Modalidad y Convocatoria de Jugadores
+                </h2>
+              </div>
+              <p className="text-sm text-slate-300 mt-1 pl-10">
+                Define el formato del partido (2 equipos vs 1 equipo), el costo de la cancha para prorratear y selecciona a tus amigos.
+              </p>
+            </div>
+            
+            {/* Widget de Cuota Rápida */}
+            <div className="bg-slate-900 border border-slate-700 p-3.5 rounded-2xl flex items-center gap-4 shadow-inner self-start md:self-auto">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Cuota por Confirmado</span>
+                <span className="text-xl font-black text-green-400 font-outfit">
+                  {costPerPerson ? `$${costPerPerson}` : '--'}
+                </span>
+              </div>
+              <div className="h-8 w-px bg-slate-700"></div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Confirmados</span>
+                <span className="text-sm font-black text-white font-outfit">
+                  {confirmedPlayers.length} / {selectedPlayers.length}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Selector de Modalidad: 2 Equipos vs 1 Equipo */}
+          <div className="mb-8">
+            <label className="block text-xs font-black text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <span>🏆 Formato del Partido</span>
+              <span className="text-[10px] text-slate-400 font-normal normal-case">(Selecciona cómo deseas armar la pichanga)</span>
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => handleModeChange('two_teams')}
+                className={`p-5 rounded-2xl border text-left transition-all flex items-start gap-4 cursor-pointer ${
+                  isTwoTeams
+                    ? 'bg-gradient-to-br from-blue-950/80 via-slate-900 to-black border-cyan-400 shadow-[0_0_25px_rgba(0,229,255,0.3)] ring-2 ring-cyan-400/80 scale-[1.01]'
+                    : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800/80 hover:border-slate-700 text-slate-400'
+                }`}
               >
-                <Phone size={15} className="text-cyan-400" />
-                <span>Llamar</span>
-              </a>
+                <div className={`p-3 rounded-2xl flex-shrink-0 ${isTwoTeams ? 'bg-cyan-400 text-black shadow-lg shadow-cyan-400/30' : 'bg-slate-800 text-slate-400'}`}>
+                  <Users size={24} />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-outfit font-black text-lg uppercase text-white">Armar 2 Equipos</span>
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-cyan-400/20 text-cyan-300 border border-cyan-400/40">
+                      10 - 14 Jugadores
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+                    Partido completo de sintética. Convoca entre 10 y 14 jugadores para dividir dos escuadras rivales (5v5 hasta 7v7).
+                  </p>
+                </div>
+              </button>
 
               <button
                 type="button"
-                onClick={handleCopyPhone}
-                className="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 flex items-center gap-1.5 text-xs font-bold cursor-pointer"
-                title="Copiar número de teléfono"
+                onClick={() => handleModeChange('single_team')}
+                className={`p-5 rounded-2xl border text-left transition-all flex items-start gap-4 cursor-pointer ${
+                  !isTwoTeams
+                    ? 'bg-gradient-to-br from-green-950/80 via-slate-900 to-black border-green-400 shadow-[0_0_25px_rgba(34,197,94,0.3)] ring-2 ring-green-400/80 scale-[1.01]'
+                    : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800/80 hover:border-slate-700 text-slate-400'
+                }`}
               >
-                {copiedPhone ? (
-                  <>
-                    <Check size={14} className="text-green-400" />
-                    <span className="text-green-400">¡Copiado!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={14} />
-                    <span>Copiar Número</span>
-                  </>
-                )}
+                <div className={`p-3 rounded-2xl flex-shrink-0 ${!isTwoTeams ? 'bg-[var(--color-highlight)] text-black shadow-lg shadow-green-400/30' : 'bg-slate-800 text-slate-400'}`}>
+                  <Shield size={24} />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-outfit font-black text-lg uppercase text-white">Un Solo Equipo</span>
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-green-400/20 text-green-300 border border-green-400/40">
+                      5 - 7 Jugadores
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+                    Convoca a tu propia escuadra o alineación titular (mínimo 5, máximo 7 jugadores) para un torneo o desafío.
+                  </p>
+                </div>
               </button>
             </div>
-          ) : (
-            <div className="text-xs text-slate-400 italic bg-black/30 px-3 py-2 rounded-xl border border-white/5">
-              Si conoces el teléfono de esta cancha, puedes anotarlo en la convocatoria.
-            </div>
-          )}
-        </div>
+          </div>
 
-        {/* Inputs adicionales si seleccionó "Otra Cancha" */}
-        {selectedCanchaId === 'otro' && (
-          <div className="mt-4 p-4 rounded-2xl bg-slate-900/90 border border-purple-500/40 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Costo de Cancha y Barra de Progreso */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center pt-2">
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
-                Nombre de la Cancha Personalizada
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <DollarSign size={14} className="text-green-400" />
+                <span>Costo Total Cancha ($)</span>
               </label>
               <input
-                type="text"
-                placeholder="Ej. Sintética El Valle, La Banda..."
-                value={customCanchaName}
-                onChange={(e) => setCustomCanchaName(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:border-purple-400"
+                type="number"
+                min="0"
+                step="1"
+                value={canchaCost}
+                onChange={(e) => setCanchaCost(Number(e.target.value) || 0)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-green-400 font-bold outline-none focus:border-green-400 text-center"
               />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
-                Número de Contacto (Opcional)
-              </label>
-              <input
-                type="tel"
-                placeholder="Ej. +593 99 123 4567"
-                value={customCanchaPhone}
-                onChange={(e) => setCustomCanchaPhone(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:border-purple-400"
-              />
-            </div>
-          </div>
-        )}
-      </section>
 
-      {/* ========================================================
-          PASO 2: FORMATO DEL PARTIDO, FECHA, HORA Y CUOTA
-      ======================================================== */}
-      <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/10 bg-black/60 backdrop-blur-2xl shadow-2xl">
-        <div className="flex items-center gap-2 mb-6 pb-4 border-b border-white/10">
-          <span className="w-7 h-7 rounded-full bg-green-400 text-black font-black text-sm flex items-center justify-center shadow-lg">2</span>
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-black font-outfit text-white">
-              Modalidad, Fecha y Cuotas
-            </h2>
-            <p className="text-sm text-slate-300 mt-0.5">
-              Define cuántos jugadores se necesitan, la fecha del partido y el valor de la cancha para prorratear.
-            </p>
-          </div>
-        </div>
-
-        {/* Selector de Modo: 2 Equipos vs 1 Equipo */}
-        <div className="mb-8">
-          <label className="block text-xs font-black text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
-            <span>🏆 Formato de Convocatoria</span>
-            <span className="text-[10px] text-slate-400 font-normal normal-case">(Selecciona cómo deseas organizar el encuentro)</span>
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button
-              type="button"
-              onClick={() => handleModeChange('two_teams')}
-              className={`p-5 rounded-2xl border text-left transition-all flex items-start gap-4 cursor-pointer ${
-                isTwoTeams
-                  ? 'bg-gradient-to-br from-blue-950/80 via-slate-900 to-black border-cyan-400 shadow-[0_0_25px_rgba(0,229,255,0.3)] ring-2 ring-cyan-400/80 scale-[1.01]'
-                  : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800/80 hover:border-slate-700 text-slate-400'
-              }`}
-            >
-              <div className={`p-3 rounded-2xl flex-shrink-0 ${isTwoTeams ? 'bg-cyan-400 text-black shadow-lg shadow-cyan-400/30' : 'bg-slate-800 text-slate-400'}`}>
-                <Users size={24} />
+            <div className="md:col-span-2">
+              <div className="flex justify-between items-center text-xs font-bold text-slate-300 mb-2">
+                <span>Progreso de Convocatoria:</span>
+                <span className={`px-3 py-0.5 rounded-full font-black ${
+                  selectedPlayers.length >= minPlayers ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
+                }`}>
+                  {selectedPlayers.length} / {maxPlayers} jugadores (Mínimo {minPlayers})
+                </span>
               </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-outfit font-black text-lg uppercase text-white">Armar 2 Equipos</span>
-                  <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-cyan-400/20 text-cyan-300 border border-cyan-400/40">
-                    10 - 14 Jugadores
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                  Partido completo de cancha sintética. Convoca entre 10 y 14 jugadores para armar dos equipos rivales (5v5 hasta 7v7).
-                </p>
+              
+              <div className="w-full bg-slate-900 h-3 rounded-full overflow-hidden border border-white/10">
+                <div 
+                  className={`h-full transition-all duration-300 rounded-full ${
+                    selectedPlayers.length >= minPlayers 
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-400' 
+                      : 'bg-gradient-to-r from-yellow-500 to-amber-400'
+                  }`}
+                  style={{ width: `${Math.min(100, (selectedPlayers.length / maxPlayers) * 100)}%` }}
+                />
               </div>
-            </button>
 
-            <button
-              type="button"
-              onClick={() => handleModeChange('single_team')}
-              className={`p-5 rounded-2xl border text-left transition-all flex items-start gap-4 cursor-pointer ${
-                !isTwoTeams
-                  ? 'bg-gradient-to-br from-green-950/80 via-slate-900 to-black border-green-400 shadow-[0_0_25px_rgba(34,197,94,0.3)] ring-2 ring-green-400/80 scale-[1.01]'
-                  : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800/80 hover:border-slate-700 text-slate-400'
-              }`}
-            >
-              <div className={`p-3 rounded-2xl flex-shrink-0 ${!isTwoTeams ? 'bg-[var(--color-highlight)] text-black shadow-lg shadow-green-400/30' : 'bg-slate-800 text-slate-400'}`}>
-                <Shield size={24} />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-outfit font-black text-lg uppercase text-white">Un Solo Equipo</span>
-                  <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-green-400/20 text-green-300 border border-green-400/40">
-                    5 - 7 Jugadores
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                  Convoca a tu propia escuadra o alineación titular (mínimo 5, máximo 7 jugadores) para un partido de torneo o desafío.
-                </p>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Inputs de Fecha, Hora, Costo y Resumen de Cuota */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-          <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Calendar size={14} className="text-green-400" />
-              <span>Fecha del Partido</span>
-            </label>
-            <input
-              type="date"
-              value={matchDate}
-              onChange={(e) => setMatchDate(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none focus:border-green-400 font-bold"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Clock size={14} className="text-green-400" />
-              <span>Hora de Inicio</span>
-            </label>
-            <input
-              type="time"
-              value={matchTime}
-              onChange={(e) => setMatchTime(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none focus:border-green-400 font-bold"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <DollarSign size={14} className="text-green-400" />
-              <span>Costo Cancha ($)</span>
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="1"
-              value={canchaCost}
-              onChange={(e) => setCanchaCost(Number(e.target.value) || 0)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-green-400 font-bold outline-none focus:border-green-400 text-center"
-            />
-          </div>
-
-          {/* Tarjeta de cálculo en vivo de cuota */}
-          <div className="bg-gradient-to-br from-slate-900 to-black border border-green-500/40 p-3.5 rounded-xl shadow-lg flex items-center justify-between">
-            <div>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">Cuota por Confirmado</span>
-              <span className="text-2xl font-black text-green-400 font-outfit">
-                {costPerPerson ? `$${costPerPerson}` : '--'}
-              </span>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">Confirmados</span>
-              <span className="text-sm font-black text-white">
-                {confirmedPlayers.length} / {selectedPlayers.length}
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================
-          PASO 3: CONVOCATORIA DE JUGADORES Y ACCIONES
-      ======================================================== */}
-      <section className="flex flex-col gap-6">
-        {/* Barra superior de progreso de la convocatoria */}
-        <div className="glass-panel p-6 rounded-3xl border border-white/10 bg-black/60 backdrop-blur-2xl shadow-2xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <div className="flex items-center gap-2">
-              <span className="w-7 h-7 rounded-full bg-yellow-400 text-black font-black text-sm flex items-center justify-center shadow-lg">3</span>
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-black font-outfit text-white">
-                  Convocatoria de Jugadores
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-300">
-                  {isTwoTeams ? 'Modo 2 Equipos (mínimo 10, máximo 14)' : 'Modo 1 Equipo (mínimo 5, máximo 7)'}. Haz clic en las cartas para convocar.
-                </p>
+              <div className="text-[11px] text-slate-400 mt-1.5 text-right">
+                {selectedPlayers.length < minPlayers 
+                  ? `Faltan ${minPlayers - selectedPlayers.length} para el mínimo` 
+                  : selectedPlayers.length === maxPlayers 
+                    ? '¡Límite máximo alcanzado!' 
+                    : `Puedes agregar hasta ${maxPlayers - selectedPlayers.length} más`}
               </div>
             </div>
-
-            {/* Contador / Estado */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-bold text-slate-300">
-                Convocados:
-              </span>
-              <span className={`px-4 py-1.5 rounded-full font-black text-sm border font-outfit ${
-                selectedPlayers.length >= minPlayers
-                  ? 'bg-green-500/20 text-green-400 border-green-500/40 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
-                  : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
-              }`}>
-                {selectedPlayers.length} / {maxPlayers}
-              </span>
-            </div>
-          </div>
-
-          {/* Barra visual de progreso */}
-          <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-white/10">
-            <div 
-              className={`h-full transition-all duration-300 rounded-full ${
-                selectedPlayers.length >= minPlayers 
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-400' 
-                  : 'bg-gradient-to-r from-yellow-500 to-amber-400'
-              }`}
-              style={{ width: `${Math.min(100, (selectedPlayers.length / maxPlayers) * 100)}%` }}
-            />
-          </div>
-          
-          <div className="flex justify-between items-center text-[11px] text-slate-400 mt-2">
-            <span>Mínimo requerido: {minPlayers} jugadores</span>
-            <span>
-              {selectedPlayers.length < minPlayers 
-                ? `Faltan ${minPlayers - selectedPlayers.length} para el mínimo` 
-                : selectedPlayers.length === maxPlayers 
-                  ? '¡Límite máximo alcanzado!' 
-                  : `Puedes agregar hasta ${maxPlayers - selectedPlayers.length} más`}
-            </span>
           </div>
         </div>
 
@@ -631,17 +629,15 @@ export default function ConvocadosClient({ initialPlayers }) {
               <div className="flex items-center justify-between gap-2 mb-4 pb-4 border-b border-white/10">
                 <div>
                   <h3 className="text-xl font-bold font-outfit text-white">
-                    Lista Activa
+                    Convocatoria Activa
                   </h3>
                   <span className="text-xs text-slate-400">
-                    {confirmedPlayers.length} confirmados de {selectedPlayers.length}
+                    {confirmedPlayers.length} confirmados • {selectedPlayers.length} seleccionados
                   </span>
                 </div>
-                {finalCanchaPhone && (
-                  <span className="text-[10px] font-bold text-yellow-400 bg-yellow-400/10 px-2.5 py-1 rounded-full border border-yellow-400/30">
-                    {finalCanchaName}
-                  </span>
-                )}
+                <span className="text-[10px] font-bold text-yellow-400 bg-yellow-400/10 px-2.5 py-1 rounded-full border border-yellow-400/30">
+                  {finalCanchaName}
+                </span>
               </div>
 
               {/* Botones de Acción: Copiar Lista para WhatsApp y Avanzar a Squad Builder */}
@@ -659,7 +655,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                   ) : (
                     <>
                       <Copy size={18} className="text-cyan-400" />
-                      <span>Copiar Convocatoria para WhatsApp</span>
+                      <span>Copiar Convocatoria para el Grupo</span>
                     </>
                   )}
                 </button>
@@ -683,7 +679,7 @@ export default function ConvocadosClient({ initialPlayers }) {
               {/* Lista Detallada de Jugadores Seleccionados con Estado */}
               {selectedPlayers.length > 0 ? (
                 <div className="flex flex-col gap-2.5 max-h-[50vh] overflow-y-auto pr-1.5 custom-scrollbar">
-                  {selectedPlayers.map((p, idx) => {
+                  {selectedPlayers.map((p) => {
                     const shortPos = (p.posicion || 'DEL').split(' ')[0].substring(0, 3).toUpperCase();
                     const ovr = calculateOVR(p, shortPos);
                     const currentStatus = statuses[p.id] || 'pendiente';
@@ -745,7 +741,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                   <span className="text-3xl mb-2">👥</span>
                   <p className="text-slate-400 text-xs font-medium">
                     Aún no has seleccionado ningún jugador.<br />
-                    Haz clic en las cartas de la plantilla para añadirlos.
+                    Haz clic en las cartas de abajo para añadirlos.
                   </p>
                 </div>
               )}
@@ -764,7 +760,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                   placeholder="Buscar jugador por nombre..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:border-cyan-400 transition"
+                  className="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:border-green-400 transition"
                 />
               </div>
 
@@ -777,7 +773,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                     onClick={() => setSelectedPosition(pos)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                       selectedPosition === pos
-                        ? 'bg-cyan-400 text-black shadow-md shadow-cyan-400/20'
+                        ? 'bg-green-400 text-black shadow-md shadow-green-400/20'
                         : 'bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800'
                     }`}
                   >
@@ -793,7 +789,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                 <p className="text-base font-bold">No se encontraron jugadores que coincidan con la búsqueda.</p>
                 <button
                   onClick={() => { setSearchQuery(''); setSelectedPosition('ALL'); }}
-                  className="mt-3 text-xs text-cyan-400 underline hover:text-cyan-300"
+                  className="mt-3 text-xs text-green-400 underline hover:text-green-300"
                 >
                   Restablecer filtros
                 </button>
