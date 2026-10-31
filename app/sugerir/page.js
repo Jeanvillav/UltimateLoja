@@ -219,7 +219,7 @@ export default function SugerirJugador() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-4xl font-black font-outfit text-center mb-4 text-white drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]">
+      <h1 className="text-4xl font-black font-outfit text-center mb-4 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
         Sugerir un Jugador
       </h1>
       <p className="text-center text-slate-400 mb-8">
@@ -401,7 +401,7 @@ export default function SugerirJugador() {
             <input type="text" name="debilidades" value={formData.debilidades || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm mb-2" />
           </div>
 
-          <button type="submit" disabled={uploading} className={`w-full py-3 btn-fifa w-full font-bold rounded-xl transition-all shadow-lg mt-4 disabled:opacity-50 ${mode === 'edit' ? 'btn-fifa-cyan' : ''}`}>
+          <button type="submit" disabled={uploading} className={`w-full py-3 btn-fifa w-full font-bold rounded-xl transition-all shadow-lg mt-4 disabled:opacity-50 ${mode === 'edit' ? 'btn-fifa-green' : ''}`}>
             Generar Código JSON
           </button>
           </form>

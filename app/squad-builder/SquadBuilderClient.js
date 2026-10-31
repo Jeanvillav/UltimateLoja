@@ -24,8 +24,8 @@ function PitchDraggablePlayer({ player, posId, removePlayer, pitchPosName, teamC
   const naturalOvr = calculateOVR(player, player.posicion);
   const isPenalized = dynamicRating < naturalOvr;
 
-  const borderColor = teamColor === 'cyan' 
-    ? 'border-cyan-400 shadow-[0_0_15px_rgba(0,229,255,0.6)]' 
+  const borderColor = teamColor === 'gold' 
+    ? 'border-[var(--color-gold)] shadow-[0_0_15px_rgba(246,197,65,0.5)]' 
     : teamColor === 'green' 
       ? 'border-green-400 shadow-[0_0_15px_rgba(34,197,94,0.6)]' 
       : 'border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.6)]';
@@ -63,7 +63,7 @@ function PitchDraggablePlayer({ player, posId, removePlayer, pitchPosName, teamC
       <div className={`mt-1 bg-black/85 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] font-black text-center w-auto max-w-[100px] truncate border shadow-lg pointer-events-none ${
         isPenalized ? 'border-red-500/60 text-red-400' : 'border-white/20 text-white'
       }`}>
-        <span className={teamColor === 'cyan' ? 'text-cyan-400 mr-1' : teamColor === 'green' ? 'text-green-400 mr-1' : 'text-yellow-400 mr-1'}>
+        <span className={teamColor === 'gold' ? 'text-[var(--color-gold)] mr-1' : teamColor === 'green' ? 'text-green-400 mr-1' : 'text-yellow-400 mr-1'}>
           {dynamicRating}
         </span>
         <span>{player.nombre ? player.nombre.split(' ')[0] : 'Jugador'}</span>
@@ -122,7 +122,7 @@ function SidebarDraggablePlayer({
   const calculatedOvr = calculateOVR(player, shortPos);
 
   const teamBorder = assignedTeam === 'team1' 
-    ? 'border-cyan-400/80 bg-cyan-950/40' 
+    ? 'border-[var(--color-gold)]/80 bg-black/60' 
     : assignedTeam === 'team2' 
       ? 'border-green-400/80 bg-green-950/40' 
       : 'border-white/10 bg-slate-900/60';
@@ -161,7 +161,7 @@ function SidebarDraggablePlayer({
         <div className="flex items-center gap-1.5 pt-1.5 border-t border-white/10 text-[10px] font-bold">
           {assignedTeam === 'team1' ? (
             <>
-              <span className="text-cyan-300 bg-cyan-400/20 px-2 py-0.5 rounded-md flex-1 text-center truncate">
+              <span className="text-[var(--color-gold)] bg-[var(--color-gold)]/15 px-2 py-0.5 rounded-md flex-1 text-center truncate">
                 🔵 Equipo 1
               </span>
               {onQuickAssign2 && (
@@ -194,7 +194,7 @@ function SidebarDraggablePlayer({
                 <button
                   type="button"
                   onClick={() => onQuickAssign1(player)}
-                  className="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-cyan-600 hover:text-white text-slate-300 transition"
+                  className="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-[var(--color-gold-dark)] hover:text-white text-slate-300 transition"
                   title="Pasar a Equipo 1"
                 >
                   ➜ Eq. 1
@@ -217,7 +217,7 @@ function SidebarDraggablePlayer({
                 <button
                   type="button"
                   onClick={() => onQuickAssign1(player)}
-                  className="flex-1 py-1 px-2 rounded-md bg-cyan-500/20 hover:bg-cyan-500 text-cyan-300 hover:text-black transition text-center"
+                  className="flex-1 py-1 px-2 rounded-md bg-[var(--color-gold)]/15 hover:bg-[var(--color-gold)] text-[var(--color-gold)] hover:text-black transition text-center"
                 >
                   + Equipo 1
                 </button>
@@ -543,13 +543,13 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
             <div className="flex items-center justify-between gap-2 mb-4">
               <h2 className="text-xl sm:text-2xl font-black font-outfit text-white flex items-center gap-2">
                 <span>Jugadores</span>
-                <span className="text-xs font-bold text-cyan-400 bg-cyan-400/10 px-2.5 py-0.5 rounded-full border border-cyan-400/30">
+                <span className="text-xs font-bold text-[var(--color-gold)] bg-[var(--color-gold)]/10 px-2.5 py-0.5 rounded-full border border-[var(--color-gold)]/30">
                   {isConvocatoria ? displayConvocados.length : players.length}
                 </span>
               </h2>
 
               {isTwoTeamsMode ? (
-                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-[var(--color-gold)]/15 text-[var(--color-gold)] border border-[var(--color-gold)]/40">
                   🏆 Modo: 2 Equipos
                 </span>
               ) : (
@@ -564,7 +564,7 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
               <div className="mb-4">
                 <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase">Plantilla Base:</label>
                 <select 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-white outline-none focus:border-cyan-400 font-bold"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-white outline-none focus:border-[var(--color-gold)] font-bold"
                   value={selectedTeam}
                   onChange={(e) => setSelectedTeam(e.target.value)}
                 >
@@ -634,10 +634,10 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
                 <div className="glass-panel p-4 sm:p-5 rounded-2xl border border-white/10 bg-black/60 backdrop-blur-xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
                   {/* Comparador de Medias de los 2 Equipos */}
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3 bg-cyan-950/60 border border-cyan-400/40 px-3.5 py-2 rounded-xl shadow-md">
-                      <span className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <div className="flex items-center gap-3 bg-[var(--color-primary)]/80 border border-[var(--color-gold)]/40 px-3.5 py-2 rounded-xl shadow-md">
+                      <span className="w-3 h-3 rounded-full bg-[var(--color-gold)] animate-pulse"></span>
                       <div>
-                        <span className="text-[10px] font-black uppercase text-cyan-300 block">Equipo 1</span>
+                        <span className="text-[10px] font-black uppercase text-[var(--color-gold)] block">Equipo 1</span>
                         <span className="text-xl font-black font-outfit text-white leading-none">{t1Ovr || '--'} OVR</span>
                       </div>
                     </div>
@@ -659,7 +659,7 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
                       type="button"
                       onClick={() => setTwoTeamsTab('both')}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                        twoTeamsTab === 'both' ? 'bg-cyan-400 text-black shadow-md' : 'text-slate-400 hover:text-white'
+                        twoTeamsTab === 'both' ? 'bg-[var(--color-gold)] text-black shadow-md' : 'text-slate-400 hover:text-white'
                       }`}
                     >
                       Ambas Canchas
@@ -668,7 +668,7 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
                       type="button"
                       onClick={() => setTwoTeamsTab('team1')}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                        twoTeamsTab === 'team1' ? 'bg-cyan-400 text-black shadow-md' : 'text-slate-400 hover:text-white'
+                        twoTeamsTab === 'team1' ? 'bg-[var(--color-gold)] text-black shadow-md' : 'text-slate-400 hover:text-white'
                       }`}
                     >
                       Solo Eq. 1
@@ -714,13 +714,13 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
                 <div ref={bothTeamsMatchRef} className="p-4 rounded-3xl bg-slate-950/90 border border-white/10 shadow-2xl flex flex-col gap-4">
                   
                   {/* Encabezado del Duelo que saldrá en la Imagen */}
-                  <div className="bg-gradient-to-r from-cyan-950/80 via-slate-900 to-green-950/80 p-3 sm:p-4 rounded-2xl border border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-center sm:text-left">
+                  <div className="bg-gradient-to-r from-black/80 via-slate-900 to-green-950/80 p-3 sm:p-4 rounded-2xl border border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-center sm:text-left">
                     <div>
                       <span className="text-[10px] font-black uppercase tracking-widest text-yellow-400 block">
                         ⚔️ Duelo de Sintética en Loja
                       </span>
                       <h3 className="text-lg sm:text-xl font-black font-outfit text-white">
-                        <span className="text-cyan-400">Equipo 1 ({t1Ovr} OVR)</span>
+                        <span className="text-[var(--color-gold)]">Equipo 1 ({t1Ovr} OVR)</span>
                         <span className="text-yellow-400 mx-2">VS</span>
                         <span className="text-green-400">Equipo 2 ({t2Ovr} OVR)</span>
                       </h3>
@@ -744,10 +744,10 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
                     ===================================== */}
                     {(twoTeamsTab === 'both' || twoTeamsTab === 'team1') && (
                       <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between bg-cyan-950/50 p-3 rounded-xl border border-cyan-400/30">
+                        <div className="flex items-center justify-between bg-[var(--color-primary)]/70 p-3 rounded-xl border border-[var(--color-gold)]/30">
                           <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
-                            <span className="font-outfit font-black text-sm text-cyan-300 uppercase">Equipo 1</span>
+                            <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-gold)]"></span>
+                            <span className="font-outfit font-black text-sm text-[var(--color-gold)] uppercase">Equipo 1</span>
                             <span className="text-xs font-bold text-white bg-black/40 px-2 py-0.5 rounded-full">
                               {t1Ovr} OVR
                             </span>
@@ -757,7 +757,7 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
                             <select
                               value={team1Formation}
                               onChange={(e) => handleTeam1FormationChange(e.target.value)}
-                              className="bg-slate-900 border border-slate-700 text-cyan-300 text-xs font-bold rounded-lg p-1.5 outline-none focus:border-cyan-400"
+                              className="bg-slate-900 border border-slate-700 text-[var(--color-gold)] text-xs font-bold rounded-lg p-1.5 outline-none focus:border-[var(--color-gold)]"
                             >
                               {Object.keys(FORMATIONS).map(f => (
                                 <option key={f} value={f}>{f}</option>
@@ -767,7 +767,7 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
                             <button
                               type="button"
                               onClick={() => exportImage(team1PitchRef, 'equipo-1-sintetica.png')}
-                              className="p-1.5 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500 hover:text-black rounded-lg transition"
+                              className="p-1.5 bg-[var(--color-gold)]/15 text-[var(--color-gold)] hover:bg-[var(--color-gold)] hover:text-black rounded-lg transition"
                               title="Copiar solo Equipo 1"
                             >
                               <Copy size={14} />
@@ -779,7 +779,7 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
                         <div className="w-full flex justify-center">
                           <div 
                             ref={team1PitchRef}
-                            className="relative w-full max-w-[440px] aspect-[736/1307] rounded-2xl overflow-hidden shadow-2xl border-2 border-cyan-500/40 select-none"
+                            className="relative w-full max-w-[440px] aspect-[736/1307] rounded-2xl overflow-hidden shadow-2xl border-2 border-[var(--color-gold)]/40 select-none"
                           >
                             {/* Imagen de Cancha Real */}
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -791,9 +791,9 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
                             />
 
                             {/* Badge superior del equipo en la cancha */}
-                            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-black/85 backdrop-blur-md px-3.5 py-1 rounded-full border border-cyan-400/50 flex items-center gap-2 shadow-2xl pointer-events-none">
-                              <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-                              <span className="text-xs font-black text-cyan-300 uppercase">Equipo 1</span>
+                            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-black/85 backdrop-blur-md px-3.5 py-1 rounded-full border border-[var(--color-gold)]/50 flex items-center gap-2 shadow-2xl pointer-events-none">
+                              <span className="w-2 h-2 rounded-full bg-[var(--color-gold)]"></span>
+                              <span className="text-xs font-black text-[var(--color-gold)] uppercase">Equipo 1</span>
                               <span className="text-xs font-bold text-white">• {t1Ovr} OVR</span>
                             </div>
 
@@ -807,7 +807,7 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
                                   const rawId = posId.replace('t1_', '');
                                   setTeam1Pitch(prev => prev.map(p => p.id === rawId ? { ...p, player: null } : p));
                                 }}
-                                teamColor="cyan"
+                                teamColor="gold"
                               />
                             ))}
 

@@ -18,7 +18,7 @@ export default function TerminosPage() {
 
       <div className="glass-panel p-8 md:p-12 rounded-2xl">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/30">
+          <div className="p-3 bg-[var(--color-gold)]/10 text-[var(--color-gold)] rounded-xl border border-[var(--color-gold)]/30">
             <FileText size={28} />
           </div>
           <div>

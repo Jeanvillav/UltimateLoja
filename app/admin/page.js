@@ -638,7 +638,7 @@ export default function AdminPage() {
                   disabled={loading || uploading}
                   className={`w-full py-4 font-black text-lg uppercase tracking-wider rounded-xl transition-all shadow-[0_0_20px_rgba(34,197,94,0.3)] disabled:opacity-50 disabled:shadow-none hover:scale-[1.02] ${
                     previewPlayer.id 
-                    ? 'btn-fifa btn-fifa-cyan w-full' 
+                    ? 'btn-fifa btn-fifa-green w-full' 
                     : 'btn-fifa w-full'
                   }`}
                 >

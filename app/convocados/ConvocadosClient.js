@@ -237,8 +237,8 @@ export default function ConvocadosClient({ initialPlayers }) {
       {/* Navegación Rápida entre las 2 Fases del Workflow */}
       <div className="glass-panel p-3 sm:p-4 rounded-2xl border border-white/10 bg-black/50 backdrop-blur-xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-center">
-          <div className="flex items-center justify-center gap-2.5 p-3 rounded-xl bg-gradient-to-r from-cyan-500/25 to-blue-500/10 border border-cyan-400/40 text-cyan-300 shadow-sm">
-            <span className="w-6 h-6 rounded-full bg-cyan-400 text-black text-xs font-black flex items-center justify-center">1</span>
+          <div className="flex items-center justify-center gap-2.5 p-3 rounded-xl bg-gradient-to-r from-[var(--color-gold)]/15 to-[var(--color-gold)]/5 border border-[var(--color-gold)]/40 text-[var(--color-gold)] shadow-sm">
+            <span className="w-6 h-6 rounded-full bg-[var(--color-gold)] text-black text-xs font-black flex items-center justify-center">1</span>
             <span className="text-xs sm:text-sm font-black uppercase tracking-wide">Paso 1: Reservar Cancha (Lugar, Fecha, Hora & WhatsApp)</span>
           </div>
           <div className="flex items-center justify-center gap-2.5 p-3 rounded-xl bg-gradient-to-r from-green-500/25 to-emerald-500/10 border border-green-400/40 text-green-300 shadow-sm">
@@ -251,12 +251,12 @@ export default function ConvocadosClient({ initialPlayers }) {
       {/* ========================================================
           BLOQUE 1: RESERVA DE LA CANCHA (Cancha + Fecha + Hora + WhatsApp directo)
       ======================================================== */}
-      <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-cyan-500/30 bg-black/60 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+      <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-[var(--color-gold)]/30 bg-black/60 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
         {/* Encabezado del Bloque de Reserva */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="w-8 h-8 rounded-full bg-cyan-400 text-black font-black text-sm flex items-center justify-center shadow-lg shadow-cyan-400/30">1</span>
+              <span className="w-8 h-8 rounded-full bg-[var(--color-gold)] text-black font-black text-sm flex items-center justify-center shadow-lg shadow-[var(--color-gold)]/30">1</span>
               <h2 className="text-2xl sm:text-3xl font-black font-outfit text-white">
                 Reserva de Cancha Sintética
               </h2>
@@ -265,8 +265,8 @@ export default function ConvocadosClient({ initialPlayers }) {
               Elige el complejo en Loja, ajusta la fecha y la hora, y escríbeles directamente por WhatsApp para apartar tu turno.
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-400/10 border border-cyan-400/30 text-xs text-cyan-300 self-start md:self-auto font-bold">
-            <MapPin size={14} className="text-cyan-400" />
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-gold)]/10 border border-[var(--color-gold)]/30 text-xs text-[var(--color-gold)] self-start md:self-auto font-bold">
+            <MapPin size={14} className="text-[var(--color-gold)]" />
             <span>Loja, Ecuador</span>
           </div>
         </div>
@@ -285,7 +285,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                 onClick={() => setSelectedCanchaId(cancha.id)}
                 className={`p-3.5 rounded-2xl border text-left transition-all relative flex flex-col justify-between cursor-pointer group ${
                   isSelectedCancha
-                    ? `bg-gradient-to-b ${cancha.colorBg} ${cancha.colorBorder} shadow-[0_0_20px_rgba(0,229,255,0.4)] ring-2 ring-cyan-400 scale-[1.02]`
+                    ? `bg-gradient-to-b ${cancha.colorBg} ${cancha.colorBorder} shadow-[0_0_20px_rgba(246,197,65,0.3)] ring-2 ring-[var(--color-gold)] scale-[1.02]`
                     : 'bg-slate-900/60 border-slate-800 hover:border-slate-600 hover:bg-slate-800/80 text-slate-300'
                 }`}
               >
@@ -326,14 +326,14 @@ export default function ConvocadosClient({ initialPlayers }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
-                <Calendar size={14} className="text-cyan-400" />
+                <Calendar size={14} className="text-[var(--color-gold)]" />
                 <span>Fecha del Partido</span>
               </label>
               <input
                 type="date"
                 value={matchDate}
                 onChange={(e) => setMatchDate(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none focus:border-cyan-400 font-bold"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none focus:border-[var(--color-gold)] font-bold"
               />
               <span className="text-[11px] text-slate-400 mt-1 block">
                 {getFormattedDate(matchDate)}
@@ -342,14 +342,14 @@ export default function ConvocadosClient({ initialPlayers }) {
 
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
-                <Clock size={14} className="text-cyan-400" />
+                <Clock size={14} className="text-[var(--color-gold)]" />
                 <span>Hora del Partido</span>
               </label>
               <input
                 type="time"
                 value={matchTime}
                 onChange={(e) => setMatchTime(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none focus:border-cyan-400 font-bold"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none focus:border-[var(--color-gold)] font-bold"
               />
               <span className="text-[11px] text-slate-400 mt-1 block">
                 Turno de cancha: {matchTime} hs
@@ -406,9 +406,9 @@ export default function ConvocadosClient({ initialPlayers }) {
                 )}
               </div>
               <p className="text-xs text-slate-300 mt-1 flex items-center gap-2 flex-wrap">
-                <span className="text-cyan-400 font-bold">📅 {getFormattedDate(matchDate)}</span>
+                <span className="text-[var(--color-gold)] font-bold">📅 {getFormattedDate(matchDate)}</span>
                 <span className="text-slate-600">•</span>
-                <span className="text-cyan-400 font-bold">⏰ {matchTime}</span>
+                <span className="text-[var(--color-gold)] font-bold">⏰ {matchTime}</span>
                 {finalCanchaPhone && (
                   <>
                     <span className="text-slate-600">•</span>
@@ -440,7 +440,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                   href={`tel:${finalCanchaPhoneRaw || finalCanchaPhone}`}
                   className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 border border-slate-600 transition-all hover:scale-105 active:scale-95 cursor-pointer"
                 >
-                  <Phone size={15} className="text-cyan-400" />
+                  <Phone size={15} className="text-[var(--color-gold)]" />
                   <span>Llamar</span>
                 </a>
 
@@ -523,17 +523,17 @@ export default function ConvocadosClient({ initialPlayers }) {
                 onClick={() => handleModeChange('two_teams')}
                 className={`p-5 rounded-2xl border text-left transition-all flex items-start gap-4 cursor-pointer ${
                   isTwoTeams
-                    ? 'bg-gradient-to-br from-blue-950/80 via-slate-900 to-black border-cyan-400 shadow-[0_0_25px_rgba(0,229,255,0.3)] ring-2 ring-cyan-400/80 scale-[1.01]'
+                    ? 'bg-gradient-to-br from-black/80 via-slate-900 to-black border-[var(--color-gold)] shadow-[0_0_25px_rgba(246,197,65,0.3)] ring-2 ring-[var(--color-gold)]/80 scale-[1.01]'
                     : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800/80 hover:border-slate-700 text-slate-400'
                 }`}
               >
-                <div className={`p-3 rounded-2xl flex-shrink-0 ${isTwoTeams ? 'bg-cyan-400 text-black shadow-lg shadow-cyan-400/30' : 'bg-slate-800 text-slate-400'}`}>
+                <div className={`p-3 rounded-2xl flex-shrink-0 ${isTwoTeams ? 'bg-[var(--color-gold)] text-black shadow-lg shadow-[var(--color-gold)]/30' : 'bg-slate-800 text-slate-400'}`}>
                   <Users size={24} />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-outfit font-black text-lg uppercase text-white">Armar 2 Equipos</span>
-                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-cyan-400/20 text-cyan-300 border border-cyan-400/40">
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-[var(--color-gold)]/15 text-[var(--color-gold)] border border-[var(--color-gold)]/40">
                       10 - 14 Jugadores
                     </span>
                   </div>
@@ -654,7 +654,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                     </>
                   ) : (
                     <>
-                      <Copy size={18} className="text-cyan-400" />
+                      <Copy size={18} className="text-[var(--color-gold)]" />
                       <span>Copiar Convocatoria para el Grupo</span>
                     </>
                   )}
@@ -665,7 +665,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                   onClick={handleConfirm}
                   className={`w-full py-4 px-4 rounded-xl font-black uppercase tracking-wider text-sm transition-all flex items-center justify-center gap-2 shadow-xl ${
                     isValidConvocatoria 
-                      ? 'bg-[var(--color-highlight)] text-black hover:bg-white hover:scale-[1.02] shadow-[0_0_20px_rgba(0,229,255,0.6)] cursor-pointer' 
+                      ? 'bg-[var(--color-highlight)] text-black hover:bg-white hover:scale-[1.02] shadow-[0_0_20px_rgba(34,197,94,0.5)] cursor-pointer' 
                       : 'bg-slate-900 text-slate-500 cursor-not-allowed border border-slate-800'
                   }`}
                 >
@@ -804,7 +804,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                       key={player.id} 
                       className={`relative cursor-pointer transition-all duration-300 ${
                         selected 
-                          ? `ring-4 rounded-xl transform scale-105 ${status === 'ausente' ? 'ring-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.3)]' : status === 'confirmado' ? 'ring-green-500 shadow-[0_0_20px_rgba(34,197,94,0.4)]' : 'ring-cyan-400 shadow-[0_0_20px_rgba(0,229,255,0.4)]'}` 
+                          ? `ring-4 rounded-xl transform scale-105 ${status === 'ausente' ? 'ring-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.3)]' : status === 'confirmado' ? 'ring-green-500 shadow-[0_0_20px_rgba(34,197,94,0.4)]' : 'ring-[var(--color-gold)] shadow-[0_0_20px_rgba(246,197,65,0.3)]'}` 
                           : 'hover:-translate-y-2 hover:scale-105 hover:shadow-xl'
                       }`}
                       onClick={() => togglePlayerSelection(player)}
@@ -818,12 +818,12 @@ export default function ConvocadosClient({ initialPlayers }) {
                         <div className={`absolute inset-0 rounded-xl backdrop-blur-[1px] flex flex-col items-center justify-center z-20 ${
                           status === 'ausente' ? 'bg-red-900/40' : 
                           status === 'confirmado' ? 'bg-green-900/30' : 
-                          'bg-cyan-500/15'
+                          'bg-[var(--color-gold)]/15'
                         }`}>
                           <div className={`rounded-full w-12 h-12 flex items-center justify-center mb-2 transform scale-110 shadow-lg ${
                             status === 'ausente' ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.8)]' : 
                             status === 'confirmado' ? 'bg-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.8)]' : 
-                            'bg-cyan-400 text-black shadow-[0_0_20px_rgba(0,229,255,0.8)]'
+                            'bg-[var(--color-gold)] text-black shadow-[0_0_20px_rgba(246,197,65,0.6)]'
                           }`}>
                             {status === 'ausente' ? (
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 font-bold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -838,7 +838,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                           <span className={`bg-black/90 font-black uppercase px-3 py-1 rounded-full text-xs border tracking-wider ${
                             status === 'ausente' ? 'text-red-400 border-red-500' : 
                             status === 'confirmado' ? 'text-green-400 border-green-500' : 
-                            'text-cyan-300 border-cyan-400'
+                            'text-[var(--color-gold)] border-[var(--color-gold)]'
                           }`}>
                             {status === 'ausente' ? 'No puede' : 
                              status === 'confirmado' ? 'Confirmado' : 'Convocado'}

@@ -28,7 +28,7 @@ export default async function Equipos() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-4xl md:text-5xl font-black font-outfit text-center mb-4 text-white drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]">
+      <h1 className="text-4xl md:text-5xl font-black font-outfit text-center mb-4 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
         Equipos de Loja
       </h1>
       <p className="text-center text-slate-400 mb-12 max-w-2xl mx-auto text-lg">
@@ -41,14 +41,14 @@ export default async function Equipos() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {teams.map((team) => (
             <Link href={`/equipos/${team.id}`} key={team.id} className="block group">
-              <div className="glass-panel p-8 rounded-2xl flex flex-col items-center transition-all duration-300 transform group-hover:-translate-y-2 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.3)] border-transparent group-hover:border-green-500/30">
+              <div className="glass-panel p-8 flex flex-col items-center transition-all duration-300 transform group-hover:-translate-y-2 group-hover:shadow-[0_0_20px_rgba(246,197,65,0.25)] border-transparent group-hover:border-[var(--color-gold)]/30">
                  {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                   src={team.logo_url || `https://placehold.co/150x150/111827/22c55e?text=${team.name.charAt(0)}`} 
                   alt={`Escudo oficial de ${team.name}`} 
                   className="w-32 h-32 rounded-full mb-6 object-cover shadow-xl group-hover:scale-110 transition-transform"
                 />
-                <h2 className="text-2xl font-bold font-outfit text-white group-hover:text-green-400 transition-colors">
+                <h2 className="text-2xl font-bold font-outfit text-white group-hover:text-[var(--color-gold)] transition-colors">
                   {team.name}
                 </h2>
               </div>

@@ -1,18 +1,27 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #111827; /* Dark grey/black */
-  --color-secondary: #1f2937;
-  --color-accent: #ffffff; /* White for contrast */
-  --color-highlight: #22c55e; /* Classic EA Sports Green */
-  --color-neon-green: #22c55e;
-  --color-dark-green: #14532d;
+  /* ============================================
+   * PALETA FIFA 15 — Negros, Grises y Dorado
+   * Fondo: verde (imagen de fondo se mantiene)
+   * Acento/Selección: #f6c541 (dorado FIFA 15)
+   * ============================================ */
+  --color-primary: #0d0d0d;        /* Negro puro para paneles base */
+  --color-secondary: #1a1a1a;      /* Gris muy oscuro, paneles secundarios */
+  --color-surface: #242424;        /* Gris oscuro, cards y superficies */
+  --color-border: #333333;         /* Borde sutil gris */
+  --color-highlight: #22c55e;      /* Verde EA Sports — fondo/fondo imagen */
+  --color-dark-green: #14532d;     /* Verde oscuro para detalles de campo */
+  --color-gold: #f6c541;           /* Dorado FIFA 15 — acento principal */
+  --color-gold-dark: #d4a017;      /* Dorado oscuro para hover */
+  --color-accent: #ffffff;         /* Blanco para texto principal */
+  --color-muted: #6b7280;          /* Gris medio para texto secundario */
 }
 
 @layer base {
   :root {
-    --background: #000000;
-    --foreground: #ffffff;
+    --background: #0d0d0d;
+    --foreground: #f0f0f0;
   }
 }
 
@@ -36,41 +45,50 @@ main {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-outfit), sans-serif;
-  text-transform: uppercase; /* FIFA styling usually uses strong uppercase headers */
+  text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-/* FIFA 15 UI Style Panel */
+/* ================================================
+ * FIFA 15 UI Style Panel
+ * Bordes negros/grises, línea dorada superior
+ * ================================================ */
 .glass-panel {
-  background: rgba(10, 10, 15, 0.85); /* Dark solid base */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top: 3px solid var(--color-highlight); /* Cyan top highlight typical in old FIFA menus */
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  border-radius: 0; /* FIFA 15 was very blocky and geometric */
+  background: rgba(10, 10, 10, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 3px solid var(--color-gold); /* Línea dorada FIFA 15 */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  border-radius: 0; /* FIFA 15 — bloques geométricos */
 }
 
 .fc-card {
   clip-path: polygon(10% 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0 90%, 0 10%);
 }
 
-/* Custom Scrollbar for FIFA vibe */
+/* Custom Scrollbar — dorado FIFA 15 */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.5);
+  background: #111111;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--color-highlight);
+  background: var(--color-gold);
+  border-radius: 0;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-dark);
 }
 
-/* FIFA 15 Buttons */
+/* ================================================
+ * FIFA 15 Buttons — negro + borde gris, hover dorado
+ * ================================================ */
 .btn-fifa {
   background: var(--color-secondary);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e0e0e0;
+  border: 1px solid var(--color-border);
   text-transform: uppercase;
   font-weight: bold;
   letter-spacing: 0.1em;
@@ -80,13 +98,16 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 0;
 }
 .btn-fifa:hover {
-  background: rgba(255,255,255,0.1);
-  border-color: var(--color-accent);
-  box-shadow: 0 0 15px rgba(195, 255, 0, 0.3);
-  color: var(--color-accent);
+  background: var(--color-gold);
+  border-color: var(--color-gold);
+  color: #000000;
+  box-shadow: 0 0 20px rgba(246, 197, 65, 0.4);
 }
-.btn-fifa-cyan:hover {
+
+/* Variante verde para acciones de campo/confirmación */
+.btn-fifa-green:hover {
+  background: var(--color-highlight);
   border-color: var(--color-highlight);
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
-  color: var(--color-highlight);
+  color: #000000;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
 }

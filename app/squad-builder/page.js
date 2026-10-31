@@ -32,7 +32,7 @@ export default async function SquadBuilderPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-black font-outfit text-center mb-8 text-white drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]">
+      <h1 className="text-4xl font-black font-outfit text-center mb-8 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
         Squad Builder
       </h1>
       

@@ -30,7 +30,7 @@ export default async function JugadoresPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl md:text-5xl font-black font-outfit text-center mb-4 text-white drop-shadow-[0_0_15px_rgba(0,229,255,0.6)]">
+      <h1 className="text-4xl md:text-5xl font-black font-outfit text-center mb-4 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
         Base de Datos de Jugadores
       </h1>
       <p className="text-center text-slate-400 mb-12 max-w-2xl mx-auto text-lg">
