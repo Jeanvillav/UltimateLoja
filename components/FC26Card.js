@@ -7,82 +7,137 @@ export default function FC26Card({ player, asPreview = false, livePhotoUrl = nul
   const shortPos = (player.posicion || 'DEL').split(' ')[0].substring(0, 3).toUpperCase();
   const calculatedOvr = calculateOVR(player, shortPos);
 
-  // Determine card style based on rating
-  let bgGradient = "from-yellow-400 to-yellow-600"; // Gold
-  let textColor = "text-yellow-950";
-  let borderGlow = "shadow-[0_0_15px_rgba(250,204,21,0.4)]";
-  
+  // Paleta FIFA 15: Oro (#f6c541 / degradados dorados oscuros), Plata, Bronce
+  let bgGradient = "from-[#f7d368] via-[#e5b32f] to-[#aa7d14]";
+  let textColor = "text-[#2a1d04]";
+  let textAccent = "text-[#422c02]";
+  let borderOuter = "border-[#ffd978]";
+  let dividerColor = "border-[#422c02]/25";
+  let badgeBg = "bg-[#2a1d04]/80 text-[#f6c541]";
+  let cardGlow = "shadow-[0_12px_28px_rgba(0,0,0,0.7),0_0_20px_rgba(246,197,65,0.35)]";
+
   if (calculatedOvr < 75) {
-    bgGradient = "from-slate-300 to-slate-500"; // Silver
-    textColor = "text-slate-900";
-    borderGlow = "shadow-[0_0_15px_rgba(203,213,225,0.4)]";
+    // Silver
+    bgGradient = "from-[#e2e8f0] via-[#cbd5e1] to-[#64748b]";
+    textColor = "text-slate-950";
+    textAccent = "text-slate-800";
+    borderOuter = "border-slate-200";
+    dividerColor = "border-slate-900/25";
+    badgeBg = "bg-slate-900/80 text-slate-100";
+    cardGlow = "shadow-[0_12px_28px_rgba(0,0,0,0.7),0_0_20px_rgba(203,213,225,0.3)]";
   }
   if (calculatedOvr < 65) {
-    bgGradient = "from-amber-700 to-amber-900"; // Bronze
-    textColor = "text-amber-100";
-    borderGlow = "shadow-[0_0_15px_rgba(180,83,9,0.4)]";
+    // Bronze
+    bgGradient = "from-[#d97746] via-[#b4532a] to-[#783516]";
+    textColor = "text-amber-950";
+    textAccent = "text-amber-900";
+    borderOuter = "border-amber-300";
+    dividerColor = "border-amber-950/30";
+    badgeBg = "bg-amber-950/85 text-amber-200";
+    cardGlow = "shadow-[0_12px_28px_rgba(0,0,0,0.7),0_0_20px_rgba(180,83,9,0.35)]";
   }
 
   const idOrName = player.id || player.nombre || 'Nuevo';
-  
-  // Use livePhotoUrl if provided (for live preview in cropper), otherwise use db foto_url with fallback to silhouette
   const foto = livePhotoUrl || getPlayerPhoto(player.foto_url);
 
   const CardContent = (
-    <div className={`fc-card relative w-64 h-96 bg-gradient-to-br ${bgGradient} ${textColor} p-4 flex flex-col justify-between overflow-hidden ${borderGlow} ${asPreview ? 'shadow-2xl scale-100' : ''}`}>
+    <div className={`fc-card relative w-64 h-[395px] bg-gradient-to-b ${bgGradient} ${textColor} p-3.5 flex flex-col justify-between overflow-hidden border-2 ${borderOuter} ${cardGlow} select-none transition-all duration-300`}>
       
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHBhdGggZD0iTTEwIDBMICAyMCAxMCBMMTAgMjAgTDAgMTAgWiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==')] bg-repeat pointer-events-none"></div>
+      {/* Patrón geométrico sutil FIFA 15 */}
+      <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:10px_10px]" />
       
-      {/* Player Image */}
-      <div className="absolute bottom-[105px] inset-x-0 mx-auto w-52 h-52 flex justify-center pointer-events-none z-0">
-         {/* eslint-disable-next-line @next/next/no-img-element */}
+      {/* Resplandor superior metálico */}
+      <div className="absolute -top-12 -left-12 w-40 h-40 bg-white/25 rounded-full blur-2xl pointer-events-none" />
+
+      {/* Top Header: OVR, Posición y Bandera */}
+      <div className="flex justify-between items-start z-10 relative pointer-events-none">
+        <div className="flex flex-col items-center">
+          <span className="text-4xl sm:text-[42px] font-black font-outfit leading-none tracking-tighter drop-shadow-sm">
+            {calculatedOvr}
+          </span>
+          <span className="text-base font-black font-outfit uppercase tracking-widest mt-0.5">
+            {shortPos}
+          </span>
+          <div className="w-5 h-[2px] bg-current opacity-40 my-1.5" />
+          {/* Escudo / Bandera Ecuador */}
+          <div className="w-6 h-4 rounded-[2px] overflow-hidden shadow-sm border border-black/30 flex flex-col">
+            <div className="bg-[#FFDD00] h-1/2 w-full" />
+            <div className="bg-[#034EA2] h-1/4 w-full" />
+            <div className="bg-[#ED1C24] h-1/4 w-full" />
+          </div>
+        </div>
+
+        {/* Badge Loja / EC */}
+        <div className={`px-2 py-0.5 rounded-sm ${badgeBg} backdrop-blur-md shadow-md border border-black/20 text-[10px] font-black tracking-wider uppercase`}>
+          LOJA
+        </div>
+      </div>
+
+      {/* Imagen del Jugador centrada */}
+      <div className="absolute top-7 inset-x-0 mx-auto w-48 h-56 flex justify-center items-end pointer-events-none z-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
           src={foto} 
-          alt={`Carta de fútbol de ${player.nombre || 'Jugador'} - Posición ${shortPos} OVR ${calculatedOvr}`} 
-          className="w-full h-full object-cover object-center drop-shadow-xl filter contrast-125" 
+          alt={`Carta FIFA de ${player.nombre || 'Jugador'}`} 
+          className="w-full h-full object-cover object-top filter drop-shadow-[0_8px_14px_rgba(0,0,0,0.6)] contrast-110" 
           style={{ 
-            maskImage: 'radial-gradient(circle at center, black 45%, transparent 75%)', 
-            WebkitMaskImage: 'radial-gradient(circle at center, black 45%, transparent 75%)' 
+            maskImage: 'linear-gradient(to bottom, black 70%, transparent 98%)', 
+            WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 98%)' 
           }} 
         />
       </div>
 
-      {/* Top bar: Rating and Position */}
-      <div className="flex justify-between items-start z-10 relative pointer-events-none">
-        <div className="flex flex-col items-center drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]">
-          <div className="text-4xl font-black font-outfit leading-none">{calculatedOvr}</div>
-          <span className="text-lg font-bold">{shortPos}</span>
+      {/* Sección Inferior: Nombre y Atributos FIFA */}
+      <div className={`z-10 relative mt-auto pt-2 bg-gradient-to-t from-black/20 via-black/5 to-transparent`}>
+        {/* Nombre del jugador */}
+        <div className={`border-b ${dividerColor} pb-1 mb-2`}>
+          <h3 className="text-center text-lg font-black font-outfit uppercase tracking-widest truncate drop-shadow-sm px-1">
+            {player.nombre ? player.nombre.split(' ')[0] : 'NOMBRE'}
+          </h3>
         </div>
-        <div className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center backdrop-blur-sm shadow-md border border-white/20">
-          <span className="text-xs font-bold text-white">EC</span>
-        </div>
-      </div>
-
-      {/* Bottom Section */}
-      <div className="z-10 relative mt-auto pt-2 border-t border-current/20 bg-gradient-to-t from-black/10 to-transparent">
-        <h3 className="text-center text-xl font-black uppercase tracking-wider mb-2 drop-shadow-sm">{player.nombre ? player.nombre.split(' ')[0] : 'NOMBRE'}</h3>
         
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm font-bold">
-          <div className="flex justify-between">
-            <span className="opacity-75">{['POR', 'ARQ'].includes(shortPos) ? 'DIV' : 'PAC'}</span> <span>{player.pace || 0}</span>
+        {/* Grilla 6 Atributos FIFA */}
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs font-black font-outfit px-1 pb-1">
+          <div className="flex justify-between items-center px-1">
+            <span className={`${textAccent} opacity-80 text-[11px]`}>
+              {['POR', 'ARQ'].includes(shortPos) ? 'DIV' : 'PAC'}
+            </span> 
+            <span className="text-sm">{player.pace || 0}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="opacity-75">{['POR', 'ARQ'].includes(shortPos) ? 'REF' : 'DRI'}</span> <span>{player.dribbling || 0}</span>
+          <div className="flex justify-between items-center px-1">
+            <span className={`${textAccent} opacity-80 text-[11px]`}>
+              {['POR', 'ARQ'].includes(shortPos) ? 'REF' : 'DRI'}
+            </span> 
+            <span className="text-sm">{player.dribbling || 0}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="opacity-75">{['POR', 'ARQ'].includes(shortPos) ? 'HAN' : 'SHO'}</span> <span>{player.shooting || 0}</span>
+          <div className="flex justify-between items-center px-1">
+            <span className={`${textAccent} opacity-80 text-[11px]`}>
+              {['POR', 'ARQ'].includes(shortPos) ? 'HAN' : 'SHO'}
+            </span> 
+            <span className="text-sm">{player.shooting || 0}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="opacity-75">{['POR', 'ARQ'].includes(shortPos) ? 'SPD' : 'DEF'}</span> <span>{player.defending || 0}</span>
+          <div className="flex justify-between items-center px-1">
+            <span className={`${textAccent} opacity-80 text-[11px]`}>
+              {['POR', 'ARQ'].includes(shortPos) ? 'SPD' : 'DEF'}
+            </span> 
+            <span className="text-sm">{player.defending || 0}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="opacity-75">{['POR', 'ARQ'].includes(shortPos) ? 'KIC' : 'PAS'}</span> <span>{player.passing || 0}</span>
+          <div className="flex justify-between items-center px-1">
+            <span className={`${textAccent} opacity-80 text-[11px]`}>
+              {['POR', 'ARQ'].includes(shortPos) ? 'KIC' : 'PAS'}
+            </span> 
+            <span className="text-sm">{player.passing || 0}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="opacity-75">{['POR', 'ARQ'].includes(shortPos) ? 'POS' : 'PHY'}</span> <span>{player.physical || 0}</span>
+          <div className="flex justify-between items-center px-1">
+            <span className={`${textAccent} opacity-80 text-[11px]`}>
+              {['POR', 'ARQ'].includes(shortPos) ? 'POS' : 'PHY'}
+            </span> 
+            <span className="text-sm">{player.physical || 0}</span>
           </div>
         </div>
+
+        {/* Pequeño detalle inferior estilo escudo FIFA */}
+        <div className="w-8 h-[2px] bg-current opacity-30 mx-auto mt-1" />
       </div>
 
     </div>
@@ -93,7 +148,7 @@ export default function FC26Card({ player, asPreview = false, livePhotoUrl = nul
   }
 
   return (
-    <Link href={`/players/${encodeURIComponent(idOrName)}`} className="block transition-transform duration-300 hover:-translate-y-2 hover:scale-105">
+    <Link href={`/players/${encodeURIComponent(idOrName)}`} className="block transition-transform duration-300 hover:-translate-y-2 hover:scale-[1.03]">
       {CardContent}
     </Link>
   );
