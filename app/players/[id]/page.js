@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import RadarChart from '@/components/RadarChart';
 import FC26Card from '@/components/FC26Card';
 import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Edit3 } from 'lucide-react';
 import { calculateAge, formatBirthdate } from '@/utils/dateUtils';
 
 export const dynamic = 'force-dynamic';
@@ -81,10 +81,20 @@ export default async function PlayerPage({ params }) {
   }
 
   return (
-    <div>
-      <Link href="/" className="inline-flex items-center mb-8 text-white hover:text-green-400 transition-colors bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">
-        <ChevronLeft size={20} className="mr-2" /> Volver
-      </Link>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-8">
+        <Link href="/jugadores" className="inline-flex items-center text-white hover:text-[var(--color-gold)] transition-colors bg-black/60 px-4 py-2 border border-white/10 text-xs font-outfit uppercase font-bold">
+          <ChevronLeft size={18} className="mr-1.5" /> Volver a Jugadores
+        </Link>
+
+        <Link
+          href={`/players/${player.id}/editar`}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-gold)] hover:bg-[var(--color-gold-dark)] text-black font-outfit font-black text-xs uppercase tracking-wider transition shadow-lg hover:scale-105"
+        >
+          <Edit3 size={15} />
+          Editar Mi Carta
+        </Link>
+      </div>
       
       <div className="flex flex-wrap lg:flex-nowrap gap-12 items-start justify-center">
         <div className="flex-shrink-0 flex justify-center sticky top-24">
