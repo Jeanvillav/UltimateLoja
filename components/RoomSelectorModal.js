@@ -81,7 +81,7 @@ export default function RoomSelectorModal({ isOpen, onClose }) {
     }
 
     if (!code || !/^[A-Z]{2,8}$/.test(code)) {
-      setErrorMsg('El código debe ser de máximo 8 caracteres alfabéticos (ej: PICHANGA).');
+      setErrorMsg('El código debe ser de máximo 8 caracteres alfabéticos (ej: PARTIDO).');
       return;
     }
 
@@ -134,7 +134,7 @@ export default function RoomSelectorModal({ isOpen, onClose }) {
 
         <h2 className="text-2xl font-black font-outfit uppercase text-white mb-2 flex items-center gap-2">
           <DoorOpen className="text-[var(--color-gold)]" size={24} />
-          Salas de Pichanga
+          Salas de Partido
         </h2>
         <p className="text-xs text-gray-400 mb-6">
           Sala actual activa: <span className="text-[var(--color-gold)] font-bold">{roomCode}</span>
@@ -218,7 +218,7 @@ export default function RoomSelectorModal({ isOpen, onClose }) {
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-300 mb-1">
-                Nombre de la Pichanga o Grupo
+                Nombre del Grupo o Partido
               </label>
               <input
                 type="text"
@@ -281,3 +281,4 @@ export default function RoomSelectorModal({ isOpen, onClose }) {
     </div>
   );
 }
+

@@ -515,7 +515,7 @@ export default function ConvocadosClient({ initialPlayers }) {
           <div className="mb-8">
             <label className="block text-xs font-black text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
               <span>🏆 Formato del Partido</span>
-              <span className="text-[10px] text-slate-400 font-normal normal-case">(Selecciona cómo deseas armar la pichanga)</span>
+              <span className="text-[10px] text-slate-400 font-normal normal-case">(Selecciona cómo deseas armar el partido)</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button

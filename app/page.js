@@ -37,7 +37,7 @@ export default function Home() {
         </h1>
         
         <p className="text-base sm:text-xl text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-          Arma tu equipo ideal, analiza las cartas estadísticas de tus amigos y convoca pichangas con cálculo de cuotas al puro estilo Ultimate Team.
+          Arma tu equipo ideal, analiza las cartas estadísticas de tus amigos y organiza partidos con cálculo de cuotas al puro estilo Ultimate Team.
         </p>
 
         {/* Botones de Sala Inicial / Acciones Principales */}
@@ -55,7 +55,7 @@ export default function Home() {
             className="w-full sm:w-auto px-8 py-4 bg-[var(--color-gold)] hover:bg-[var(--color-gold-dark)] text-black font-black font-outfit uppercase tracking-wider transition-all shadow-[0_0_25px_rgba(246,197,65,0.4)] hover:scale-105 text-sm flex items-center justify-center gap-2 cursor-pointer"
           >
             <CalendarCheck size={18} />
-            Organizar Pichanga
+            Organizar Partido
             <ArrowRight size={16} />
           </Link>
         </div>

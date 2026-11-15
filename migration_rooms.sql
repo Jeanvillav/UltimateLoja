@@ -6,7 +6,7 @@
 CREATE TABLE IF NOT EXISTS rooms (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   code varchar(8) UNIQUE NOT NULL,      -- Solo letras mayúsculas, máx 8 caracteres (ej: 'LOJA')
-  name text NOT NULL,                   -- Nombre de la sala o pichanga
+  name text NOT NULL,                   -- Nombre de la sala o partido
   admin_pin varchar(4) NOT NULL,        -- Contraseña ligera de 4 dígitos numéricos
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   last_active_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,

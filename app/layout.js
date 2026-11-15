@@ -33,7 +33,7 @@ export const metadata = {
     'Canchas Sintéticas Loja', 
     'Squad Builder', 
     'FIFA Card Loja', 
-    'Pichanga Loja',
+    'Partido Loja',
     'Fútbol amateur Ecuador'
   ],
   authors: [{ name: 'Jean Villavicencio' }],
@@ -44,7 +44,7 @@ export const metadata = {
     url: 'https://ultimate-loja.vercel.app',
     siteName: 'Ultimate Loja',
     title: 'Ultimate Loja | Fútbol Sintética & Stats estilo FC',
-    description: 'Arma tu equipo ideal, analiza las estadísticas de tus amigos y convoca pichangas en las canchas sintéticas de Loja.',
+    description: 'Arma tu equipo ideal, analiza las estadísticas de tus amigos y organiza partidos en las canchas sintéticas de Loja.',
     images: [
       {
         url: '/FondoUltimateLoja.jpg',
