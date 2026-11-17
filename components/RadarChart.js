@@ -19,7 +19,7 @@ export default function RadarChart({ stats }) {
           <PolarGrid stroke="rgba(255,255,255,0.2)" />
           <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 12 }} />
           <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-          <Radar name="Estadísticas" dataKey="A" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
+          <Radar name="Estadísticas" dataKey="A" stroke="#f6c541" fill="#f6c541" fillOpacity={0.5} />
         </RechartsRadarChart>
       </ResponsiveContainer>
     </div>

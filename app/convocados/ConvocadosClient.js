@@ -360,7 +360,7 @@ export default function ConvocadosClient({ initialPlayers }) {
 
         {/* Campos opcionales si eligió "Otra Cancha" */}
         {selectedCanchaId === 'otro' && (
-          <div className="mb-6 p-4 rounded-2xl bg-purple-950/30 border border-purple-500/40 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="mb-6 p-4 rounded-2xl bg-black/40 border border-[var(--color-gold)]/40 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
                 Nombre de la Cancha
@@ -370,7 +370,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                 placeholder="Ej. Sintética El Valle, La Banda..."
                 value={customCanchaName}
                 onChange={(e) => setCustomCanchaName(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:border-purple-400"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:border-[var(--color-gold)]"
               />
             </div>
             <div>
@@ -382,7 +382,7 @@ export default function ConvocadosClient({ initialPlayers }) {
                 placeholder="Ej. 099 123 4567 o +593..."
                 value={customCanchaPhone}
                 onChange={(e) => setCustomCanchaPhone(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:border-purple-400"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-500 outline-none focus:border-[var(--color-gold)]"
               />
             </div>
           </div>

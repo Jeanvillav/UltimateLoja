@@ -477,7 +477,7 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
 
     try {
       const canvas = await html2canvas(ref.current, { 
-        backgroundColor: '#0a0f1d', 
+        backgroundColor: '#0d0d0d', 
         useCORS: true, 
         scale: 2,
         allowTaint: true,
@@ -939,7 +939,7 @@ export default function SquadBuilderClient({ teams, players, isAdmin }) {
                       <button 
                         onClick={handleSaveTeamLineup}
                         disabled={isSaving}
-                        className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider transition shadow-lg"
+                        className="px-4 py-2.5 rounded-xl bg-[var(--color-gold)] hover:bg-[var(--color-gold-dark)] text-black font-bold text-xs uppercase tracking-wider transition shadow-lg cursor-pointer"
                       >
                         {isSaving ? 'Guardando...' : 'Guardar como Titular'}
                       </button>

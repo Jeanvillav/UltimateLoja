@@ -161,12 +161,12 @@ export default async function PlayerPage({ params }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
               <div className="bg-slate-800/40 p-6 rounded-2xl border border-white/5">
-                <h3 className="text-blue-400 font-bold mb-3 uppercase tracking-wider text-sm">Perfil Físico</h3>
+                <h3 className="text-[var(--color-gold)] font-bold mb-3 uppercase tracking-wider text-sm">Perfil Físico</h3>
                 <p className="text-slate-300 leading-relaxed text-sm">{player.perfil_fisico}</p>
               </div>
 
               <div className="bg-slate-800/40 p-6 rounded-2xl border border-white/5">
-                <h3 className="text-purple-400 font-bold mb-3 uppercase tracking-wider text-sm">Rol Táctico</h3>
+                <h3 className="text-green-400 font-bold mb-3 uppercase tracking-wider text-sm">Rol Táctico</h3>
                 <p className="text-slate-300 leading-relaxed text-sm">{player.rol_tactico}</p>
               </div>
             </div>

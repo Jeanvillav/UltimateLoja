@@ -500,7 +500,7 @@ export default function AdminPage() {
           ) : (
             <div className="bg-slate-900 p-4 rounded-lg border border-green-500/30 flex-1 flex flex-col overflow-y-auto max-h-[600px] custom-scrollbar pr-2 relative">
               <div className="flex items-center justify-between mb-6">
-                <span className={`text-xs font-bold px-3 py-1 rounded-full shadow-inner ${previewPlayer.id ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}`}>
+                <span className={`text-xs font-bold px-3 py-1 rounded-full shadow-inner ${previewPlayer.id ? 'bg-[var(--color-gold)]/20 text-[var(--color-gold)] border border-[var(--color-gold)]/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}`}>
                   {previewPlayer.id ? '✏️ MODO EDICIÓN' : '✨ CREACIÓN NUEVA'}
                 </span>
                 {previewPlayer.id && (
@@ -696,7 +696,7 @@ export default function AdminPage() {
                   <td className="p-4 flex gap-3">
                     <button 
                       onClick={() => handleEdit(player)}
-                      className="text-blue-400 hover:text-white hover:bg-blue-500 text-sm font-bold bg-blue-500/10 px-4 py-2 rounded-lg transition"
+                      className="text-[var(--color-gold)] hover:text-black hover:bg-[var(--color-gold)] text-sm font-bold bg-[var(--color-gold)]/10 px-4 py-2 rounded-lg transition"
                     >
                       Editar
                     </button>
@@ -781,7 +781,7 @@ export default function AdminPage() {
                     <td className="p-4 font-bold text-white text-lg">{team.name}</td>
                     <td className="p-4">
                       <div className="flex gap-2">
-                        <button onClick={() => handleEditTeam(team)} className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30 font-bold transition text-xs">Editar</button>
+                        <button onClick={() => handleEditTeam(team)} className="px-3 py-1 bg-[var(--color-gold)]/20 text-[var(--color-gold)] rounded hover:bg-[var(--color-gold)]/30 font-bold transition text-xs">Editar</button>
                         <button onClick={() => handleDeleteTeam(team.id)} className="px-3 py-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 font-bold transition text-xs">Eliminar</button>
                       </div>
                     </td>

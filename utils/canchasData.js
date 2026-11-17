@@ -33,10 +33,10 @@ export const CANCHAS_LOJA = [
     telefonoDisplay: '098 739 8969',
     direccion: 'Loja, Ecuador',
     badge: 'Top Sintética',
-    colorBorder: 'border-cyan-400/60',
-    colorBg: 'from-cyan-500/20 via-slate-900 to-black',
-    colorText: 'text-cyan-400',
-    colorBadge: 'bg-cyan-400/20 text-cyan-300 border-cyan-400/40',
+    colorBorder: 'border-green-500/60',
+    colorBg: 'from-green-600/20 via-slate-900 to-black',
+    colorText: 'text-green-400',
+    colorBadge: 'bg-green-500/20 text-green-300 border-green-500/40',
   },
   {
     id: 'colegio_ingenieros',
@@ -72,10 +72,10 @@ export const CANCHAS_LOJA = [
     telefonoDisplay: null,
     direccion: 'Personalizada',
     badge: 'Personalizado',
-    colorBorder: 'border-purple-500/40',
-    colorBg: 'from-purple-500/10 via-slate-900 to-black',
-    colorText: 'text-purple-400',
-    colorBadge: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+    colorBorder: 'border-slate-600',
+    colorBg: 'from-slate-800/60 via-slate-900 to-black',
+    colorText: 'text-slate-200',
+    colorBadge: 'bg-slate-800 text-slate-200 border-slate-600',
   }
 ];
 
