@@ -2,9 +2,9 @@ export const CANCHAS_LOJA = [
   {
     id: 'la_sede',
     nombre: 'La Sede',
-    telefono: '+593 99 407 9595',
-    telefonoRaw: '593994079595',
-    telefonoDisplay: '+593 99 407 9595',
+    telefono: '099 705 0619',
+    telefonoRaw: '593997050619',
+    telefonoDisplay: '099 705 0619',
     direccion: 'Av. Salvador Bustamante Celi, Loja',
     mapsUrl: 'https://maps.google.com/?q=Cancha+Sintetica+La+Sede+Loja',
     badge: 'Popular',

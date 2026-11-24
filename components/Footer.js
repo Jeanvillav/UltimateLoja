@@ -12,7 +12,7 @@ export default function Footer() {
             Ultimate Loja
           </span>
           <span className="text-slate-500">•</span>
-          <span>Prototipo MVP v1 — Fútbol sintético en Loja, Ecuador</span>
+          <span>Fútbol sintético en Loja, Ecuador</span>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-6">
@@ -20,7 +20,16 @@ export default function Footer() {
             Inicio
           </Link>
           <Link href="/convocados" className="hover:text-white transition-colors text-[var(--color-gold)] font-bold">
-            Organizar Partido
+            Convocados
+          </Link>
+          <Link href="/squad-builder" className="hover:text-white transition-colors">
+            Squad Builder
+          </Link>
+          <Link href="/jugadores" className="hover:text-white transition-colors">
+            Jugadores
+          </Link>
+          <Link href="/equipos" className="hover:text-white transition-colors">
+            Equipos
           </Link>
           <Link href="/privacidad" className="hover:text-white transition-colors">
             Privacidad

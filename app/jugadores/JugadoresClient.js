@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import FC26Card from '@/components/FC26Card';
-import { useRoom } from '@/store/RoomContext';
 import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
-import { UserPlus, Search, Sparkles } from 'lucide-react';
+import { UserPlus, Search } from 'lucide-react';
 
 export default function JugadoresClient() {
-  const { room, roomCode } = useRoom();
   const [players, setPlayers] = useState([]);
   const [search, setSearch] = useState('');
   const [posFilter, setPosFilter] = useState('ALL');
@@ -20,19 +18,11 @@ export default function JugadoresClient() {
     async function fetchPlayers() {
       setLoading(true);
       try {
-        let query = supabase.from('players').select('*').order('overall_rating', { ascending: false });
+        const { data, error } = await supabase
+          .from('players')
+          .select('*')
+          .order('overall_rating', { ascending: false });
 
-        if (room?.id) {
-          query = query.eq('room_id', room.id);
-        } else if (roomCode) {
-          // Si aún no tenemos room.id pero sí roomCode, buscar primero el room_id
-          const { data: roomData } = await supabase.from('rooms').select('id').eq('code', roomCode).single();
-          if (roomData?.id) {
-            query = query.eq('room_id', roomData.id);
-          }
-        }
-
-        const { data, error } = await query;
         if (!error && data) {
           setPlayers(data);
         }
@@ -44,7 +34,7 @@ export default function JugadoresClient() {
     }
 
     fetchPlayers();
-  }, [room?.id, roomCode]);
+  }, []);
 
   const filtered = players.filter((p) => {
     const matchesSearch = p.nombre?.toLowerCase().includes(search.toLowerCase());
@@ -58,10 +48,10 @@ export default function JugadoresClient() {
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl sm:text-5xl font-black font-outfit text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
-            Jugadores de la Sala
+            Base de Jugadores
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Sala activa: <span className="text-[var(--color-gold)] font-bold">{room?.name || roomCode}</span> ({players.length} jugadores registrados)
+            Estadísticas y cartas FC • <span className="text-[var(--color-gold)] font-bold">{players.length} jugadores</span> registrados
           </p>
         </div>
 
@@ -106,17 +96,17 @@ export default function JugadoresClient() {
 
       {loading ? (
         <div className="text-center py-20 text-gray-400 font-outfit uppercase tracking-widest text-sm animate-pulse">
-          Cargando cartas de la sala...
+          Cargando cartas de jugadores...
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 glass-panel border border-white/10 p-8 max-w-md mx-auto">
-          <p className="text-gray-300 mb-4 font-bold">No hay jugadores registrados en esta sala todavía.</p>
+          <p className="text-gray-300 mb-4 font-bold">No se encontraron jugadores.</p>
           <Link
             href="/players/nuevo"
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-gold)] text-black font-black font-outfit text-xs uppercase"
           >
             <UserPlus size={16} />
-            Sé el primero en crear tu carta
+            Crear Carta de Jugador
           </Link>
         </div>
       ) : (
@@ -129,4 +119,3 @@ export default function JugadoresClient() {
     </div>
   );
 }
-
